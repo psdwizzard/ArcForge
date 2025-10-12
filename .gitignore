@@ -1,0 +1,25 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Logs
+logs/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime data
+data/encounters/
+data/characters/
+data/effects/
+data/data.json
+
+# Environment
+.env
+
+# Editor
+.idea/
+.vscode/
+

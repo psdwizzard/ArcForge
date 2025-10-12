@@ -1,0 +1,66 @@
+{
+  "name": "Orc",
+  "type": "monster",
+  "cr": "1/2",
+  "size": "Medium",
+  "hp": 15,
+  "ac": 13,
+  "speed": "30 ft.",
+  "abilities": {
+    "str": 16,
+    "dex": 12,
+    "con": 16,
+    "int": 7,
+    "wis": 11,
+    "cha": 10
+  },
+  "dexModifier": 1,
+  "proficiencyBonus": 2,
+  "skills": {
+    "intimidation": 2
+  },
+  "senses": "darkvision 60 ft., passive Perception 10",
+  "languages": "Common, Orc",
+  "specialAbilities": [
+    {
+      "name": "Aggressive",
+      "description": "As a bonus action, the orc can move up to its speed toward a hostile creature that it can see."
+    }
+  ],
+  "actions": [
+    {
+      "name": "Greataxe",
+      "type": "Melee Weapon Attack",
+      "attackBonus": 5,
+      "reach": "5 ft.",
+      "damage": "1d12 + 3 slashing"
+    },
+    {
+      "name": "Javelin",
+      "type": "Melee or Ranged Weapon Attack",
+      "attackBonus": 5,
+      "reach": "5 ft. or range 30/120 ft.",
+      "damage": "1d6 + 3 piercing"
+    }
+  ],
+  "loot": [
+    {
+      "name": "Greataxe",
+      "quantity": 1,
+      "weight": 7,
+      "value": 30
+    },
+    {
+      "name": "Javelin",
+      "quantity": 2,
+      "weight": 2,
+      "value": 5
+    },
+    {
+      "name": "Gold Pieces",
+      "quantity": 12,
+      "weight": 0,
+      "value": 12
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "name": "Skeleton",
+  "type": "monster",
+  "cr": "1/4",
+  "size": "Medium",
+  "hp": 13,
+  "ac": 13,
+  "speed": "30 ft.",
+  "abilities": {
+    "str": 10,
+    "dex": 14,
+    "con": 15,
+    "int": 6,
+    "wis": 8,
+    "cha": 5
+  },
+  "dexModifier": 2,
+  "proficiencyBonus": 2,
+  "vulnerabilities": "bludgeoning",
+  "immunities": "poison",
+  "conditionImmunities": "exhaustion, poisoned",
+  "senses": "darkvision 60 ft., passive Perception 9",
+  "languages": "understands all languages it knew in life but can't speak",
+  "specialAbilities": [],
+  "actions": [
+    {
+      "name": "Shortsword",
+      "type": "Melee Weapon Attack",
+      "attackBonus": 4,
+      "reach": "5 ft.",
+      "damage": "1d6 + 2 piercing"
+    },
+    {
+      "name": "Shortbow",
+      "type": "Ranged Weapon Attack",
+      "attackBonus": 4,
+      "range": "80/320 ft.",
+      "damage": "1d6 + 2 piercing"
+    }
+  ],
+  "loot": [
+    {
+      "name": "Shortsword",
+      "quantity": 1,
+      "weight": 2,
+      "value": 10
+    },
+    {
+      "name": "Shortbow",
+      "quantity": 1,
+      "weight": 2,
+      "value": 25
+    },
+    {
+      "name": "Arrows",
+      "quantity": 20,
+      "weight": 1,
+      "value": 1
+    }
+  ]
+}

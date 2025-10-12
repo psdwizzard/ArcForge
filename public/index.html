@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Buddy - Initiative Tracker</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>DM Buddy</h1>
+            <nav class="header-nav">
+                <button id="nav-combat-btn" class="nav-btn active">Combat Tracker</button>
+                <button id="nav-characters-btn" class="nav-btn">Character Builder</button>
+                <button id="nav-effects-btn" class="nav-btn">Effects Builder</button>
+                <button id="nav-loot-btn" class="nav-btn">Loot</button>
+            </nav>
+            <div class="header-actions">
+                <button id="save-data-btn" class="btn btn-primary">Save</button>
+                <button id="load-data-btn" class="btn btn-secondary">Load</button>
+                <button id="new-encounter-btn" class="btn btn-secondary">New Encounter</button>
+                <div class="round-display">
+                    Round: <span id="round-number">1</span>
+                </div>
+            </div>
+        </header>
+
+        <main id="combat-view">
+            <div class="left-panel">
+                <section class="agents-list-section">
+                    <div class="agents-header">
+                        <h2>Agents</h2>
+                        <select id="agent-type-filter" class="agent-type-filter">
+                            <option value="all">All Types</option>
+                            <option value="p">Players</option>
+                            <option value="n">NPCs</option>
+                            <option value="e">Enemies</option>
+                        </select>
+                    </div>
+                    <button id="create-new-agent-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">+ Create New Agent</button>
+                    <div id="agents-list" class="agents-list">
+                        Loading agents...
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-panel">
+                <section class="initiative-tracker">
+                    <div class="tracker-header">
+                        <h2>Initiative Order</h2>
+                        <div class="combat-controls">
+                            <button id="start-combat-btn" class="btn btn-success">Start Combat</button>
+                            <button id="next-turn-btn" class="btn btn-primary" style="display: none;">End Turn</button>
+                            <button id="end-combat-btn" class="btn btn-danger" style="display: none;">End Combat</button>
+                        </div>
+                    </div>
+                    <div id="combatants-list" class="combatants-list">
+                        <div class="empty-state">
+                            No agents yet. Add some to start combat!
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main id="character-view" style="display: none;">
+            <div class="character-builder-container">
+                <section class="character-form-section">
+                    <h2>Character Builder</h2>
+
+                    <form id="character-form">
+                        <!-- Agent Type Selection -->
+                        <div class="form-group">
+                            <label for="char-agent-type">Agent Type</label>
+                            <select id="char-agent-type">
+                                <option value="p">Player Character</option>
+                                <option value="n">NPC</option>
+                                <option value="e">Enemy/Monster</option>
+                            </select>
+                        </div>
+
+                        <!-- Basic Info -->
+                        <div class="form-section">
+                            <h3>Basic Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-name">Character Name *</label>
+                                    <input type="text" id="char-name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-race">Race</label>
+                                    <select id="char-race">
+                                        <option value="">Select Race</option>
+                                        <option value="human">Human</option>
+                                        <option value="elf">Elf</option>
+                                        <option value="dwarf">Dwarf</option>
+                                        <option value="halfling">Halfling</option>
+                                        <option value="dragonborn">Dragonborn</option>
+                                        <option value="gnome">Gnome</option>
+                                        <option value="half-elf">Half-Elf</option>
+                                        <option value="half-orc">Half-Orc</option>
+                                        <option value="tiefling">Tiefling</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-class">Class</label>
+                                    <select id="char-class">
+                                        <option value="">Select Class</option>
+                                        <option value="barbarian">Barbarian</option>
+                                        <option value="bard">Bard</option>
+                                        <option value="cleric">Cleric</option>
+                                        <option value="druid">Druid</option>
+                                        <option value="fighter">Fighter</option>
+                                        <option value="monk">Monk</option>
+                                        <option value="paladin">Paladin</option>
+                                        <option value="ranger">Ranger</option>
+                                        <option value="rogue">Rogue</option>
+                                        <option value="sorcerer">Sorcerer</option>
+                                        <option value="warlock">Warlock</option>
+                                        <option value="wizard">Wizard</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-level">Level</label>
+                                    <input type="number" id="char-level" min="1" max="20" value="1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ability Scores -->
+                        <div class="form-section">
+                            <h3>Ability Scores</h3>
+                            <div class="ability-scores-grid">
+                                <div class="ability-score-group">
+                                    <label for="char-str">STR</label>
+                                    <input type="number" id="char-str" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="str-mod">+0</span>
+                                </div>
+                                <div class="ability-score-group">
+                                    <label for="char-dex">DEX</label>
+                                    <input type="number" id="char-dex" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="dex-mod">+0</span>
+                                </div>
+                                <div class="ability-score-group">
+                                    <label for="char-con">CON</label>
+                                    <input type="number" id="char-con" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="con-mod">+0</span>
+                                </div>
+                                <div class="ability-score-group">
+                                    <label for="char-int">INT</label>
+                                    <input type="number" id="char-int" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="int-mod">+0</span>
+                                </div>
+                                <div class="ability-score-group">
+                                    <label for="char-wis">WIS</label>
+                                    <input type="number" id="char-wis" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="wis-mod">+0</span>
+                                </div>
+                                <div class="ability-score-group">
+                                    <label for="char-cha">CHA</label>
+                                    <input type="number" id="char-cha" min="1" max="30" value="10">
+                                    <span class="ability-modifier" id="cha-mod">+0</span>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <button type="button" id="standard-array-btn" class="btn btn-secondary btn-small">Standard Array</button>
+                                <button type="button" id="roll-stats-btn" class="btn btn-secondary btn-small">Roll 4d6 Drop Lowest</button>
+                            </div>
+                        </div>
+
+                        <!-- Combat Stats -->
+                        <div class="form-section">
+                            <h3>Combat Stats</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-hp">Max HP</label>
+                                    <input type="number" id="char-hp" min="1" value="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-ac">Armor Class</label>
+                                    <input type="number" id="char-ac" min="1" value="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="char-speed">Speed (ft)</label>
+                                    <input type="number" id="char-speed" min="0" value="30">
+                                </div>
+                                <div class="form-group">
+                                    <label>Initiative</label>
+                                    <span id="char-initiative-mod" class="stat-display">+0</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Skills -->
+                        <div class="form-section">
+                            <h3>Skills</h3>
+                            <div class="skills-grid" id="skills-list">
+                                <!-- Skills will be populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Attacks -->
+                        <div class="form-section">
+                            <h3>Attacks</h3>
+                            <div id="attacks-list"></div>
+                            <button type="button" id="add-attack-btn" class="btn btn-secondary btn-small">+ Add Attack</button>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-section">
+                            <h3>Notes / Features</h3>
+                            <textarea id="char-notes" rows="4" placeholder="Character features, abilities, backstory, etc."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="download-json-btn" class="btn btn-secondary">Download JSON</button>
+                            <button type="submit" class="btn btn-primary">Save Character</button>
+                            <button type="button" id="clear-form-btn" class="btn btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="character-list-section">
+                    <div class="character-list-header">
+                        <h2>Saved Characters</h2>
+                        <input type="file" id="upload-json-input" accept=".json" style="display: none;">
+                        <button type="button" id="upload-json-btn" class="btn btn-secondary btn-small">Upload JSON</button>
+                    </div>
+                    <div id="characters-list" class="characters-list">
+                        <div class="empty-state">No characters saved yet</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <main id="effects-view" style="display: none;">
+            <div class="effects-builder-container">
+                <section class="effects-form-section">
+                    <h2>Effects Builder</h2>
+
+                    <form id="effects-form">
+                        <!-- Basic Info -->
+                        <div class="form-section">
+                            <h3>Effect Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-name">Effect Name *</label>
+                                    <input type="text" id="effect-name" required placeholder="e.g., Bless, Poisoned, Rage">
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-duration">Default Duration (Rounds)</label>
+                                    <input type="number" id="effect-duration" min="1" max="100" value="1">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="effect-description">Description</label>
+                                <textarea id="effect-description" rows="2" placeholder="What does this effect do?"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- HP Modifications -->
+                        <div class="form-section">
+                            <h3>HP Changes (Per Round)</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-hp-change">HP Change</label>
+                                    <input type="number" id="effect-hp-change" placeholder="Positive for healing, negative for damage">
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-hp-timing">Apply When</label>
+                                    <select id="effect-hp-timing">
+                                        <option value="start">Start of Turn</option>
+                                        <option value="end">End of Turn</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Roll Modifiers -->
+                        <div class="form-section">
+                            <h3>Roll Modifiers</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-attack-mod">Attack Roll Modifier</label>
+                                    <select id="effect-attack-mod">
+                                        <option value="none">None</option>
+                                        <option value="advantage">Advantage</option>
+                                        <option value="disadvantage">Disadvantage</option>
+                                        <option value="bonus">Bonus (numeric)</option>
+                                        <option value="penalty">Penalty (numeric)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-attack-value">Value (if bonus/penalty)</label>
+                                    <input type="number" id="effect-attack-value" placeholder="e.g., +2 or -2">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-save-mod">Saving Throw Modifier</label>
+                                    <select id="effect-save-mod">
+                                        <option value="none">None</option>
+                                        <option value="advantage">Advantage</option>
+                                        <option value="disadvantage">Disadvantage</option>
+                                        <option value="bonus">Bonus (numeric)</option>
+                                        <option value="penalty">Penalty (numeric)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-save-value">Value (if bonus/penalty)</label>
+                                    <input type="number" id="effect-save-value" placeholder="e.g., +2 or -2">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-ability-mod">Ability Check Modifier</label>
+                                    <select id="effect-ability-mod">
+                                        <option value="none">None</option>
+                                        <option value="advantage">Advantage</option>
+                                        <option value="disadvantage">Disadvantage</option>
+                                        <option value="bonus">Bonus (numeric)</option>
+                                        <option value="penalty">Penalty (numeric)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-ability-value">Value (if bonus/penalty)</label>
+                                    <input type="number" id="effect-ability-value" placeholder="e.g., +2 or -2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Stat Modifiers -->
+                        <div class="form-section">
+                            <h3>Stat Modifiers</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="effect-ac-mod">AC Modifier</label>
+                                    <input type="number" id="effect-ac-mod" placeholder="e.g., +2 or -2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="effect-speed-mod">Speed Modifier</label>
+                                    <input type="number" id="effect-speed-mod" placeholder="e.g., +10 or -10">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Special Conditions -->
+                        <div class="form-section">
+                            <h3>Special Conditions</h3>
+                            <div class="conditions-grid">
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-incapacitated">
+                                    <span>Incapacitated</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-unconscious">
+                                    <span>Unconscious</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-stunned">
+                                    <span>Stunned</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-paralyzed">
+                                    <span>Paralyzed</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-restrained">
+                                    <span>Restrained</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-blinded">
+                                    <span>Blinded</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-deafened">
+                                    <span>Deafened</span>
+                                </label>
+                                <label class="condition-checkbox">
+                                    <input type="checkbox" id="effect-invisible">
+                                    <span>Invisible</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save Effect</button>
+                            <button type="button" id="clear-effect-btn" class="btn btn-secondary">Clear Form</button>
+                        </div>
+                    </form>
+                </section>
+
+                <section class="effects-list-section">
+                    <h2>Saved Effects</h2>
+                    <div id="effects-list" class="effects-list">
+                        <div class="empty-state">No effects created yet</div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <main id="loot-view" style="display: none;">
+        <div class="loot-container">
+            <div class="loot-header">
+                <h2>Loot Distribution</h2>
+                <button id="distribute-gold-btn" class="btn btn-success">Distribute Gold</button>
+            </div>
+            <div class="loot-main">
+                <div class="loot-pool-section">
+                    <h3>Collected Loot</h3>
+                    <div id="loot-pool" class="loot-pool"></div>
+                </div>
+                <div class="party-inventory-section">
+                    <h3>Party Inventory</h3>
+                    <div id="party-inventory" class="party-inventory"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Attack Modal -->
+    <div id="attack-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="attack-modal-title">Attacks</h2>
+                <button class="modal-close" onclick="closeAttackModal()">&times;</button>
+            </div>
+            <div id="attack-modal-body" class="modal-body">
+                <!-- Attacks will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js?v=12"></script>
+    <script src="js/character-builder.js?v=2"></script>
+    <script src="js/effects-builder.js?v=1"></script>
+    <script src="js/loot-manager.js?v=1"></script>
+    <script src="js/data-manager.js?v=1"></script>
+</body>
+</html>

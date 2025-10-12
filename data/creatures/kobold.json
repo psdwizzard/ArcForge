@@ -1,0 +1,67 @@
+{
+  "name": "Kobold",
+  "type": "monster",
+  "cr": "1/8",
+  "size": "Small",
+  "hp": 5,
+  "ac": 12,
+  "speed": "30 ft.",
+  "abilities": {
+    "str": 7,
+    "dex": 15,
+    "con": 9,
+    "int": 8,
+    "wis": 7,
+    "cha": 8
+  },
+  "dexModifier": 2,
+  "proficiencyBonus": 2,
+  "senses": "darkvision 60 ft., passive Perception 8",
+  "languages": "Common, Draconic",
+  "specialAbilities": [
+    {
+      "name": "Sunlight Sensitivity",
+      "description": "While in sunlight, the kobold has disadvantage on attack rolls and on Wisdom (Perception) checks that rely on sight."
+    },
+    {
+      "name": "Pack Tactics",
+      "description": "The kobold has advantage on an attack roll against a creature if at least one of the kobold's allies is within 5 feet of the creature and the ally isn't incapacitated."
+    }
+  ],
+  "actions": [
+    {
+      "name": "Dagger",
+      "type": "Melee Weapon Attack",
+      "attackBonus": 4,
+      "reach": "5 ft.",
+      "damage": "1d4 + 2 piercing"
+    },
+    {
+      "name": "Sling",
+      "type": "Ranged Weapon Attack",
+      "attackBonus": 4,
+      "range": "30/120 ft.",
+      "damage": "1d4 + 2 bludgeoning"
+    }
+  ],
+  "loot": [
+    {
+      "name": "Dagger",
+      "quantity": 1,
+      "weight": 1,
+      "value": 2
+    },
+    {
+      "name": "Sling",
+      "quantity": 1,
+      "weight": 0,
+      "value": 1
+    },
+    {
+      "name": "Gold Pieces",
+      "quantity": 2,
+      "weight": 0,
+      "value": 2
+    }
+  ]
+}

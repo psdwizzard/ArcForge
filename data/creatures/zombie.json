@@ -1,0 +1,49 @@
+{
+  "name": "Zombie",
+  "type": "monster",
+  "cr": "1/4",
+  "size": "Medium",
+  "hp": 22,
+  "ac": 8,
+  "speed": "20 ft.",
+  "abilities": {
+    "str": 13,
+    "dex": 6,
+    "con": 16,
+    "int": 3,
+    "wis": 6,
+    "cha": 5
+  },
+  "dexModifier": -2,
+  "proficiencyBonus": 2,
+  "savingThrows": {
+    "wis": 0
+  },
+  "immunities": "poison",
+  "conditionImmunities": "poisoned",
+  "senses": "darkvision 60 ft., passive Perception 8",
+  "languages": "understands the languages it knew in life but can't speak",
+  "specialAbilities": [
+    {
+      "name": "Undead Fortitude",
+      "description": "If damage reduces the zombie to 0 hit points, it must make a Constitution saving throw with a DC of 5 + the damage taken, unless the damage is radiant or from a critical hit. On a success, the zombie drops to 1 hit point instead."
+    }
+  ],
+  "actions": [
+    {
+      "name": "Slam",
+      "type": "Melee Weapon Attack",
+      "attackBonus": 3,
+      "reach": "5 ft.",
+      "damage": "1d6 + 1 bludgeoning"
+    }
+  ],
+  "loot": [
+    {
+      "name": "Tattered Clothing",
+      "quantity": 1,
+      "weight": 1,
+      "value": 0
+    }
+  ]
+}
