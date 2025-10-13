@@ -234,7 +234,8 @@ function switchCrucibleSection(section) {
     const sections = {
         character: document.getElementById('crucible-character-section'),
         effects: document.getElementById('crucible-effects-section'),
-        items: document.getElementById('crucible-items-section')
+        items: document.getElementById('crucible-items-section'),
+        monsters: document.getElementById('crucible-monsters-section')
     };
 
     Object.values(sections).forEach(sec => {
@@ -259,6 +260,10 @@ function switchCrucibleSection(section) {
         } else if (section === 'items') {
             if (typeof loadItemsData === 'function') {
                 loadItemsData();
+            }
+        } else if (section === 'monsters') {
+            if (typeof loadMonstersData === 'function') {
+                loadMonstersData();
             }
         }
     }

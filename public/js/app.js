@@ -446,6 +446,12 @@ async function init() {
     await loadEncounterState();
     await loadSavedAgents();
     await reloadEffectsData(); // Load effects
+    if (typeof loadItemsData === 'function') {
+        loadItemsData();
+    }
+    if (typeof loadMonstersData === 'function') {
+        loadMonstersData();
+    }
     await loadCodexData();
     attachEventListeners();
     renderCombatantsList();
