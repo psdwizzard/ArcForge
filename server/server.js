@@ -91,7 +91,7 @@ app.get('/api/encounter', (req, res) => {
 
 // Add combatant
 app.post('/api/combatants', (req, res) => {
-  const { name, type = 'monster' } = req.body;
+  const { name, type = 'monster', sourceId = null } = req.body;
   const normalizedType = (type || 'monster').toLowerCase();
   const enemyTypes = ['enemy', 'monster', 'e'];
   const baseName = (name || 'Enemy').split(' - ')[0];
@@ -129,6 +129,7 @@ app.post('/api/combatants', (req, res) => {
     initiative: initiativeValue,
     dexModifier,
     imagePath: req.body.imagePath || null,
+    sourceId,
     hp: {
       current: req.body.hp || 10,
       max: req.body.hp || 10,

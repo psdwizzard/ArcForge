@@ -852,7 +852,7 @@ function getAttacksHTML(combatant) {
     }
 
     // Find the character data from saved agents
-    const character = savedAgents.find(a => a.name === combatant.name);
+    const character = combatant.sourceId ? savedAgents.find(a => a.id === combatant.sourceId) : savedAgents.find(a => a.name === combatant.name);
 
     if (!character || !character.attacks || character.attacks.length === 0) {
         return '';
@@ -1017,7 +1017,7 @@ function rollAttack(attackerId) {
         return;
     }
 
-    const attackerData = savedAgents.find(agent => agent.name === attacker.name);
+    const attackerData = attacker.sourceId ? savedAgents.find(agent => agent.id === attacker.sourceId) : savedAgents.find(agent => agent.name === attacker.name);
     if (!attackerData || !attackerData.attacks || !attackerData.attacks[attackIndex]) {
         updateAttackResultUI(attackerId, 'Attack data is missing for this combatant.', 'info');
         resetAttackUI(attackerId);
@@ -1136,6 +1136,9 @@ function createCombatantCard(combatant, isCurrentTurn) {
     const card = document.createElement('div');
     card.className = 'combatant-card';
     card.dataset.combatantId = combatant.id;
+    if (combatant.sourceId) {
+        card.dataset.sourceId = combatant.sourceId;
+    }
 
     switch (combatant.type) {
         case 'p':
@@ -1833,7 +1836,7 @@ async function showAttacksModal(combatantId) {
     }
 
     // Find the character data from saved agents
-    const character = savedAgents.find(a => a.name === combatant.name);
+    const character = combatant.sourceId ? savedAgents.find(a => a.id === combatant.sourceId) : savedAgents.find(a => a.name === combatant.name);
     console.log('[showAttacksModal] Found character:', character);
     console.log('[showAttacksModal] Character attacks:', character?.attacks);
 
