@@ -1,7 +1,7 @@
 {
-  "name": "md-buddy-v2",
+  "name": "arcforge",
   "version": "1.0.0",
-  "description": "D&D 5e Battle and Initiative Tracker for Dungeon Masters",
+  "description": "ArcForge: D&D 5e Battle and Initiative Tracker for Dungeon Masters",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

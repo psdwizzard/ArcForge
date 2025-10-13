@@ -1,6 +1,6 @@
-# DM Buddy v2
+# ArcForge
 
-DM Buddy is a lightweight, local-first companion app for Dungeon Masters running in-person D&D 5e games. It brings together initiative tracking, combatant management, attack automation, status tracking, and loot handling in a single desktop-friendly interface backed by a minimal Express server.
+ArcForge is a lightweight, local-first companion app for Dungeon Masters running in-person D&D 5e games. It brings together initiative tracking, combatant management, attack automation, status tracking, and loot handling in a single desktop-friendly interface backed by a minimal Express server.
 
 ## Features
 

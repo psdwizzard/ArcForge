@@ -698,6 +698,6 @@ app.get('/api/load', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`DM Buddy server running on http://localhost:${PORT}`);
+  console.log(`ArcForge server running on http://localhost:${PORT}`);
   console.log(`Ready to track initiative and manage combat!`);
 });
