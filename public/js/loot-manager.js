@@ -484,7 +484,8 @@ async function addMonsterToCombat(monster) {
                 hp: monster.system?.attributes?.hp?.max ?? 0,
                 ac: monster.system?.attributes?.ac?.value ?? 10,
                 dexModifier: modifierFromScore(monster.system?.abilities?.dex?.value ?? 10),
-                imagePath: null
+                imagePath: getIconPath(monster.img),
+                sourceId: monster._id || monster.system?.identifier || monster.name
             })
         });
 
