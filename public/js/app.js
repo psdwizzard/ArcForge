@@ -101,7 +101,7 @@ async function loadCodexData() {
 }
 
 function initCodex() {
-    const tabButtons = document.querySelectorAll('.codex-tab-btn');
+    const tabButtons = document.querySelectorAll('#codex-view .codex-tab-btn');
     tabButtons.forEach(btn => {
         btn.addEventListener('click', () => switchCodexSection(btn.dataset.codexSection));
     });
@@ -109,6 +109,8 @@ function initCodex() {
     document.getElementById('codex-journal-save-btn').addEventListener('click', handleJournalSave);
     document.getElementById('codex-journal-new-btn').addEventListener('click', handleJournalNew);
 
+    // Ensure character tab is active on first render
+    codexState.activeSection = 'character';
     renderCodex();
 }
 
@@ -125,7 +127,7 @@ function renderCodex() {
 }
 
 function updateCodexTabs() {
-    document.querySelectorAll('.codex-tab-btn').forEach(btn => {
+    document.querySelectorAll('#codex-view .codex-tab-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.codexSection === codexState.activeSection);
     });
 
