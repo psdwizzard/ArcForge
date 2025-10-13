@@ -434,12 +434,18 @@
                         <div class="items-container">
                             <div class="items-header">
                                 <h2>Item Catalog</h2>
-                                <div class="item-catalog-actions">
+                                <div class="items-controls">
+                                    <input type="text" id="item-search-input" class="form-input" placeholder="Search items..." aria-label="Search items">
                                     <label for="item-category-filter">Category</label>
                                     <select id="item-category-filter" class="form-input"></select>
                                 </div>
                             </div>
-                            <div id="item-browser" class="item-browser"></div>
+                            <div class="items-content">
+                                <div class="item-list" id="item-list"></div>
+                                <aside class="item-detail" id="item-detail">
+                                    <div class="item-detail-empty">Select an item to view details.</div>
+                                </aside>
+                            </div>
                         </div>
                     </div>
             </div>
