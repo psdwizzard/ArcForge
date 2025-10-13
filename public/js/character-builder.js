@@ -193,13 +193,8 @@ function switchView(view) {
         }
         if (crucibleChar && crucibleEffects && crucibleLoot) {
             const activeTab = document.querySelector('.crucible-tab-btn.active');
-            if (activeTab && activeTab.id === 'crucible-effects-btn') {
-                switchCrucibleSection('effects');
-            } else if (activeTab && activeTab.id === 'crucible-loot-btn') {
-                switchCrucibleSection('loot');
-            } else {
-                switchCrucibleSection('character');
-            }
+            const activeSection = (activeTab && activeTab.dataset.section) || 'character';
+            switchCrucibleSection(activeSection);
         }
     } else if (view === 'atlas') {
         if (atlasView) {

@@ -20,8 +20,8 @@
 
 .crucible-tab-btn {
     padding: 0.6rem 1.2rem;
-    border: 1px solid rgba(255, 71, 87, 0.4);
-    background-color: rgba(255, 71, 87, 0.2);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-tertiary);
     color: var(--text-primary);
     border-radius: 4px;
     cursor: pointer;
@@ -30,12 +30,13 @@
 }
 
 .crucible-tab-btn:hover {
-    background-color: rgba(255, 71, 87, 0.3);
+    background-color: var(--bg-hover);
 }
 
 .crucible-tab-btn.active {
-    background-color: rgba(255, 71, 87, 0.35);
-    border-color: rgba(255, 71, 87, 0.6);
+    background-color: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: #fff;
 }
 
 .crucible-section {
