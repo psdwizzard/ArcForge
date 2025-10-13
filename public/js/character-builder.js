@@ -130,6 +130,12 @@ function attachCharacterBuilderListeners() {
     // Download JSON button
     document.getElementById('download-json-btn').addEventListener('click', handleDownloadJson);
 
+    // Download template button
+    const downloadTemplateBtn = document.getElementById('download-template-btn');
+    if (downloadTemplateBtn) {
+        downloadTemplateBtn.addEventListener('click', downloadCharacterTemplate);
+    }
+
     // Upload JSON button
     const uploadJsonBtn = document.getElementById('upload-json-btn');
     const uploadJsonInput = document.getElementById('upload-json-input');
@@ -456,6 +462,45 @@ function handleDownloadJson() {
     const filename = `${characterName}.json`;
 
     const jsonString = JSON.stringify(characterData, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(url);
+}
+
+function downloadCharacterTemplate() {
+    const template = {
+        agentType: 'p',
+        name: 'Character Name',
+        race: '',
+        class: '',
+        level: 1,
+        abilities: {
+            str: 10,
+            dex: 10,
+            con: 10,
+            int: 10,
+            wis: 10,
+            cha: 10
+        },
+        hp: 10,
+        ac: 10,
+        speed: 30,
+        skills: [],
+        attacks: [],
+        notes: '',
+        imagePath: null
+    };
+
+    const filename = 'character_template.json';
+    const jsonString = JSON.stringify(template, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
 

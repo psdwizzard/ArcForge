@@ -482,6 +482,7 @@ async function loadEncounterState() {
 
         encounterState = data;
         window.encounterState = encounterState; // Ensure it's accessible
+        updateCombatButtons();
     } catch (error) {
         console.error('Error loading encounter state:', error);
         // Set a default state if loading fails
@@ -492,6 +493,8 @@ async function loadEncounterState() {
             combatActive: false
         };
     }
+
+    updateCombatButtons();
 }
 
 // Load saved agents (characters)
@@ -502,6 +505,15 @@ async function loadSavedAgents() {
     } catch (error) {
         console.error('Error loading saved agents:', error);
     }
+}
+
+function isEnemyType(type) {
+    if (!type) {
+        return false;
+    }
+
+    const normalized = type.toLowerCase();
+    return normalized === 'enemy' || normalized === 'monster' || normalized === 'e';
 }
 
 async function reloadEffectsData() {
@@ -533,6 +545,10 @@ function renderStatusEffectsDatalist() {
 // Attach event listeners
 function attachEventListeners() {
     document.getElementById('start-combat-btn').addEventListener('click', handleStartCombat);
+    const rollEnemyButton = document.getElementById('roll-enemy-initiative-btn');
+    if (rollEnemyButton) {
+        rollEnemyButton.addEventListener('click', handleRollEnemyInitiative);
+    }
     document.getElementById('next-turn-btn').addEventListener('click', handleNextTurn);
     document.getElementById('end-combat-btn').addEventListener('click', handleEndCombat);
     document.getElementById('new-encounter-btn').addEventListener('click', handleNewEncounter);
@@ -543,15 +559,22 @@ function attachEventListeners() {
 // Update button visibility based on combat state
 function updateCombatButtons() {
     const startBtn = document.getElementById('start-combat-btn');
+    const rollEnemyBtn = document.getElementById('roll-enemy-initiative-btn');
     const nextBtn = document.getElementById('next-turn-btn');
     const endBtn = document.getElementById('end-combat-btn');
 
     if (encounterState.combatActive) {
         startBtn.style.display = 'none';
+        if (rollEnemyBtn) {
+            rollEnemyBtn.style.display = 'none';
+        }
         nextBtn.style.display = 'inline-block';
         endBtn.style.display = 'inline-block';
     } else {
         startBtn.style.display = 'inline-block';
+        if (rollEnemyBtn) {
+        rollEnemyBtn.style.display = encounterState.combatants.some(c => isEnemyType(c.type)) ? 'inline-block' : 'none';
+        }
         nextBtn.style.display = 'none';
         endBtn.style.display = 'none';
     }
@@ -568,6 +591,14 @@ async function handleStartCombat() {
     if (encounterState.combatants.length === 0) {
         alert('Add agents before starting combat!');
         return;
+    }
+
+    const unrolledEnemies = encounterState.combatants.some(c => isEnemyType(c.type) && !c.initiative);
+    if (unrolledEnemies) {
+        const confirmRoll = confirm('Some enemies have no initiative yet. Roll enemy initiative now?');
+        if (confirmRoll) {
+            await handleRollEnemyInitiative();
+        }
     }
 
     try {
@@ -768,6 +799,8 @@ function renderCombatantsList() {
     }
 
     container.innerHTML = '';
+
+    updateCombatButtons();
 
     const activeCombatantId = encounterState.combatActive && encounterState.combatants.length > 0
         ? encounterState.combatants[encounterState.currentTurnIndex].id
@@ -1209,6 +1242,9 @@ function createCombatantCard(combatant, isCurrentTurn) {
     </div>`;
     const typeLabel = getTypeDisplayName(combatant.type);
 
+    const initiativeRollValue = combatant.initiative ? (combatant.initiative - combatant.dexModifier) : '';
+    const totalInitiativeDisplay = combatant.initiative || 0;
+
     card.innerHTML = `
         <div class="combatant-header">
             <div class="combatant-header-main">
@@ -1226,9 +1262,9 @@ function createCombatantCard(combatant, isCurrentTurn) {
             <div class="combatant-initiative">
                 <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
                 <span class="initiative-plus">+</span>
-                <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${combatant.initiative - combatant.dexModifier}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
+                <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${initiativeRollValue}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
                 <span class="initiative-equals">=</span>
-                <span class="initiative-total" id="initiative-total-${combatant.id}">${combatant.initiative}</span>
+                <span class="initiative-total" id="initiative-total-${combatant.id}">${totalInitiativeDisplay}</span>
             </div>
                 <div class="combatant-summary-stats">
                     <span class="summary-stat hp">HP ${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</span>
@@ -1700,7 +1736,18 @@ async function reorderInitiative(combatantIds) {
 // Update initiative based on a d20 roll
 async function updateInitiativeRoll(combatantId) {
     const rollInput = document.getElementById(`initiative-roll-${combatantId}`);
+    if (rollInput.value === '') {
+        rollInput.dataset.manualEntry = 'false';
+        const combatant = encounterState.combatants.find(c => c.id === combatantId);
+        if (combatant) {
+            const totalDisplay = document.getElementById(`initiative-total-${combatantId}`);
+            totalDisplay.textContent = combatant.initiative || 0;
+        }
+        return;
+    }
+
     const roll = parseInt(rollInput.value) || 0;
+    rollInput.dataset.manualEntry = 'true';
 
     const combatant = encounterState.combatants.find(c => c.id === combatantId);
     if (!combatant) return;
@@ -1734,6 +1781,17 @@ async function updateInitiativeRoll(combatantId) {
     } catch (error) {
         console.error('Error setting initiative:', error);
     }
+}
+
+function getInitiativeRollValue(combatant) {
+    if (!combatant.initiative) {
+        return '';
+    }
+    return combatant.initiative - (combatant.dexModifier || 0);
+}
+
+function getInitiativeTotalDisplay(combatant) {
+    return combatant.initiative || 0;
 }
 
 // Show attacks modal for a combatant
@@ -1899,6 +1957,29 @@ function rollDice(diceString, isCrit = false) {
 // Make functions globally available
 window.showAttacksModal = showAttacksModal;
 window.closeAttackModal = closeAttackModal;
+
+async function handleRollEnemyInitiative() {
+    if (!encounterState || !encounterState.combatants) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE}/initiative/roll-enemies`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            encounterState = data;
+            window.encounterState = encounterState;
+            renderCombatantsList();
+            updateCombatButtons();
+        }
+    } catch (error) {
+        console.error('Error rolling enemy initiative:', error);
+    }
+}
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);

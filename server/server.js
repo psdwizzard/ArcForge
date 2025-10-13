@@ -90,9 +90,29 @@ app.get('/api/encounter', (req, res) => {
 
 // Add combatant
 app.post('/api/combatants', (req, res) => {
+  const { name, type = 'monster' } = req.body;
+  let finalName = name;
+
+  if (type && ['enemy', 'monster', 'e'].includes(type.toLowerCase())) {
+    const baseName = name || 'Enemy';
+    const normalizedType = type.toLowerCase();
+    const existingCount = currentEncounter.combatants.filter(c => {
+      const combatantType = (c.type || '').toLowerCase();
+      if (!['enemy', 'monster', 'e'].includes(combatantType)) {
+        return false;
+      }
+
+      const nameSegments = (c.name || '').split(' - ');
+      const combatantBase = nameSegments[0];
+      return combatantType === normalizedType && combatantBase === baseName;
+    }).length;
+
+    finalName = `${baseName} - ${String(existingCount + 1).padStart(2, '0')}`;
+  }
+
   const combatant = {
     id: `combatant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    name: req.body.name,
+    name: finalName,
     type: req.body.type || 'monster',
     initiative: req.body.initiative || 0,
     dexModifier: req.body.dexModifier || 0,
@@ -186,6 +206,28 @@ app.post('/api/initiative/roll', (req, res) => {
   }
 
   res.json({ roll, initiative });
+});
+
+// Roll initiative for all enemies
+app.post('/api/initiative/roll-enemies', (req, res) => {
+  currentEncounter.combatants = currentEncounter.combatants.map(combatant => {
+    const normalizedType = (combatant.type || '').toLowerCase();
+    if (['enemy', 'monster', 'e'].includes(normalizedType)) {
+      const roll = Math.floor(Math.random() * 20) + 1;
+      combatant.initiative = roll + (combatant.dexModifier || 0);
+    }
+    return combatant;
+  });
+
+  currentEncounter.combatants.sort((a, b) => {
+    if (b.initiative !== a.initiative) {
+      return b.initiative - a.initiative;
+    }
+    return (b.dexModifier || 0) - (a.dexModifier || 0);
+  });
+
+  autoSaveEncounter();
+  res.json(currentEncounter);
 });
 
 // Reorder initiative (for drag-and-drop)

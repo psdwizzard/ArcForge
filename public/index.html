@@ -19,8 +19,6 @@
                 <button id="nav-codex-btn" class="nav-btn">Codex</button>
             </nav>
             <div class="header-actions">
-                <button id="save-data-btn" class="btn btn-primary">Save</button>
-                <button id="load-data-btn" class="btn btn-secondary">Load</button>
                 <button id="new-encounter-btn" class="btn btn-secondary">New Encounter</button>
                 <div class="round-display">
                     Round: <span id="round-number">1</span>
@@ -53,6 +51,7 @@
                         <h2>Initiative Order</h2>
                         <div class="combat-controls">
                             <button id="start-combat-btn" class="btn btn-success">Start Combat</button>
+                            <button id="roll-enemy-initiative-btn" class="btn btn-secondary">Roll Enemy Initiative</button>
                             <button id="next-turn-btn" class="btn btn-primary" style="display: none;">End Turn</button>
                             <button id="end-combat-btn" class="btn btn-danger" style="display: none;">End Combat</button>
                         </div>
@@ -238,6 +237,7 @@
 
                                 <div class="form-actions">
                                     <button type="button" id="download-json-btn" class="btn btn-secondary">Download JSON</button>
+                                <button type="button" id="download-template-btn" class="btn btn-secondary btn-small">Download Template</button>
                                     <button type="submit" class="btn btn-primary">Save Character</button>
                                     <button type="button" id="clear-form-btn" class="btn btn-secondary">Clear Form</button>
                                 </div>
