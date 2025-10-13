@@ -70,6 +70,16 @@ function initCharacterBuilder() {
     attachCharacterBuilderListeners();
     loadSavedCharacters();
     window.renderCharactersList = renderCharactersList;
+
+    const charTabBtn = document.getElementById('crucible-character-btn');
+    const effectsTabBtn = document.getElementById('crucible-effects-btn');
+    const lootTabBtn = document.getElementById('crucible-loot-btn');
+
+    if (charTabBtn && effectsTabBtn && lootTabBtn) {
+        charTabBtn.addEventListener('click', () => switchCrucibleSection('character'));
+        effectsTabBtn.addEventListener('click', () => switchCrucibleSection('effects'));
+        lootTabBtn.addEventListener('click', () => switchCrucibleSection('loot'));
+    }
 }
 
 // Populate skills list
@@ -94,6 +104,8 @@ function attachCharacterBuilderListeners() {
     // Navigation
     document.getElementById('nav-arena-btn').addEventListener('click', () => switchView('arena'));
     document.getElementById('nav-crucible-btn').addEventListener('click', () => switchView('crucible'));
+    document.getElementById('nav-atlas-btn').addEventListener('click', () => switchView('atlas'));
+    document.getElementById('nav-codex-btn').addEventListener('click', () => switchView('codex'));
 
     // Ability score changes
     ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
@@ -139,6 +151,9 @@ function attachCharacterBuilderListeners() {
 function switchView(view) {
     const arenaView = document.getElementById('arena-view');
     const crucibleView = document.getElementById('crucible-view');
+    const crucibleChar = document.getElementById('crucible-character-section');
+    const crucibleEffects = document.getElementById('crucible-effects-section');
+    const crucibleLoot = document.getElementById('crucible-loot-section');
     const atlasView = document.getElementById('atlas-view');
     const codexView = document.getElementById('codex-view');
 
@@ -166,12 +181,25 @@ function switchView(view) {
         if (arenaBtn) {
             arenaBtn.classList.add('active');
         }
+        if (crucibleChar && crucibleEffects && crucibleLoot) {
+            switchCrucibleSection('character');
+        }
     } else if (view === 'crucible') {
         if (crucibleView) {
             crucibleView.style.display = 'block';
         }
         if (crucibleBtn) {
             crucibleBtn.classList.add('active');
+        }
+        if (crucibleChar && crucibleEffects && crucibleLoot) {
+            const activeTab = document.querySelector('.crucible-tab-btn.active');
+            if (activeTab && activeTab.id === 'crucible-effects-btn') {
+                switchCrucibleSection('effects');
+            } else if (activeTab && activeTab.id === 'crucible-loot-btn') {
+                switchCrucibleSection('loot');
+            } else {
+                switchCrucibleSection('character');
+            }
         }
     } else if (view === 'atlas') {
         if (atlasView) {
@@ -187,6 +215,35 @@ function switchView(view) {
         if (codexBtn) {
             codexBtn.classList.add('active');
         }
+    }
+}
+
+function switchCrucibleSection(section) {
+    const sections = {
+        character: document.getElementById('crucible-character-section'),
+        effects: document.getElementById('crucible-effects-section'),
+        loot: document.getElementById('crucible-loot-section')
+    };
+
+    Object.values(sections).forEach(sec => {
+        if (sec) {
+            sec.classList.remove('active');
+        }
+    });
+
+    const target = sections[section];
+    if (target) {
+        target.classList.add('active');
+    }
+
+    document.querySelectorAll('.crucible-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    if (section === 'character') {
+        document.getElementById('crucible-character-btn')?.classList.add('active');
+    } else if (section === 'effects') {
+        document.getElementById('crucible-effects-btn')?.classList.add('active');
+    } else if (section === 'loot') {
+        document.getElementById('crucible-loot-btn')?.classList.add('active');
     }
 }
 

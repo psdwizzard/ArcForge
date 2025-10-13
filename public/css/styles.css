@@ -1,3 +1,51 @@
+.crucible-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+}
+
+.crucible-section {
+    display: none;
+}
+
+.crucible-section.active {
+    display: block;
+}
+
+.crucible-tabs {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.crucible-tab-btn {
+    padding: 0.6rem 1.2rem;
+    border: 1px solid rgba(255, 71, 87, 0.4);
+    background-color: rgba(255, 71, 87, 0.2);
+    color: var(--text-primary);
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.crucible-tab-btn:hover {
+    background-color: rgba(255, 71, 87, 0.3);
+}
+
+.crucible-tab-btn.active {
+    background-color: rgba(255, 71, 87, 0.35);
+    border-color: rgba(255, 71, 87, 0.6);
+}
+
+.crucible-section {
+    flex: 1;
+    display: none;
+}
+
+.crucible-section.active {
+    display: block;
+}
 .combatant-card.type-player {
     border-color: rgba(46, 213, 115, 0.06);
     box-shadow: 0 0 0 1px rgba(46, 213, 115, 0.02);
