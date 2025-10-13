@@ -18,6 +18,10 @@ let currentAgentFilter = 'all';
 const combatantAttackState = {};
 window.combatantAttackState = combatantAttackState;
 
+// Track collapsed state for combatant cards
+const combatantCollapseState = {};
+window.combatantCollapseState = combatantCollapseState;
+
 // Helper function to convert type codes to full names
 function getTypeDisplayName(type) {
     const typeMap = {
@@ -409,19 +413,21 @@ function getAttacksHTML(combatant) {
         <div class="combatant-attacks">
             <div class="attack-controls">
                 <div class="attack-controls-row">
-                    <select class="attack-select" id="attack-select-${combatant.id}">
-                        <option value="">Select attack</option>
-                        ${attackOptions}
-                    </select>
-                    <select class="attack-target-select" id="attack-target-${combatant.id}" ${targetSelectDisabled}>
-                        <option value="">Select target</option>
-                        ${targetOptions}
-                    </select>
-                </div>
-                <div class="attack-controls-row">
-                    <button type="button" class="btn btn-small btn-secondary" onclick="rollAttack('${combatant.id}')">Roll</button>
-                    <input type="number" class="attack-damage-input" id="attack-damage-${combatant.id}" placeholder="Damage" min="0" step="1" value="0" disabled>
-                    <button type="button" class="btn btn-small btn-primary" id="attack-confirm-${combatant.id}" onclick="confirmAttack('${combatant.id}')" disabled>Confirm</button>
+                    <div class="attack-select-group">
+                        <select class="attack-select" id="attack-select-${combatant.id}">
+                            <option value="">Select attack</option>
+                            ${attackOptions}
+                        </select>
+                        <select class="attack-target-select" id="attack-target-${combatant.id}" ${targetSelectDisabled}>
+                            <option value="">Select target</option>
+                            ${targetOptions}
+                        </select>
+                    </div>
+                    <div class="attack-roll-group">
+                        <button type="button" class="btn btn-small btn-secondary" onclick="rollAttack('${combatant.id}')">Roll</button>
+                        <input type="number" class="attack-damage-input" id="attack-damage-${combatant.id}" placeholder="Damage" min="0" step="1" value="0" disabled>
+                        <button type="button" class="btn btn-small btn-primary" id="attack-confirm-${combatant.id}" onclick="confirmAttack('${combatant.id}')" disabled>Confirm</button>
+                    </div>
                 </div>
                 <div class="attack-result" id="attack-result-${combatant.id}"></div>
             </div>
@@ -490,6 +496,25 @@ function updateAttackResultUI(combatantId, message, status = 'info') {
 function resetAttackUI(combatantId) {
     delete combatantAttackState[combatantId];
     syncAttackUIWithState(combatantId);
+}
+
+function toggleCombatantDetails(combatantId) {
+    const card = document.querySelector(`.combatant-card[data-combatant-id="${combatantId}"]`);
+    if (!card) {
+        return;
+    }
+
+    const isNowCollapsed = card.classList.toggle('collapsed');
+    combatantCollapseState[combatantId] = isNowCollapsed;
+
+    const toggleButton = card.querySelector('.combatant-toggle');
+    if (toggleButton) {
+        toggleButton.textContent = isNowCollapsed ? '▸' : '▾';
+    }
+
+    if (!isNowCollapsed) {
+        syncAttackUIWithState(combatantId);
+    }
 }
 
 // Roll to hit with the currently selected attack and target
@@ -651,8 +676,26 @@ function createCombatantCard(combatant, isCurrentTurn) {
     card.className = 'combatant-card';
     card.dataset.combatantId = combatant.id;
 
+    let isCollapsed;
     if (isCurrentTurn) {
         card.classList.add('current-turn');
+        card.classList.remove('collapsed');
+        isCollapsed = false;
+        combatantCollapseState[combatant.id] = false;
+    } else {
+        const storedState = combatantCollapseState[combatant.id];
+        if (storedState === undefined) {
+            isCollapsed = true;
+            combatantCollapseState[combatant.id] = true;
+        } else {
+            isCollapsed = storedState;
+        }
+
+        if (isCollapsed) {
+            card.classList.add('collapsed');
+        } else {
+            card.classList.remove('collapsed');
+        }
     }
 
     // Determine HP color class
@@ -730,56 +773,66 @@ function createCombatantCard(combatant, isCurrentTurn) {
 
     card.innerHTML = `
         <div class="combatant-header">
+            <button class="combatant-toggle" type="button" onclick="toggleCombatantDetails('${combatant.id}')">${isCollapsed ? '▸' : '▾'}</button>
             <div class="combatant-name-section">
-                ${nameHTML}
-                <div class="combatant-type">${getTypeDisplayName(combatant.type)}</div>
+                <div class="combatant-name-row">
+                    ${nameHTML}
+                    <div class="combatant-type">${getTypeDisplayName(combatant.type)}</div>
+                    <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
+                </div>
             </div>
-            <div class="combatant-initiative">
-                <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
-                <span class="initiative-plus">+</span>
-                <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${combatant.initiative - combatant.dexModifier}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
-                <span class="initiative-equals">=</span>
-                <span class="initiative-total" id="initiative-total-${combatant.id}">${combatant.initiative}</span>
-            </div>
-        </div>
-        <div class="combatant-stats">
-            <div class="stat">
-                <div class="stat-label">HP</div>
-                <div class="stat-value ${hpClass}">${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">AC</div>
-                <div class="stat-value">${combatant.ac}</div>
-            </div>
-            <div class="stat">
-                <div class="stat-label">DEX</div>
-                <div class="stat-value">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</div>
+            <div class="combatant-summary">
+                <div class="combatant-initiative">
+                    <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
+                    <span class="initiative-plus">+</span>
+                    <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${combatant.initiative - combatant.dexModifier}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
+                    <span class="initiative-equals">=</span>
+                    <span class="initiative-total" id="initiative-total-${combatant.id}">${combatant.initiative}</span>
+                </div>
+                <div class="combatant-summary-stats">
+                    <span class="summary-stat hp">HP ${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</span>
+                    <span class="summary-stat ac">AC ${combatant.ac}</span>
+                    <span class="summary-stat dex">DEX ${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
+                </div>
             </div>
         </div>
-        ${statusEffectsHTML}
-        ${deathSavesHTML}
-        <div class="hp-controls">
-            <div class="hp-input-group">
-                <input type="number" class="hp-input" id="dmg-${combatant.id}" placeholder="0" min="0">
-                <button class="btn btn-small btn-danger" onclick="applyDamage('${combatant.id}')">Damage</button>
+        <div class="combatant-details">
+            <div class="combatant-stats">
+                <div class="stat">
+                    <div class="stat-label">HP</div>
+                    <div class="stat-value ${hpClass}">${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">AC</div>
+                    <div class="stat-value">${combatant.ac}</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">DEX</div>
+                    <div class="stat-value">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</div>
+                </div>
             </div>
-            <div class="hp-input-group">
-                <input type="number" class="hp-input" id="heal-${combatant.id}" placeholder="0" min="0">
-                <button class="btn btn-small btn-success" onclick="applyHealing('${combatant.id}')">Heal</button>
+            ${statusEffectsHTML}
+            ${deathSavesHTML}
+            <div class="hp-controls">
+                <div class="hp-input-group">
+                    <input type="number" class="hp-input" id="dmg-${combatant.id}" placeholder="0" min="0">
+                    <button class="btn btn-small btn-danger" onclick="applyDamage('${combatant.id}')">Damage</button>
+                </div>
+                <div class="hp-input-group">
+                    <input type="number" class="hp-input" id="heal-${combatant.id}" placeholder="0" min="0">
+                    <button class="btn btn-small btn-success" onclick="applyHealing('${combatant.id}')">Heal</button>
+                </div>
+                <div class="hp-input-group">
+                    <input type="number" class="hp-input" id="temp-${combatant.id}" placeholder="Temp" min="0">
+                    <button class="btn btn-small btn-secondary" onclick="applyTempHP('${combatant.id}')">Temp HP</button>
+                </div>
             </div>
-            <div class="hp-input-group">
-                <input type="number" class="hp-input" id="temp-${combatant.id}" placeholder="Temp" min="0">
-                <button class="btn btn-small btn-secondary" onclick="applyTempHP('${combatant.id}')">Temp HP</button>
+            <div class="add-status-controls">
+                <input type="text" class="status-input" id="status-name-${combatant.id}" placeholder="Status effect" list="status-effects-list" onchange="handleEffectSelection(event)" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
+                <input type="number" class="duration-input" id="status-duration-${combatant.id}" placeholder="Rds" min="1" value="1" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
+                <button class="btn btn-small btn-secondary" onclick="addStatusEffect('${combatant.id}')">Add</button>
             </div>
-        </div>
-        <div class="add-status-controls">
-            <input type="text" class="status-input" id="status-name-${combatant.id}" placeholder="Status effect" list="status-effects-list" onchange="handleEffectSelection(event)" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
-            <input type="number" class="duration-input" id="status-duration-${combatant.id}" placeholder="Rds" min="1" value="1" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
-            <button class="btn btn-small btn-secondary" onclick="addStatusEffect('${combatant.id}')">Add</button>
-        </div>
-        ${getAttacksHTML(combatant)}
-        <div class="combatant-actions">
-            <button class="btn btn-small btn-danger" onclick="removeCombatant('${combatant.id}')">Remove</button>
+            ${getAttacksHTML(combatant)}
         </div>
     `;
 

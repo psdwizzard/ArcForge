@@ -1,3 +1,83 @@
+.combatant-card.collapsed .combatant-details {
+    display: none;
+}
+
+.combatant-card.collapsed .combatant-summary-stats {
+    display: flex;
+}
+
+.combatant-card .combatant-summary-stats {
+    display: none;
+}
+
+.combatant-card.collapsed {
+    padding-bottom: 0.5rem;
+}
+
+.combatant-card.collapsed .hp-controls,
+.combatant-card.collapsed .add-status-controls,
+.combatant-card.collapsed .combatant-attacks,
+.combatant-card.collapsed .status-effects,
+.combatant-card.collapsed .combatant-stats,
+.combatant-card.collapsed .death-saves {
+    display: none;
+}
+
+.combatant-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.combatant-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.2rem;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.combatant-name-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.combatant-remove-inline {
+    margin-left: auto;
+}
+
+.combatant-summary {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.combatant-summary-stats {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.combatant-summary-stats .summary-stat.hp {
+    color: var(--success);
+}
+
+.combatant-summary-stats .summary-stat.ac {
+    color: var(--text-primary);
+}
+
+.combatant-summary-stats .summary-stat.dex {
+    color: var(--text-primary);
+}
 :root {
     --bg-primary: #1a1a1a;
     --bg-secondary: #252525;
@@ -1119,9 +1199,17 @@ h2 {
 
 .attack-controls-row {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.attack-select-group,
+.attack-roll-group {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
 }
 
 .attack-select,
@@ -1137,12 +1225,12 @@ h2 {
 
 .attack-select,
 .attack-target-select {
-    min-width: 160px;
+    min-width: 140px;
     flex: 1;
 }
 
 .attack-damage-input {
-    width: 80px;
+    width: 70px;
 }
 
 .attack-result {
