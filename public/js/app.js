@@ -815,69 +815,71 @@ function createCombatantCard(combatant, isCurrentTurn) {
 
     // Just show the name - no special clickable behavior
     const nameHTML = `<div class="combatant-name">${combatant.name}</div>`;
+    const portraitHTML = combatant.imagePath ? `<img class="combatant-portrait" src="${combatant.imagePath}" alt="${combatant.name} portrait">` : '';
 
     card.innerHTML = `
         <div class="combatant-header">
             <button class="combatant-toggle" type="button" onclick="toggleCombatantDetails('${combatant.id}')">${isCollapsed ? '▸' : '▾'}</button>
             <div class="combatant-name-section">
                 <div class="combatant-name-row">
-                    ${nameHTML}
-                    <div class="combatant-type">${getTypeDisplayName(combatant.type)}</div>
+                ${nameHTML}
+                <div class="combatant-type">${getTypeDisplayName(combatant.type)}</div>
                     <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
-                </div>
+            </div>
             </div>
             <div class="combatant-summary">
-                <div class="combatant-initiative">
-                    <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
-                    <span class="initiative-plus">+</span>
-                    <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${combatant.initiative - combatant.dexModifier}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
-                    <span class="initiative-equals">=</span>
-                    <span class="initiative-total" id="initiative-total-${combatant.id}">${combatant.initiative}</span>
-                </div>
+            <div class="combatant-initiative">
+                <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
+                <span class="initiative-plus">+</span>
+                <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${combatant.initiative - combatant.dexModifier}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
+                <span class="initiative-equals">=</span>
+                <span class="initiative-total" id="initiative-total-${combatant.id}">${combatant.initiative}</span>
+            </div>
                 <div class="combatant-summary-stats">
                     <span class="summary-stat hp">HP ${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</span>
                     <span class="summary-stat ac">AC ${combatant.ac}</span>
                     <span class="summary-stat dex">DEX ${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
-                </div>
+        </div>
             </div>
         </div>
         <div class="combatant-details">
-            <div class="combatant-stats">
-                <div class="stat">
-                    <div class="stat-label">HP</div>
-                    <div class="stat-value ${hpClass}">${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">AC</div>
-                    <div class="stat-value">${combatant.ac}</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-label">DEX</div>
-                    <div class="stat-value">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</div>
-                </div>
+            ${portraitHTML}
+        <div class="combatant-stats">
+            <div class="stat">
+                <div class="stat-label">HP</div>
+                <div class="stat-value ${hpClass}">${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</div>
             </div>
-            ${statusEffectsHTML}
-            ${deathSavesHTML}
-            <div class="hp-controls">
-                <div class="hp-input-group">
-                    <input type="number" class="hp-input" id="dmg-${combatant.id}" placeholder="0" min="0">
-                    <button class="btn btn-small btn-danger" onclick="applyDamage('${combatant.id}')">Damage</button>
-                </div>
-                <div class="hp-input-group">
-                    <input type="number" class="hp-input" id="heal-${combatant.id}" placeholder="0" min="0">
-                    <button class="btn btn-small btn-success" onclick="applyHealing('${combatant.id}')">Heal</button>
-                </div>
-                <div class="hp-input-group">
-                    <input type="number" class="hp-input" id="temp-${combatant.id}" placeholder="Temp" min="0">
-                    <button class="btn btn-small btn-secondary" onclick="applyTempHP('${combatant.id}')">Temp HP</button>
-                </div>
+            <div class="stat">
+                <div class="stat-label">AC</div>
+                <div class="stat-value">${combatant.ac}</div>
             </div>
-            <div class="add-status-controls">
-                <input type="text" class="status-input" id="status-name-${combatant.id}" placeholder="Status effect" list="status-effects-list" onchange="handleEffectSelection(event)" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
-                <input type="number" class="duration-input" id="status-duration-${combatant.id}" placeholder="Rds" min="1" value="1" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
-                <button class="btn btn-small btn-secondary" onclick="addStatusEffect('${combatant.id}')">Add</button>
+            <div class="stat">
+                <div class="stat-label">DEX</div>
+                <div class="stat-value">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</div>
             </div>
-            ${getAttacksHTML(combatant)}
+        </div>
+        ${statusEffectsHTML}
+        ${deathSavesHTML}
+        <div class="hp-controls">
+            <div class="hp-input-group">
+                <input type="number" class="hp-input" id="dmg-${combatant.id}" placeholder="0" min="0">
+                <button class="btn btn-small btn-danger" onclick="applyDamage('${combatant.id}')">Damage</button>
+            </div>
+            <div class="hp-input-group">
+                <input type="number" class="hp-input" id="heal-${combatant.id}" placeholder="0" min="0">
+                <button class="btn btn-small btn-success" onclick="applyHealing('${combatant.id}')">Heal</button>
+            </div>
+            <div class="hp-input-group">
+                <input type="number" class="hp-input" id="temp-${combatant.id}" placeholder="Temp" min="0">
+                <button class="btn btn-small btn-secondary" onclick="applyTempHP('${combatant.id}')">Temp HP</button>
+            </div>
+        </div>
+        <div class="add-status-controls">
+            <input type="text" class="status-input" id="status-name-${combatant.id}" placeholder="Status effect" list="status-effects-list" onchange="handleEffectSelection(event)" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
+            <input type="number" class="duration-input" id="status-duration-${combatant.id}" placeholder="Rds" min="1" value="1" onkeypress="if(event.key==='Enter') addStatusEffect('${combatant.id}')">
+            <button class="btn btn-small btn-secondary" onclick="addStatusEffect('${combatant.id}')">Add</button>
+        </div>
+        ${getAttacksHTML(combatant)}
         </div>
     `;
 
@@ -1127,19 +1129,23 @@ function renderAgentsList() {
 
         const detailsHTML = `
             <div class="agent-details">
-                <div class="agent-info-line">${agent.race || ''}</div>
-                <div class="agent-info-line">HP: ${agent.hp} | AC: ${agent.ac} | Type: ${typeLabel}</div>
+                ${agent.imagePath ? `<img class="agent-list-portrait" src="${agent.imagePath}" alt="${agent.name} portrait">` : ''}
+                <div class="agent-info-text">
+                    <div class="agent-info-line">${agent.race || ''}</div>
+                    <div class="agent-info-line">HP: ${agent.hp} | AC: ${agent.ac}</div>
+                    <div class="agent-info-line">Type: ${typeLabel}</div>
+                </div>
             </div>
         `;
 
         card.innerHTML = `
             <div class="agent-header">
                 <button class="agent-toggle" type="button" onclick="toggleAgentDetails('${agent.id}')">${isCollapsed ? '▸' : '▾'}</button>
-                <div class="agent-name">${agent.name}</div>
+            <div class="agent-name">${agent.name}</div>
                 <div class="agent-actions-inline">
                     <button class="btn btn-small btn-${colorClass}" onclick="addAgentToCombatFromList('${agent.id}')">Add</button>
-                    <button class="btn btn-small btn-secondary" onclick="editAgentFromList('${agent.id}')">Edit</button>
-                </div>
+                <button class="btn btn-small btn-secondary" onclick="editAgentFromList('${agent.id}')">Edit</button>
+            </div>
             </div>
             ${detailsHTML}
         `;

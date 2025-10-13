@@ -2,6 +2,12 @@
 node_modules/
 npm-debug.log*
 
+# Generated uploads
+uploads/
+
+# Scratch docs
+todo.md
+
 # Logs
 logs/
 *.log

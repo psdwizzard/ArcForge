@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const multer = require('multer');
 
 const app = express();
 const PORT = 3000;
@@ -20,6 +21,22 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(path.join(__dirname, '../public')));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+
+const storage = multer.diskStorage({
+  destination: function(req, file, cb) {
+    const targetDir = path.join(__dirname, '../uploads', file.fieldname || 'misc');
+    fs.mkdirSync(targetDir, { recursive: true });
+    cb(null, targetDir);
+  },
+  filename: function(req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname) || '';
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 // In-memory encounter state
 let currentEncounter = {
@@ -494,6 +511,21 @@ app.get('/api/encounter/:id', (req, res) => {
 
   currentEncounter = JSON.parse(fs.readFileSync(encounterPath, 'utf8'));
   res.json(currentEncounter);
+});
+
+// Upload character image
+app.post('/api/uploads/characters', upload.single('characterImage'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
+  }
+
+  const relativePath = `/uploads/${req.file.fieldname || 'characters'}/${req.file.filename}`;
+  res.json({
+    filename: req.file.filename,
+    path: relativePath,
+    size: req.file.size,
+    mimetype: req.file.mimetype
+  });
 });
 
 // List saved encounters

@@ -145,6 +145,11 @@ function attachCharacterBuilderListeners() {
 
     // Add attack button
     document.getElementById('add-attack-btn').addEventListener('click', addAttackToForm);
+
+    const imageInput = document.getElementById('char-image');
+    if (imageInput) {
+        imageInput.addEventListener('change', handleCharacterImageUpload);
+    }
 }
 
 // Switch between views
@@ -223,22 +228,34 @@ function switchCrucibleSection(section) {
     Object.values(sections).forEach(sec => {
         if (sec) {
             sec.classList.remove('active');
+            sec.style.display = 'none';
         }
     });
 
     const target = sections[section];
     if (target) {
         target.classList.add('active');
+        if (section === 'character') {
+            target.style.display = 'grid';
+        } else {
+            target.style.display = 'block';
+        }
+        if (section === 'effects') {
+            if (typeof loadSavedEffects === 'function') {
+                loadSavedEffects();
+            }
+        } else if (section === 'loot') {
+            if (typeof loadLootData === 'function') {
+                loadLootData();
+            }
+        }
     }
 
     document.querySelectorAll('.crucible-tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    if (section === 'character') {
-        document.getElementById('crucible-character-btn')?.classList.add('active');
-    } else if (section === 'effects') {
-        document.getElementById('crucible-effects-btn')?.classList.add('active');
-    } else if (section === 'loot') {
-        document.getElementById('crucible-loot-btn')?.classList.add('active');
+    const tabBtn = document.getElementById(`crucible-${section}-btn`);
+    if (tabBtn) {
+        tabBtn.classList.add('active');
     }
 }
 
@@ -367,7 +384,8 @@ function getCharacterDataFromForm() {
         speed: parseInt(document.getElementById('char-speed').value),
         skills: [],
         attacks: currentCharacter?.attacks || [],
-        notes: document.getElementById('char-notes').value
+        notes: document.getElementById('char-notes').value,
+        imagePath: document.getElementById('char-image-path').value || null
     };
 
     // Get proficient skills
@@ -405,7 +423,6 @@ async function handleSaveCharacter(e) {
         if (response.ok) {
             alert(`Character "${characterData.name}" saved successfully!`);
             await loadSavedCharacters();
-            clearCharacterForm();
 
             // Also refresh agents list in combat view
             if (typeof loadSavedAgents === 'function') {
@@ -413,6 +430,13 @@ async function handleSaveCharacter(e) {
             }
             if (typeof renderAgentsList === 'function') {
                 renderAgentsList();
+            }
+
+            currentCharacter = savedCharacters.find(c => c.id === characterData.id);
+            if (currentCharacter) {
+                populateFormWithData(currentCharacter);
+            } else {
+                populateFormWithData(characterData);
             }
         }
     } catch (error) {
@@ -513,6 +537,54 @@ async function handleJsonUpload(event) {
     event.target.value = '';
 }
 
+async function handleCharacterImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
+
+    const preview = document.getElementById('char-image-preview');
+    const statusText = document.getElementById('char-image-status');
+
+    if (statusText) {
+        statusText.textContent = 'Uploading...';
+    }
+
+    const formData = new FormData();
+    formData.append('characterImage', file);
+
+    try {
+        const response = await fetch(`${API_BASE}/uploads/characters`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error('Upload failed');
+        }
+
+        const data = await response.json();
+        if (preview) {
+            preview.src = data.path;
+            preview.style.display = 'block';
+        }
+
+        const hiddenInput = document.getElementById('char-image-path');
+        if (hiddenInput) {
+            hiddenInput.value = data.path;
+        }
+
+        if (statusText) {
+            statusText.textContent = 'Image uploaded successfully';
+        }
+    } catch (error) {
+        console.error('Error uploading character image:', error);
+        if (statusText) {
+            statusText.textContent = 'Upload failed';
+        }
+    }
+}
+
 // Load saved characters
 async function loadSavedCharacters() {
     try {
@@ -542,10 +614,17 @@ function renderCharactersList() {
         const classLevel = char.class && char.level ? `${char.class} ${char.level}` : 'No class';
         const raceInfo = char.race ? char.race : '';
 
+        const portrait = char.imagePath ? `<img class="character-list-portrait" src="${char.imagePath}" alt="${char.name} portrait">` : '';
+
         card.innerHTML = `
+            <div class="character-card-header">
+                <div class="character-card-info">
             <div class="character-list-name">${char.name}</div>
             <div class="character-list-info">${raceInfo} ${classLevel}</div>
             <div class="character-list-info">HP: ${char.hp} | AC: ${char.ac}</div>
+                </div>
+                ${portrait}
+            </div>
             <div class="character-list-actions">
                 <button class="btn btn-small btn-primary" onclick="loadCharacterToForm('${char.id}')">Edit</button>
                 <button class="btn btn-small btn-secondary" onclick="addCharacterToCombat('${char.id}')">Add to Combat</button>
@@ -583,6 +662,28 @@ function populateFormWithData(character) {
     document.getElementById('char-ac').value = character.ac;
     document.getElementById('char-speed').value = character.speed;
     document.getElementById('char-notes').value = character.notes || '';
+
+    const imagePathInput = document.getElementById('char-image-path');
+    const preview = document.getElementById('char-image-preview');
+    const statusText = document.getElementById('char-image-status');
+
+    if (imagePathInput) {
+        imagePathInput.value = character.imagePath || '';
+    }
+
+    if (preview) {
+        if (character.imagePath) {
+            preview.src = character.imagePath;
+            preview.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    }
+
+    if (statusText) {
+        statusText.textContent = character.imagePath ? 'Image loaded' : '';
+    }
 
     // Update modifiers
     ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
@@ -679,6 +780,23 @@ function clearCharacterForm() {
     document.getElementById('char-hp').value = 10;
     document.getElementById('char-ac').value = 10;
     document.getElementById('char-speed').value = 30;
+
+    const imagePreview = document.getElementById('char-image-preview');
+    const imagePathInput = document.getElementById('char-image-path');
+    const statusText = document.getElementById('char-image-status');
+
+    if (imagePreview) {
+        imagePreview.src = '';
+        imagePreview.style.display = 'none';
+    }
+
+    if (imagePathInput) {
+        imagePathInput.value = '';
+    }
+
+    if (statusText) {
+        statusText.textContent = '';
+    }
 
     ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
         document.getElementById(`char-${ability}`).value = 10;

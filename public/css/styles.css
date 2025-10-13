@@ -1,3 +1,24 @@
+.image-preview-group {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.image-preview {
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background-color: var(--bg-tertiary);
+}
+
+.image-status-text {
+    display: block;
+    margin-top: 0.4rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
 .crucible-layout {
     display: flex;
     flex-direction: column;
@@ -131,6 +152,15 @@
     gap: 0.6rem;
     font-size: 0.85rem;
     color: var(--text-secondary);
+}
+
+.combatant-portrait {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.8rem;
 }
 
 .combatant-summary-stats .summary-stat.hp {
@@ -1060,6 +1090,23 @@ h2 {
     transition: all 0.2s ease;
 }
 
+.character-card-header {
+    display: flex;
+    gap: 0.8rem;
+}
+
+.character-card-info {
+    flex: 1;
+}
+
+.character-list-portrait {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
 .character-list-card:hover {
     background-color: var(--bg-hover);
     border-color: var(--accent-primary);
@@ -1422,4 +1469,26 @@ h2 {
 
 .attack-result.miss {
     color: var(--danger);
+}
+
+.agent-details {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.agent-list-portrait {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.agent-info-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
 }
