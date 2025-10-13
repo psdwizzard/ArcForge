@@ -466,6 +466,7 @@ async function init() {
     }
 
     initCodex();
+    attachAtlasEventListeners();
 }
 
 // Load encounter state from server
@@ -1242,8 +1243,8 @@ function createCombatantCard(combatant, isCurrentTurn) {
     </div>`;
     const typeLabel = getTypeDisplayName(combatant.type);
 
-    const initiativeRollValue = combatant.initiative ? (combatant.initiative - combatant.dexModifier) : '';
-    const totalInitiativeDisplay = combatant.initiative || 0;
+    const initiativeRollValue = getInitiativeRollValue(combatant);
+    const totalInitiativeDisplay = getInitiativeTotalDisplay(combatant);
 
     card.innerHTML = `
         <div class="combatant-header">
@@ -1743,6 +1744,28 @@ async function updateInitiativeRoll(combatantId) {
             const totalDisplay = document.getElementById(`initiative-total-${combatantId}`);
             totalDisplay.textContent = combatant.initiative || 0;
         }
+
+        try {
+            const response = await fetch(`${API_BASE}/combatants/${combatantId}/initiative`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initiative: null })
+            });
+
+            if (response.ok) {
+                const newState = await response.json();
+                if (!newState.combatants) {
+                    newState.combatants = [];
+                }
+
+                encounterState = newState;
+                window.encounterState = encounterState;
+                renderCombatantsList();
+            }
+        } catch (error) {
+            console.error('Error clearing initiative:', error);
+        }
+
         return;
     }
 
@@ -1754,11 +1777,9 @@ async function updateInitiativeRoll(combatantId) {
 
     const totalInitiative = roll + combatant.dexModifier;
 
-    // Update the total display on the card immediately for responsiveness
     const totalDisplay = document.getElementById(`initiative-total-${combatantId}`);
     totalDisplay.textContent = totalInitiative;
 
-    // Send the final total to the server
     try {
         const response = await fetch(`${API_BASE}/combatants/${combatantId}/initiative`, {
             method: 'POST',
@@ -1769,14 +1790,13 @@ async function updateInitiativeRoll(combatantId) {
         if (response.ok) {
             const newState = await response.json();
 
-            // Ensure combatants array exists
             if (!newState.combatants) {
                 newState.combatants = [];
             }
 
             encounterState = newState;
             window.encounterState = encounterState;
-            renderCombatantsList(); // Re-render to reflect the new sort order
+            renderCombatantsList();
         }
     } catch (error) {
         console.error('Error setting initiative:', error);
@@ -1983,3 +2003,20 @@ async function handleRollEnemyInitiative() {
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', init);
+
+function attachAtlasEventListeners() {
+    const atlasTabs = document.querySelectorAll('#atlas-tabs .codex-tab-btn');
+    atlasTabs.forEach(btn => {
+        btn.addEventListener('click', () => switchAtlasSection(btn.dataset.atlasSection));
+    });
+}
+
+function switchAtlasSection(section) {
+    document.querySelectorAll('#atlas-tabs .codex-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.atlasSection === section);
+    });
+
+    document.querySelectorAll('.atlas-section').forEach(sec => {
+        sec.classList.toggle('active', sec.id === `atlas-${section}-section`);
+    });
+}

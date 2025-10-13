@@ -72,6 +72,7 @@
                         <button id="crucible-character-btn" class="codex-tab-btn active" data-section="character">Character Builder</button>
                         <button id="crucible-effects-btn" class="codex-tab-btn" data-section="effects">Effects Builder</button>
                         <button id="crucible-items-btn" class="codex-tab-btn" data-section="items">Items</button>
+                        <button id="crucible-monsters-btn" class="codex-tab-btn" data-section="monsters">Monsters</button>
                     </div>
 
                     <div id="crucible-character-section" class="crucible-section active">
@@ -448,13 +449,47 @@
                             </div>
                         </div>
                     </div>
+
+                    <div id="crucible-monsters-section" class="crucible-section">
+                        <div class="monsters-container">
+                            <div class="monsters-header">
+                                <h2>Monster Library</h2>
+                                <div class="monsters-controls">
+                                    <input type="text" id="monster-search-input" class="form-input" placeholder="Search monsters..." aria-label="Search monsters">
+                                    <label for="monster-category-filter">Category</label>
+                                    <select id="monster-category-filter" class="form-input"></select>
+                                </div>
+                            </div>
+                            <div class="monsters-content">
+                                <div class="monster-list" id="monster-list"></div>
+                                <aside class="monster-detail" id="monster-detail">
+                                    <div class="monster-detail-empty">Select a monster to view details.</div>
+                                </aside>
+                            </div>
+                        </div>
+                    </div>
             </div>
         </main>
 
         <main id="atlas-view" style="display: none;">
-            <div class="empty-section">
-                <h2>Atlas</h2>
-                <p>Coming soon.</p>
+            <div class="codex-container">
+                <div class="codex-tabs" id="atlas-tabs">
+                    <button class="codex-tab-btn active" data-atlas-section="map">Map</button>
+                    <button class="codex-tab-btn" data-atlas-section="encounters">Encounters</button>
+                    <button class="codex-tab-btn" data-atlas-section="control">Control</button>
+                </div>
+
+                <section id="atlas-map-section" class="atlas-section active">
+                    <div class="atlas-section-placeholder">Map tools coming soon.</div>
+                </section>
+
+                <section id="atlas-encounters-section" class="atlas-section">
+                    <div class="atlas-section-placeholder">Encounter management coming soon.</div>
+                </section>
+
+                <section id="atlas-control-section" class="atlas-section">
+                    <div class="atlas-section-placeholder">Control center coming soon.</div>
+                </section>
             </div>
         </main>
 

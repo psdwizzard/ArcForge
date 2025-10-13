@@ -1049,7 +1049,7 @@ h2 {
     display: grid;
     grid-template-columns: 320px 1fr;
     gap: 1.5rem;
-    min-height: 400px;
+    min-height: 500px;
 }
 
 .item-list {
@@ -1057,6 +1057,7 @@ h2 {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     overflow-y: auto;
+    max-height: 70vh;
 }
 
 .item-row {
@@ -1121,6 +1122,8 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 .item-detail-empty {
@@ -2023,5 +2026,192 @@ h2 {
     flex-direction: column;
     gap: 0.3rem;
     font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.monsters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.monsters-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.monsters-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.monsters-controls input[type="text"] {
+    min-width: 220px;
+}
+
+.monsters-content {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.5rem;
+    min-height: 500px;
+}
+
+.monster-list {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.monster-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 140px;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    align-items: center;
+    cursor: pointer;
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.2s ease;
+}
+
+.monster-row:last-child {
+    border-bottom: none;
+}
+
+.monster-row:hover,
+.monster-row.active {
+    background-color: rgba(255, 71, 87, 0.12);
+}
+
+.monster-row img,
+.monster-row .avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+    background-color: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.monster-row h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.monster-row-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.monster-row .monster-row-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.monster-detail {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.monster-detail-empty {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.monster-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.monster-detail-header img {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    object-fit: cover;
+}
+
+.monster-detail-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.monster-detail-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.monster-detail-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+}
+
+.monster-stat-card {
+    background-color: var(--bg-tertiary);
+    border-radius: 6px;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.monster-stat-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.monster-stat-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+@media (max-width: 1024px) {
+    .monsters-content {
+        grid-template-columns: 1fr;
+    }
+}
+
+.atlas-section {
+    display: none;
+    min-height: 420px;
+}
+
+.atlas-section.active {
+    display: block;
+}
+
+.atlas-section-placeholder {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
     color: var(--text-secondary);
 }
