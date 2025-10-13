@@ -228,7 +228,7 @@ async function assignItemToOwner(item) {
         });
 
         if (response.ok) {
-            cachedCharacterData = await response.json();
+            await fetchCharactersIfNeeded(true);
             alert(`${item.name} added to ${character.name}'s inventory.`);
         } else {
             alert('Failed to assign item.');
