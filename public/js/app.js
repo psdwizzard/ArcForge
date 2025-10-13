@@ -1152,7 +1152,7 @@ function renderAgentsList() {
 function handleCreateNewAgent() {
     // Switch to character builder view and clear form
     if (typeof switchView === 'function') {
-        switchView('characters');
+        switchView('crucible');
     }
     if (typeof clearCharacterForm === 'function') {
         clearCharacterForm();
@@ -1193,7 +1193,7 @@ async function addAgentToCombatFromList(agentId) {
 function editAgentFromList(agentId) {
     // Switch to character builder and load the agent
     if (typeof switchView === 'function') {
-        switchView('characters');
+        switchView('crucible');
     }
     if (typeof loadCharacterToForm === 'function') {
         loadCharacterToForm(agentId);

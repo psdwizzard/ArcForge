@@ -92,8 +92,8 @@ function populateSkills() {
 // Attach event listeners for character builder
 function attachCharacterBuilderListeners() {
     // Navigation
-    document.getElementById('nav-combat-btn').addEventListener('click', () => switchView('combat'));
-    document.getElementById('nav-characters-btn').addEventListener('click', () => switchView('characters'));
+    document.getElementById('nav-arena-btn').addEventListener('click', () => switchView('arena'));
+    document.getElementById('nav-crucible-btn').addEventListener('click', () => switchView('crucible'));
 
     // Ability score changes
     ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
@@ -137,21 +137,56 @@ function attachCharacterBuilderListeners() {
 
 // Switch between views
 function switchView(view) {
-    const combatView = document.getElementById('combat-view');
-    const characterView = document.getElementById('character-view');
-    const combatBtn = document.getElementById('nav-combat-btn');
-    const charactersBtn = document.getElementById('nav-characters-btn');
+    const arenaView = document.getElementById('arena-view');
+    const crucibleView = document.getElementById('crucible-view');
+    const atlasView = document.getElementById('atlas-view');
+    const codexView = document.getElementById('codex-view');
 
-    if (view === 'combat') {
-        combatView.style.display = 'grid';
-        characterView.style.display = 'none';
-        combatBtn.classList.add('active');
-        charactersBtn.classList.remove('active');
-    } else {
-        combatView.style.display = 'none';
-        characterView.style.display = 'block';
-        combatBtn.classList.remove('active');
-        charactersBtn.classList.add('active');
+    const arenaBtn = document.getElementById('nav-arena-btn');
+    const crucibleBtn = document.getElementById('nav-crucible-btn');
+    const atlasBtn = document.getElementById('nav-atlas-btn');
+    const codexBtn = document.getElementById('nav-codex-btn');
+
+    [arenaView, crucibleView, atlasView, codexView].forEach(viewEl => {
+        if (viewEl) {
+            viewEl.style.display = 'none';
+        }
+    });
+
+    [arenaBtn, crucibleBtn, atlasBtn, codexBtn].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('active');
+        }
+    });
+
+    if (view === 'arena') {
+        if (arenaView) {
+            arenaView.style.display = 'grid';
+        }
+        if (arenaBtn) {
+            arenaBtn.classList.add('active');
+        }
+    } else if (view === 'crucible') {
+        if (crucibleView) {
+            crucibleView.style.display = 'block';
+        }
+        if (crucibleBtn) {
+            crucibleBtn.classList.add('active');
+        }
+    } else if (view === 'atlas') {
+        if (atlasView) {
+            atlasView.style.display = 'flex';
+        }
+        if (atlasBtn) {
+            atlasBtn.classList.add('active');
+        }
+    } else if (view === 'codex') {
+        if (codexView) {
+            codexView.style.display = 'flex';
+        }
+        if (codexBtn) {
+            codexBtn.classList.add('active');
+        }
     }
 }
 

@@ -32,48 +32,6 @@ function attachEffectsBuilderListeners() {
 
 // Switch between views (extend existing function)
 const originalSwitchView = typeof switchView !== 'undefined' ? switchView : null;
-function switchView(view) {
-    const combatView = document.getElementById('combat-view');
-    const characterView = document.getElementById('character-view');
-    const effectsView = document.getElementById('effects-view');
-    const lootView = document.getElementById('loot-view');
-    const combatBtn = document.getElementById('nav-combat-btn');
-    const charactersBtn = document.getElementById('nav-characters-btn');
-    const effectsBtn = document.getElementById('nav-effects-btn');
-    const lootBtn = document.getElementById('nav-loot-btn');
-
-    // Hide all views
-    combatView.style.display = 'none';
-    characterView.style.display = 'none';
-    effectsView.style.display = 'none';
-    lootView.style.display = 'none';
-
-    // Remove all active classes
-    combatBtn.classList.remove('active');
-    charactersBtn.classList.remove('active');
-    effectsBtn.classList.remove('active');
-    lootBtn.classList.remove('active');
-
-    // Show selected view
-    if (view === 'combat') {
-        combatView.style.display = 'grid';
-        combatBtn.classList.add('active');
-    } else if (view === 'characters') {
-        characterView.style.display = 'block';
-        charactersBtn.classList.add('active');
-    } else if (view === 'effects') {
-        effectsView.style.display = 'block';
-        effectsBtn.classList.add('active');
-    } else if (view === 'loot') {
-        lootView.style.display = 'block';
-        lootBtn.classList.add('active');
-    }
-}
-
-// Make switchView available globally if it wasn't before
-if (typeof window.switchView === 'undefined') {
-    window.switchView = switchView;
-}
 
 // Handle save effect
 async function handleSaveEffect(e) {

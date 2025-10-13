@@ -11,10 +11,10 @@
         <header>
             <h1>ArcForge</h1>
             <nav class="header-nav">
-                <button id="nav-combat-btn" class="nav-btn active">Combat Tracker</button>
-                <button id="nav-characters-btn" class="nav-btn">Character Builder</button>
-                <button id="nav-effects-btn" class="nav-btn">Effects Builder</button>
-                <button id="nav-loot-btn" class="nav-btn">Loot</button>
+                <button id="nav-arena-btn" class="nav-btn active">Arena</button>
+                <button id="nav-crucible-btn" class="nav-btn">Crucible</button>
+                <button id="nav-atlas-btn" class="nav-btn">Atlas</button>
+                <button id="nav-codex-btn" class="nav-btn">Codex</button>
             </nav>
             <div class="header-actions">
                 <button id="save-data-btn" class="btn btn-primary">Save</button>
@@ -26,7 +26,7 @@
             </div>
         </header>
 
-        <main id="combat-view">
+        <main id="arena-view">
             <div class="left-panel">
                 <section class="agents-list-section">
                     <div class="agents-header">
@@ -64,10 +64,10 @@
             </div>
         </main>
 
-        <main id="character-view" style="display: none;">
+        <main id="crucible-view" style="display: none;">
             <div class="character-builder-container">
                 <section class="character-form-section">
-                    <h2>Character Builder</h2>
+                    <h2>Crucible</h2>
 
                     <form id="character-form">
                         <!-- Agent Type Selection -->
@@ -234,6 +234,20 @@
                         <div class="empty-state">No characters saved yet</div>
                     </div>
                 </section>
+            </div>
+        </main>
+
+        <main id="atlas-view" style="display: none;">
+            <div class="empty-section">
+                <h2>Atlas</h2>
+                <p>Coming soon.</p>
+            </div>
+        </main>
+
+        <main id="codex-view" style="display: none;">
+            <div class="empty-section">
+                <h2>Codex</h2>
+                <p>Coming soon.</p>
             </div>
         </main>
 
