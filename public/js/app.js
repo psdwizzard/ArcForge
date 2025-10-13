@@ -58,18 +58,37 @@ const codexState = {
 async function loadCodexData() {
     try {
         const allCharacters = await fetch(`${API_BASE}/characters`).then(res => res.json());
-        codexState.characterSheets = allCharacters.filter(char => (char.agentType || 'p') !== 'e');
+        codexState.characterSheets = allCharacters.filter(char => (char.agentType || 'p') !== 'e' && (char.agentType || 'p') !== 'enemy');
+        const characterEnemies = allCharacters.filter(char => {
+            const agentType = (char.agentType || 'p').toLowerCase();
+            return agentType === 'e' || agentType === 'enemy';
+        }).map(char => ({
+            ...char,
+            type: 'Character Enemy'
+        }));
+
         codexState.enemySheets = [
-            ...codexState.enemySheets,
-            ...allCharacters.filter(char => (char.agentType || 'p') === 'e')
+            ...characterEnemies
         ];
     } catch (error) {
         console.error('Error loading character sheets:', error);
         codexState.characterSheets = [];
+        codexState.enemySheets = [];
     }
 
     try {
-        codexState.enemySheets = await fetch(`${API_BASE}/creatures`).then(res => res.json());
+        const creatureTemplates = await fetch(`${API_BASE}/creatures`).then(res => res.json());
+        const mergedEnemySheets = [...codexState.enemySheets];
+
+        creatureTemplates.forEach(creature => {
+            const sheetId = creature.id || creature.name;
+            const exists = mergedEnemySheets.some(existing => (existing.id || existing.name) === sheetId);
+            if (!exists) {
+                mergedEnemySheets.push(creature);
+            }
+        });
+
+        codexState.enemySheets = mergedEnemySheets;
     } catch (error) {
         console.error('Error loading enemy sheets:', error);
         codexState.enemySheets = [];
