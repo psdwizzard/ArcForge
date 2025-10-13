@@ -96,6 +96,7 @@ app.post('/api/combatants', (req, res) => {
     type: req.body.type || 'monster',
     initiative: req.body.initiative || 0,
     dexModifier: req.body.dexModifier || 0,
+    imagePath: req.body.imagePath || null,
     hp: {
       current: req.body.hp || 10,
       max: req.body.hp || 10,
