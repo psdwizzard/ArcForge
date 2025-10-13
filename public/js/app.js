@@ -848,13 +848,22 @@ function getAttacksHTML(combatant) {
     // Only show attacks for NPCs and enemies
     const isNPCorEnemy = combatant.type === 'n' || combatant.type === 'e' || combatant.type === 'npc' || combatant.type === 'enemy';
     if (!isNPCorEnemy) {
+        console.log(`[getAttacksHTML] Skipping ${combatant.name}: not NPC/Enemy (type: ${combatant.type})`);
         return '';
     }
 
     // Find the character data from saved agents
-    const character = combatant.sourceId ? savedAgents.find(a => a.id === combatant.sourceId) : savedAgents.find(a => a.name === combatant.name);
+    // Strip " - 01" style suffix from enemy names for legacy lookup
+    const baseName = combatant.name.split(' - ')[0];
+    const character = combatant.sourceId 
+        ? savedAgents.find(a => a.id === combatant.sourceId) 
+        : (savedAgents.find(a => a.name === combatant.name) || savedAgents.find(a => a.name === baseName));
+
+    console.log(`[getAttacksHTML] ${combatant.name}: sourceId=${combatant.sourceId}, baseName=${baseName}, found character:`, character);
+    console.log(`[getAttacksHTML] savedAgents count:`, savedAgents.length);
 
     if (!character || !character.attacks || character.attacks.length === 0) {
+        console.log(`[getAttacksHTML] No attacks for ${combatant.name}: character=${!!character}, attacks=${character?.attacks?.length || 0}`);
         return '';
     }
 
@@ -1017,7 +1026,10 @@ function rollAttack(attackerId) {
         return;
     }
 
-    const attackerData = attacker.sourceId ? savedAgents.find(agent => agent.id === attacker.sourceId) : savedAgents.find(agent => agent.name === attacker.name);
+    const attackerBaseName = attacker.name.split(' - ')[0];
+    const attackerData = attacker.sourceId 
+        ? savedAgents.find(agent => agent.id === attacker.sourceId) 
+        : (savedAgents.find(agent => agent.name === attacker.name) || savedAgents.find(agent => agent.name === attackerBaseName));
     if (!attackerData || !attackerData.attacks || !attackerData.attacks[attackIndex]) {
         updateAttackResultUI(attackerId, 'Attack data is missing for this combatant.', 'info');
         resetAttackUI(attackerId);
@@ -1836,7 +1848,10 @@ async function showAttacksModal(combatantId) {
     }
 
     // Find the character data from saved agents
-    const character = combatant.sourceId ? savedAgents.find(a => a.id === combatant.sourceId) : savedAgents.find(a => a.name === combatant.name);
+    const baseName = combatant.name.split(' - ')[0];
+    const character = combatant.sourceId 
+        ? savedAgents.find(a => a.id === combatant.sourceId) 
+        : (savedAgents.find(a => a.name === combatant.name) || savedAgents.find(a => a.name === baseName));
     console.log('[showAttacksModal] Found character:', character);
     console.log('[showAttacksModal] Character attacks:', character?.attacks);
 
