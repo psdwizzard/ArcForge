@@ -22,6 +22,7 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/data', express.static(path.join(__dirname, '../data')));
 
 const storage = multer.diskStorage({
   destination: function(req, file, cb) {
@@ -91,31 +92,42 @@ app.get('/api/encounter', (req, res) => {
 // Add combatant
 app.post('/api/combatants', (req, res) => {
   const { name, type = 'monster' } = req.body;
-  let finalName = name;
+  const normalizedType = (type || 'monster').toLowerCase();
+  const enemyTypes = ['enemy', 'monster', 'e'];
+  const baseName = (name || 'Enemy').split(' - ')[0];
 
-  if (type && ['enemy', 'monster', 'e'].includes(type.toLowerCase())) {
-    const baseName = name || 'Enemy';
-    const normalizedType = type.toLowerCase();
+  let finalName = name || 'Enemy';
+  if (enemyTypes.includes(normalizedType)) {
     const existingCount = currentEncounter.combatants.filter(c => {
       const combatantType = (c.type || '').toLowerCase();
-      if (!['enemy', 'monster', 'e'].includes(combatantType)) {
+      if (!enemyTypes.includes(combatantType)) {
         return false;
       }
 
-      const nameSegments = (c.name || '').split(' - ');
-      const combatantBase = nameSegments[0];
-      return combatantType === normalizedType && combatantBase === baseName;
+      const combatantBase = (c.name || '').split(' - ')[0];
+      return combatantBase === baseName;
     }).length;
 
     finalName = `${baseName} - ${String(existingCount + 1).padStart(2, '0')}`;
+  }
+
+  const dexModifier = req.body.dexModifier || 0;
+  let initiativeValue = req.body.initiative;
+  if (initiativeValue === undefined || initiativeValue === null || initiativeValue === '') {
+    if (enemyTypes.includes(normalizedType)) {
+      const roll = Math.floor(Math.random() * 20) + 1;
+      initiativeValue = roll + dexModifier;
+    } else {
+      initiativeValue = 0;
+    }
   }
 
   const combatant = {
     id: `combatant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     name: finalName,
     type: req.body.type || 'monster',
-    initiative: req.body.initiative || 0,
-    dexModifier: req.body.dexModifier || 0,
+    initiative: initiativeValue,
+    dexModifier,
     imagePath: req.body.imagePath || null,
     hp: {
       current: req.body.hp || 10,
@@ -186,7 +198,7 @@ app.delete('/api/combatants/:id', (req, res) => {
 app.post('/api/initiative/roll', (req, res) => {
   const { combatantId, dexModifier } = req.body;
   const roll = Math.floor(Math.random() * 20) + 1;
-  const initiative = roll + (dexModifier || 0);
+      const initiative = roll + (dexModifier || 0);
 
   const combatantIndex = currentEncounter.combatants.findIndex(c => c.id === combatantId);
 
