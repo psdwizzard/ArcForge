@@ -44,6 +44,370 @@ window.lastActiveCombatantId = lastActiveCombatantId;
 const agentCollapseState = {};
 window.agentCollapseState = agentCollapseState;
 
+// Codex state
+const codexState = {
+    activeSection: 'character',
+    characterSheets: [],
+    enemySheets: [],
+    journalEntries: [],
+    activeCharacterId: null,
+    activeEnemyId: null,
+    activeJournalId: null
+};
+
+async function loadCodexData() {
+    try {
+        const allCharacters = await fetch(`${API_BASE}/characters`).then(res => res.json());
+        codexState.characterSheets = allCharacters.filter(char => (char.agentType || 'p') !== 'e');
+        codexState.enemySheets = [
+            ...codexState.enemySheets,
+            ...allCharacters.filter(char => (char.agentType || 'p') === 'e')
+        ];
+    } catch (error) {
+        console.error('Error loading character sheets:', error);
+        codexState.characterSheets = [];
+    }
+
+    try {
+        codexState.enemySheets = await fetch(`${API_BASE}/creatures`).then(res => res.json());
+    } catch (error) {
+        console.error('Error loading enemy sheets:', error);
+        codexState.enemySheets = [];
+    }
+
+    // Placeholder journal entries (will be replaced with saved data later)
+    if (!codexState.journalEntries || codexState.journalEntries.length === 0) {
+        codexState.journalEntries = [];
+    }
+}
+
+function initCodex() {
+    const tabButtons = document.querySelectorAll('.codex-tab-btn');
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => switchCodexSection(btn.dataset.codexSection));
+    });
+
+    document.getElementById('codex-journal-save-btn').addEventListener('click', handleJournalSave);
+    document.getElementById('codex-journal-new-btn').addEventListener('click', handleJournalNew);
+
+    renderCodex();
+}
+
+function switchCodexSection(section) {
+    codexState.activeSection = section;
+    renderCodex();
+}
+
+function renderCodex() {
+    updateCodexTabs();
+    renderCodexCharacters();
+    renderCodexEnemies();
+    renderCodexJournal();
+}
+
+function updateCodexTabs() {
+    document.querySelectorAll('.codex-tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.codexSection === codexState.activeSection);
+    });
+
+    document.querySelectorAll('.codex-section').forEach(section => {
+        section.classList.toggle('active', section.id === `codex-${codexState.activeSection}-section`);
+    });
+}
+
+function renderCodexCharacters() {
+    const listEl = document.getElementById('codex-character-list');
+    const detailEl = document.getElementById('codex-character-detail');
+
+    if (!listEl || !detailEl) return;
+
+    if (!codexState || !codexState.characterSheets || codexState.characterSheets.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No characters saved yet</div>';
+        detailEl.innerHTML = '<div class="empty-state">Create characters in the Crucible to view them here</div>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+
+    codexState.characterSheets.forEach(char => {
+        const card = document.createElement('div');
+        card.className = 'codex-sheet-card';
+        card.dataset.sheetId = char.id;
+        card.innerHTML = `
+            ${char.imagePath ? `<img class="codex-sheet-portrait" src="${char.imagePath}" alt="${char.name} portrait">` : ''}
+            <div class="codex-sheet-meta">
+                <div class="codex-sheet-name">${char.name}</div>
+                <div class="codex-sheet-sub">${[char.race, char.class ? `${char.class} ${char.level || ''}` : ''].filter(Boolean).join(' • ')}</div>
+                <div class="codex-sheet-sub">HP ${char.hp} • AC ${char.ac}</div>
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            codexState.activeCharacterId = char.id;
+            renderCodexCharacters();
+        });
+
+        if (codexState.activeCharacterId === char.id) {
+            card.classList.add('active');
+        }
+
+        listEl.appendChild(card);
+    });
+
+    if (!codexState.activeCharacterId && codexState.characterSheets.length > 0) {
+        codexState.activeCharacterId = codexState.characterSheets[0].id;
+    }
+
+    const activeChar = codexState.characterSheets.find(char => char.id === codexState.activeCharacterId);
+    if (!activeChar) {
+        detailEl.innerHTML = '<div class="empty-state">Select a character to view their sheet</div>';
+        return;
+    }
+
+    detailEl.innerHTML = getCodexSheetDetailHTML(activeChar, 'character');
+}
+
+function renderCodexEnemies() {
+    const listEl = document.getElementById('codex-enemy-list');
+    const detailEl = document.getElementById('codex-enemy-detail');
+
+    if (!listEl || !detailEl) return;
+
+    if (!codexState.enemySheets || codexState.enemySheets.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No enemies in the bestiary yet</div>';
+        detailEl.innerHTML = '<div class="empty-state">Add JSON files to data/creatures to populate this list</div>';
+        return;
+    }
+
+    listEl.innerHTML = '';
+
+    codexState.enemySheets.forEach(enemy => {
+        const card = document.createElement('div');
+        card.className = 'codex-sheet-card';
+        card.dataset.sheetId = enemy.id || enemy.name;
+        card.innerHTML = `
+            ${enemy.imagePath ? `<img class="codex-sheet-portrait" src="${enemy.imagePath}" alt="${enemy.name} portrait">` : ''}
+            <div class="codex-sheet-meta">
+                <div class="codex-sheet-name">${enemy.name}</div>
+                <div class="codex-sheet-sub">CR ${enemy.cr || '—'} • ${enemy.type || ''}</div>
+                <div class="codex-sheet-sub">HP ${enemy.hp || '—'} • AC ${enemy.ac || '—'}</div>
+            </div>
+        `;
+        card.addEventListener('click', () => {
+            codexState.activeEnemyId = enemy.id || enemy.name;
+            renderCodexEnemies();
+        });
+
+        if (codexState.activeEnemyId === (enemy.id || enemy.name)) {
+            card.classList.add('active');
+        }
+
+        listEl.appendChild(card);
+    });
+
+    if (!codexState.activeEnemyId && codexState.enemySheets.length > 0) {
+        codexState.activeEnemyId = codexState.enemySheets[0].id || codexState.enemySheets[0].name;
+    }
+
+    const activeEnemy = codexState.enemySheets.find(enemy => (enemy.id || enemy.name) === codexState.activeEnemyId);
+    if (!activeEnemy) {
+        detailEl.innerHTML = '<div class="empty-state">Select an enemy to view their sheet</div>';
+        return;
+    }
+
+    detailEl.innerHTML = getCodexSheetDetailHTML(activeEnemy, 'enemy');
+}
+
+function getCodexSheetDetailHTML(sheet, type) {
+    const portraitHTML = sheet.imagePath ? `<img src="${sheet.imagePath}" alt="${sheet.name} portrait">` : '<div class="codex-sheet-placeholder">No Image</div>';
+
+    const abilityBlock = sheet.abilities ? Object.entries(sheet.abilities).map(([ability, value]) => `
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">${ability.toUpperCase()}</div>
+            <div class="codex-summary-value">${value}</div>
+        </div>
+    `).join('') : '';
+
+    const extraBlocks = [];
+
+    if (type === 'character') {
+        extraBlocks.push(`
+            <div class="codex-summary-block">
+                <div class="codex-summary-label">Class & Level</div>
+                <div class="codex-summary-value">${sheet.class ? `${sheet.class} ${sheet.level || ''}` : '—'}</div>
+            </div>
+        `);
+        extraBlocks.push(`
+            <div class="codex-summary-block">
+                <div class="codex-summary-label">Speed</div>
+                <div class="codex-summary-value">${sheet.speed || '—'}</div>
+            </div>
+        `);
+    } else if (type === 'enemy') {
+        extraBlocks.push(`
+            <div class="codex-summary-block">
+                <div class="codex-summary-label">Challenge</div>
+                <div class="codex-summary-value">CR ${sheet.cr || '—'}</div>
+            </div>
+        `);
+        extraBlocks.push(`
+            <div class="codex-summary-block">
+                <div class="codex-summary-label">Type & Size</div>
+                <div class="codex-summary-value">${[sheet.size, sheet.type].filter(Boolean).join(' • ') || '—'}</div>
+            </div>
+        `);
+    }
+
+    const traitsHTML = sheet.specialAbilities && sheet.specialAbilities.length > 0
+        ? `
+            <div class="codex-notes">
+                <h3>Traits</h3>
+                ${sheet.specialAbilities.map(ability => `
+                    <div class="codex-trait-block">
+                        <strong>${ability.name}.</strong> ${ability.description}
+                    </div>
+                `).join('')}
+            </div>
+        `
+        : '';
+
+    const actionsHTML = sheet.actions && sheet.actions.length > 0
+        ? `
+            <div class="codex-notes">
+                <h3>Actions</h3>
+                ${sheet.actions.map(action => `
+                    <div class="codex-trait-block">
+                        <strong>${action.name}</strong> ${action.type ? `(${action.type})` : ''} — ${action.damage || action.description || ''}
+                    </div>
+                `).join('')}
+            </div>
+        `
+        : '';
+
+    const lootHTML = type === 'enemy' && sheet.loot && sheet.loot.length > 0
+        ? `
+            <div class="codex-notes">
+                <h3>Loot</h3>
+                <ul class="codex-loot-list">
+                    ${sheet.loot.map(item => `<li>${item.quantity || 1} × ${item.name}${item.value ? ` (${item.value} gp)` : ''}</li>`).join('')}
+                </ul>
+            </div>
+        `
+        : '';
+
+    return `
+        <div class="codex-sheet-header">
+            <div class="codex-sheet-portrait-wrapper">
+                ${portraitHTML}
+            </div>
+            <div class="codex-sheet-title">
+                <div class="codex-sheet-nameplate">
+                    <h2>${sheet.name}</h2>
+                    <span class="codex-sheet-tag">${type === 'character' ? 'Character' : 'Enemy'}</span>
+                </div>
+                <div class="codex-sheet-subtitle">${type === 'character' ? [sheet.race, sheet.background].filter(Boolean).join(' • ') : [sheet.type, sheet.size].filter(Boolean).join(' • ')}</div>
+                <div class="codex-sheet-primary-stats">
+                    <span>HP <strong>${sheet.hp || '—'}</strong></span>
+                    <span>AC <strong>${sheet.ac || '—'}</strong></span>
+                    <span>DEX <strong>${sheet.dexModifier >= 0 ? '+' : ''}${sheet.dexModifier || 0}</strong></span>
+                </div>
+            </div>
+        </div>
+        <div class="codex-sheet-summary">
+            ${abilityBlock}
+            ${extraBlocks.join('')}
+        </div>
+        <div class="codex-notes">
+            <div class="codex-notes-header">
+                <h3>Notes</h3>
+                <small>Use this space for session prep, tactics, or narrative cues. Notes auto-save with Save All Data.</small>
+            </div>
+            <textarea data-codex-notes="${sheet.id || sheet.name}" placeholder="Add encounter notes, roleplaying cues, or status updates...">${sheet.notes || ''}</textarea>
+        </div>
+        ${traitsHTML}
+        ${actionsHTML}
+        ${lootHTML}
+    `;
+}
+
+function renderCodexJournal() {
+    const listEl = document.getElementById('codex-journal-list');
+    const editor = document.getElementById('codex-journal-text');
+
+    if (!listEl || !editor) return;
+
+    if (!codexState.journalEntries || codexState.journalEntries.length === 0) {
+        listEl.innerHTML = '<div class="empty-state">No journal entries yet</div>';
+        editor.value = '';
+        editor.placeholder = 'Click "New Entry" to start a journal entry.';
+        return;
+    }
+
+    listEl.innerHTML = '';
+
+    codexState.journalEntries.forEach(entry => {
+        const card = document.createElement('div');
+        card.className = 'codex-journal-entry';
+        card.dataset.entryId = entry.id;
+        card.innerHTML = `
+            <div class="codex-journal-title">${entry.title || 'Untitled Entry'}</div>
+            <div class="codex-journal-date">${new Date(entry.updatedAt || Date.now()).toLocaleString()}</div>
+        `;
+        card.addEventListener('click', () => selectJournalEntry(entry.id));
+        if (codexState.activeJournalId === entry.id) {
+            card.classList.add('active');
+        }
+        listEl.appendChild(card);
+    });
+
+    if (!codexState.activeJournalId && codexState.journalEntries.length > 0) {
+        codexState.activeJournalId = codexState.journalEntries[0].id;
+    }
+
+    const activeEntry = codexState.journalEntries.find(entry => entry.id === codexState.activeJournalId);
+    if (activeEntry) {
+        editor.value = activeEntry.body || '';
+        editor.placeholder = 'Write notes for this entry...';
+    } else {
+        editor.value = '';
+        editor.placeholder = 'Select a journal entry to view or edit.';
+    }
+}
+
+function selectJournalEntry(entryId) {
+    codexState.activeJournalId = entryId;
+    renderCodexJournal();
+}
+
+function handleJournalNew() {
+    const newEntry = {
+        id: `journal-${Date.now()}`,
+        title: 'New Entry',
+        body: '',
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    };
+    codexState.journalEntries.unshift(newEntry);
+    codexState.activeJournalId = newEntry.id;
+    renderCodexJournal();
+}
+
+function handleJournalSave() {
+    const activeEntry = codexState.journalEntries.find(entry => entry.id === codexState.activeJournalId);
+    if (!activeEntry) {
+        alert('No journal entry selected.');
+        return;
+    }
+
+    const editor = document.getElementById('codex-journal-text');
+    if (!editor) return;
+
+    activeEntry.body = editor.value;
+    activeEntry.updatedAt = Date.now();
+
+    renderCodexJournal();
+    alert('Journal entry saved.');
+}
+
 // Helper function to convert type codes to full names
 function getTypeDisplayName(type) {
     const typeMap = {
@@ -63,6 +427,7 @@ async function init() {
     await loadEncounterState();
     await loadSavedAgents();
     await reloadEffectsData(); // Load effects
+    await loadCodexData();
     attachEventListeners();
     renderCombatantsList();
     renderAgentsList();
@@ -80,6 +445,8 @@ async function init() {
     if (typeof initEffectsBuilder === 'function') {
         initEffectsBuilder();
     }
+
+    initCodex();
 }
 
 // Load encounter state from server
@@ -813,19 +1180,28 @@ function createCombatantCard(combatant, isCurrentTurn) {
     // Temp HP display
     const tempHPDisplay = combatant.hp.temp > 0 ? ` (+${combatant.hp.temp})` : '';
 
-    // Just show the name - no special clickable behavior
-    const nameHTML = `<div class="combatant-name">${combatant.name}</div>`;
-    const portraitHTML = combatant.imagePath ? `<img class="combatant-portrait" src="${combatant.imagePath}" alt="${combatant.name} portrait">` : '';
+    // Header display helpers
+    const displayName = combatant.name || 'Unknown';
+    const nameHTML = `<div class="combatant-name">${displayName}</div>`;
+    const sanitizedName = displayName.trim();
+    const avatarInitial = sanitizedName ? sanitizedName.charAt(0).toUpperCase() : '?';
+    const avatarHTML = `<div class="combatant-avatar">
+        ${combatant.imagePath ? `<img class="combatant-avatar-image" src="${combatant.imagePath}" alt="${displayName} portrait">` : `<span class="combatant-avatar-initial">${avatarInitial}</span>`}
+    </div>`;
+    const typeLabel = getTypeDisplayName(combatant.type);
 
     card.innerHTML = `
         <div class="combatant-header">
-            <button class="combatant-toggle" type="button" onclick="toggleCombatantDetails('${combatant.id}')">${isCollapsed ? '▸' : '▾'}</button>
-            <div class="combatant-name-section">
-                <div class="combatant-name-row">
-                ${nameHTML}
-                <div class="combatant-type">${getTypeDisplayName(combatant.type)}</div>
-                    <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
-            </div>
+            <div class="combatant-header-main">
+                <button class="combatant-toggle" type="button" onclick="toggleCombatantDetails('${combatant.id}')">${isCollapsed ? '▸' : '▾'}</button>
+                ${avatarHTML}
+                <div class="combatant-name-section">
+                    <div class="combatant-name-row">
+                        ${nameHTML}
+                        <div class="combatant-type">${typeLabel}</div>
+                    </div>
+                </div>
+                <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
             </div>
             <div class="combatant-summary">
             <div class="combatant-initiative">
@@ -843,7 +1219,6 @@ function createCombatantCard(combatant, isCurrentTurn) {
             </div>
         </div>
         <div class="combatant-details">
-            ${portraitHTML}
         <div class="combatant-stats">
             <div class="stat">
                 <div class="stat-label">HP</div>
@@ -1182,7 +1557,8 @@ async function addAgentToCombatFromList(agentId) {
                 hp: agent.hp,
                 ac: agent.ac,
                 dexModifier: dexMod,
-                initiative: 0
+                initiative: 0,
+                imagePath: agent.imagePath || null
             })
         });
 

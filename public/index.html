@@ -9,7 +9,9 @@
 <body>
     <div class="app-container">
         <header>
-            <h1>ArcForge</h1>
+            <div class="header-logo">
+                <img src="images/Arc_Logo-48px.png" alt="ArcForge logo" class="logo-image">
+            </div>
             <nav class="header-nav">
                 <button id="nav-arena-btn" class="nav-btn active">Arena</button>
                 <button id="nav-crucible-btn" class="nav-btn">Crucible</button>
@@ -75,8 +77,6 @@
                 <div id="crucible-character-section" class="crucible-section active">
                     <div class="character-builder-container" id="character-builder-container">
                         <section class="character-form-section">
-                            <h2>Crucible</h2>
-
                             <form id="character-form">
                                 <!-- Agent Type Selection -->
                                 <div class="form-group">
@@ -455,9 +455,49 @@
         </main>
 
         <main id="codex-view" style="display: none;">
-            <div class="empty-section">
-                <h2>Codex</h2>
-                <p>Coming soon.</p>
+            <div class="codex-container">
+                <div class="codex-tabs">
+                    <button class="codex-tab-btn active" data-codex-section="character">Character Sheets</button>
+                    <button class="codex-tab-btn" data-codex-section="enemy">Enemy Sheets</button>
+                    <button class="codex-tab-btn" data-codex-section="journal">Journal</button>
+                </div>
+
+                <section id="codex-character-section" class="codex-section active">
+                    <div class="codex-sheets-layout">
+                        <div class="codex-sheet-list" id="codex-character-list">
+                            <div class="empty-state">No characters selected</div>
+                        </div>
+                        <div class="codex-sheet-detail" id="codex-character-detail">
+                            <div class="empty-state">Choose a character to view their sheet</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="codex-enemy-section" class="codex-section">
+                    <div class="codex-sheets-layout">
+                        <div class="codex-sheet-list" id="codex-enemy-list">
+                            <div class="empty-state">No enemies available</div>
+                        </div>
+                        <div class="codex-sheet-detail" id="codex-enemy-detail">
+                            <div class="empty-state">Choose an enemy to view their sheet</div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="codex-journal-section" class="codex-section">
+                    <div class="codex-journal">
+                        <div class="codex-journal-list" id="codex-journal-list">
+                            <div class="empty-state">No journal entries yet</div>
+                        </div>
+                        <div class="codex-journal-editor">
+                            <textarea id="codex-journal-text" placeholder="Select or create a journal entry to begin writing..."></textarea>
+                            <div class="codex-journal-actions">
+                                <button class="btn btn-primary" id="codex-journal-save-btn">Save Entry</button>
+                                <button class="btn btn-secondary" id="codex-journal-new-btn">New Entry</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
             </div>
         </main>
 

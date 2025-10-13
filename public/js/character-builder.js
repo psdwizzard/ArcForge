@@ -724,7 +724,8 @@ async function addCharacterToCombat(charId) {
                 hp: character.hp,
                 ac: character.ac,
                 dexModifier: dexMod,
-                initiative: 0
+                initiative: 0,
+                imagePath: character.imagePath || null
             })
         });
 
