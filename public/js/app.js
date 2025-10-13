@@ -1,3 +1,18 @@
+function toggleAgentDetails(agentId) {
+    const card = document.querySelector(`.agent-card[data-agent-id="${agentId}"]`);
+    if (!card) {
+        return;
+    }
+
+    const isCollapsed = card.classList.toggle('collapsed');
+    agentCollapseState[agentId] = isCollapsed;
+
+    const toggleButton = card.querySelector('.agent-toggle');
+    if (toggleButton) {
+        toggleButton.textContent = isCollapsed ? '▸' : '▾';
+    }
+}
+
 // API Base URL
 const API_BASE = 'http://localhost:3000/api';
 
@@ -24,6 +39,10 @@ window.combatantCollapseState = combatantCollapseState;
 
 let lastActiveCombatantId = null;
 window.lastActiveCombatantId = lastActiveCombatantId;
+
+// Track collapsed state for sidebar agent cards
+const agentCollapseState = {};
+window.agentCollapseState = agentCollapseState;
 
 // Helper function to convert type codes to full names
 function getTypeDisplayName(type) {
@@ -692,6 +711,24 @@ function createCombatantCard(combatant, isCurrentTurn) {
     card.className = 'combatant-card';
     card.dataset.combatantId = combatant.id;
 
+    switch (combatant.type) {
+        case 'p':
+        case 'player':
+            card.classList.add('type-player');
+            break;
+        case 'n':
+        case 'npc':
+            card.classList.add('type-npc');
+            break;
+        case 'e':
+        case 'enemy':
+        case 'monster':
+            card.classList.add('type-enemy');
+            break;
+        default:
+            break;
+    }
+
     const storedState = combatantCollapseState[combatant.id];
     const isCollapsed = !isCurrentTurn && storedState !== false;
 
@@ -1072,19 +1109,39 @@ function renderAgentsList() {
     filteredAgents.forEach(agent => {
         const card = document.createElement('div');
         card.className = 'agent-card';
+        card.dataset.agentId = agent.id;
 
-        const classLevel = agent.class && agent.level ? `${agent.class} ${agent.level}` : '';
-        const raceInfo = agent.race ? agent.race : '';
-        const fullInfo = [raceInfo, classLevel].filter(Boolean).join(' ');
+        const agentType = agent.agentType || 'p';
+        const typeLabel = getTypeDisplayName(agentType);
+        const colorClass = agentType === 'p' || agentType === 'player' ? 'player'
+            : (agentType === 'n' || agentType === 'npc' ? 'npc' : 'enemy');
+
+        card.classList.add(`agent-type-${colorClass}`);
+
+        const storedCollapsed = agentCollapseState[agent.id];
+        const isCollapsed = storedCollapsed !== false;
+
+        if (isCollapsed) {
+            card.classList.add('collapsed');
+        }
+
+        const detailsHTML = `
+            <div class="agent-details">
+                <div class="agent-info-line">${agent.race || ''}</div>
+                <div class="agent-info-line">HP: ${agent.hp} | AC: ${agent.ac} | Type: ${typeLabel}</div>
+            </div>
+        `;
 
         card.innerHTML = `
-            <div class="agent-name">${agent.name}</div>
-            <div class="agent-stats">${fullInfo || 'No class/race'}</div>
-            <div class="agent-stats">HP: ${agent.hp} | AC: ${agent.ac} | Type: ${getTypeDisplayName(agent.agentType || 'p')}</div>
-            <div class="agent-actions">
-                <button class="btn btn-small btn-primary" onclick="addAgentToCombatFromList('${agent.id}')">Add</button>
-                <button class="btn btn-small btn-secondary" onclick="editAgentFromList('${agent.id}')">Edit</button>
+            <div class="agent-header">
+                <button class="agent-toggle" type="button" onclick="toggleAgentDetails('${agent.id}')">${isCollapsed ? '▸' : '▾'}</button>
+                <div class="agent-name">${agent.name}</div>
+                <div class="agent-actions-inline">
+                    <button class="btn btn-small btn-${colorClass}" onclick="addAgentToCombatFromList('${agent.id}')">Add</button>
+                    <button class="btn btn-small btn-secondary" onclick="editAgentFromList('${agent.id}')">Edit</button>
+                </div>
             </div>
+            ${detailsHTML}
         `;
 
         container.appendChild(card);

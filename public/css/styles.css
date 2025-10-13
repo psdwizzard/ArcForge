@@ -1,3 +1,20 @@
+.combatant-card.type-player {
+    border-color: rgba(46, 213, 115, 0.06);
+    box-shadow: 0 0 0 1px rgba(46, 213, 115, 0.02);
+    background-image: linear-gradient(135deg, rgba(46, 213, 115, 0.012), transparent);
+}
+
+.combatant-card.type-npc {
+    border-color: rgba(74, 158, 255, 0.06);
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.02);
+    background-image: linear-gradient(135deg, rgba(74, 158, 255, 0.012), transparent);
+}
+
+.combatant-card.type-enemy {
+    border-color: rgba(255, 71, 87, 0.06);
+    box-shadow: 0 0 0 1px rgba(255, 71, 87, 0.02);
+    background-image: linear-gradient(135deg, rgba(255, 71, 87, 0.012), transparent);
+}
 .combatant-card.collapsed .combatant-details {
     display: none;
 }
@@ -297,6 +314,21 @@ h2 {
     transition: all 0.2s ease;
 }
 
+.combatant-card.type-player {
+    border-color: rgba(46, 213, 115, 0.6);
+    box-shadow: 0 0 0 1px rgba(46, 213, 115, 0.2);
+}
+
+.combatant-card.type-npc {
+    border-color: rgba(74, 158, 255, 0.6);
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.2);
+}
+
+.combatant-card.type-enemy {
+    border-color: rgba(255, 71, 87, 0.6);
+    box-shadow: 0 0 0 1px rgba(255, 71, 87, 0.2);
+}
+
 .combatant-card:hover {
     background-color: var(--bg-hover);
     border-color: var(--accent-primary);
@@ -441,13 +473,98 @@ h2 {
     background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     border-radius: 4px;
-    padding: 0.8rem;
+    padding: 0.6rem 0.8rem;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
 }
 
 .agent-card:hover {
     background-color: var(--bg-hover);
     border-color: var(--accent-primary);
+}
+
+.agent-card.collapsed .agent-details {
+    display: none;
+}
+
+.agent-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.agent-toggle {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.2rem;
+}
+
+.agent-name {
+    font-weight: 600;
+    flex: 1;
+}
+
+.agent-actions-inline {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.agent-details {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.btn-player {
+    background-color: rgba(46, 213, 115, 0.2);
+    color: var(--text-primary);
+    border: 1px solid rgba(46, 213, 115, 0.4);
+}
+
+.btn-player:hover {
+    background-color: rgba(46, 213, 115, 0.3);
+}
+
+.btn-npc {
+    background-color: rgba(74, 158, 255, 0.2);
+    color: var(--text-primary);
+    border: 1px solid rgba(74, 158, 255, 0.4);
+}
+
+.btn-npc:hover {
+    background-color: rgba(74, 158, 255, 0.3);
+}
+
+.btn-enemy {
+    background-color: rgba(255, 71, 87, 0.2);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 71, 87, 0.4);
+}
+
+.btn-enemy:hover {
+    background-color: rgba(255, 71, 87, 0.3);
+}
+
+.agent-card.agent-type-player {
+    border-color: rgba(46, 213, 115, 0.06);
+    box-shadow: 0 0 0 1px rgba(46, 213, 115, 0.02);
+}
+
+.agent-card.agent-type-npc {
+    border-color: rgba(74, 158, 255, 0.06);
+    box-shadow: 0 0 0 1px rgba(74, 158, 255, 0.02);
+}
+
+.agent-card.agent-type-enemy {
+    border-color: rgba(255, 71, 87, 0.06);
+    box-shadow: 0 0 0 1px rgba(255, 71, 87, 0.02);
 }
 
 .agent-name {
