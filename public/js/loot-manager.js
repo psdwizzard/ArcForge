@@ -1,194 +1,102 @@
-// Loot Manager
+// Item Browser
 
-let lootEncounterState = {};
+let cachedItemData = [];
+let filteredItems = [];
 
-function initLootManager() {
-    const lootNavBtn = document.getElementById('nav-loot-btn');
-    if (lootNavBtn) {
-        lootNavBtn.addEventListener('click', () => {
-            loadLootData();
-        });
+function initItemBrowser() {
+    const itemsTab = document.getElementById('crucible-items-btn');
+    if (itemsTab) {
+        itemsTab.addEventListener('click', loadItemsData);
     }
 
-    const distributeGoldBtn = document.getElementById('distribute-gold-btn');
-    if (distributeGoldBtn) {
-        distributeGoldBtn.addEventListener('click', distributeGold);
+    const categorySelect = document.getElementById('item-category-filter');
+    if (categorySelect) {
+        categorySelect.addEventListener('change', handleCategoryChange);
     }
 }
 
-async function distributeGold() {
-    const players = lootEncounterState.combatants.filter(c => c.type === 'player');
-    if (players.length === 0) {
-        alert('No players to distribute gold to.');
+async function loadItemsData() {
+    if (cachedItemData.length === 0) {
+        try {
+            const response = await fetch('data/DBs/items.json');
+            cachedItemData = await response.json();
+        } catch (error) {
+            console.error('Error loading items catalog:', error);
+            renderItems([]);
+            return;
+        }
+    }
+
+    populateItemCategories();
+    handleCategoryChange();
+}
+
+function populateItemCategories() {
+    const categorySelect = document.getElementById('item-category-filter');
+    if (!categorySelect) {
         return;
     }
 
-    let totalGold = 0;
-    const goldRegex = /(\d+)\s*gp/i;
+    const categories = Array.from(new Set(cachedItemData.map(item => item.type || 'Uncategorized'))).sort();
+    categorySelect.innerHTML = '<option value="all">All Categories</option>' + categories.map(category => `<option value="${category}">${capitalize(category)}</option>`).join('');
+}
 
-    lootEncounterState.combatants.forEach(creature => {
-        if (creature.loot) {
-            creature.loot = creature.loot.filter(item => {
-                const match = item.match(goldRegex);
-                if (match) {
-                    totalGold += parseInt(match[1]);
-                    return false;
-                }
-                return true;
-            });
-        }
-    });
+function handleCategoryChange() {
+    const categorySelect = document.getElementById('item-category-filter');
+    const category = categorySelect ? categorySelect.value : 'all';
 
-    if (totalGold === 0) {
-        alert('No gold found in the loot pool.');
+    if (category === 'all') {
+        filteredItems = cachedItemData;
+    } else {
+        filteredItems = cachedItemData.filter(item => (item.type || 'Uncategorized') === category);
+    }
+
+    renderItems(filteredItems);
+}
+
+function renderItems(items) {
+    const browser = document.getElementById('item-browser');
+    if (!browser) {
         return;
     }
 
-    const goldPerPlayer = Math.floor(totalGold / players.length);
-    const remainder = totalGold % players.length;
+    browser.innerHTML = '';
 
-    players.forEach((player, index) => {
-        if (!player.loot) {
-            player.loot = [];
-        }
-        let share = goldPerPlayer;
-        if (index < remainder) {
-            share++;
-        }
-        player.loot.push(`${share} gp`);
-    });
-
-    try {
-        for (const combatant of lootEncounterState.combatants) {
-            await fetch(`${API_BASE}/combatants/${combatant.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(combatant)
-            });
-        }
-        loadLootData();
-    } catch (error) {
-        console.error('Error distributing gold:', error);
-    }
-}
-
-async function loadLootData() {
-    try {
-        const response = await fetch(`${API_BASE}/encounter`);
-        lootEncounterState = await response.json();
-        renderLootUI();
-    } catch (error) {
-        console.error('Error loading encounter state for loot:', error);
-    }
-}
-
-function renderLootUI() {
-    renderLootPool();
-    renderPartyInventory();
-}
-
-function renderLootPool() {
-    const lootPool = document.getElementById('loot-pool');
-    lootPool.innerHTML = '';
-
-    const defeatedCreatures = lootEncounterState.combatants.filter(c => c.hp.current === 0 && c.loot && c.loot.length > 0);
-
-    if (defeatedCreatures.length === 0) {
-        lootPool.innerHTML = '<div class="empty-state">No loot to distribute.</div>';
+    if (!items || items.length === 0) {
+        browser.innerHTML = '<div class="empty-state">No items found for this category.</div>';
         return;
     }
 
-    defeatedCreatures.forEach(creature => {
-        creature.loot.forEach((item, index) => {
-            const lootItem = document.createElement('div');
-            lootItem.className = 'loot-item';
-            lootItem.draggable = true;
-            lootItem.dataset.creatureId = creature.id;
-            lootItem.dataset.itemIndex = index;
-            lootItem.textContent = item;
-            lootItem.addEventListener('dragstart', handleLootDragStart);
-            lootPool.appendChild(lootItem);
-        });
-    });
-}
-
-function renderPartyInventory() {
-    const partyInventory = document.getElementById('party-inventory');
-    partyInventory.innerHTML = '';
-
-    const players = lootEncounterState.combatants.filter(c => c.type === 'player');
-
-    if (players.length === 0) {
-        partyInventory.innerHTML = '<div class="empty-state">No players in the encounter.</div>';
-        return;
-    }
-
-    players.forEach(player => {
-        const playerCard = document.createElement('div');
-        playerCard.className = 'player-inventory-card';
-        playerCard.dataset.playerId = player.id;
-
-        let inventoryHTML = '';
-        if (player.loot && player.loot.length > 0) {
-            inventoryHTML = player.loot.map(item => `<div class="inventory-item">${item}</div>`).join('');
-        }
-
-        playerCard.innerHTML = `
-            <div class="player-name">${player.name}</div>
-            <div class="player-inventory">${inventoryHTML}</div>
+    items.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card';
+        card.innerHTML = `
+            <div class="item-card-header">
+                ${item.img ? `<img src="${item.img}" alt="${item.name}">` : ''}
+                <div>
+                    <h3>${item.name}</h3>
+                    <p class="item-type">${capitalize(item.type || 'Uncategorized')}</p>
+                </div>
+            </div>
+            <div class="item-card-body">
+                ${item.system?.description?.value || '<p>No description provided.</p>'}
+            </div>
+            <div class="item-card-meta">
+                <span>Price: ${item.system?.price?.value ?? '-'} ${item.system?.price?.denomination ?? ''}</span>
+                <span>Weight: ${item.system?.weight?.value ?? '-'} ${item.system?.weight?.units ?? ''}</span>
+            </div>
         `;
-
-        playerCard.addEventListener('dragover', handlePlayerDragOver);
-        playerCard.addEventListener('drop', handlePlayerDrop);
-
-        partyInventory.appendChild(playerCard);
+        browser.appendChild(card);
     });
 }
 
-function handleLootDragStart(e) {
-    e.dataTransfer.setData('text/plain', JSON.stringify({
-        creatureId: e.target.dataset.creatureId,
-        itemIndex: e.target.dataset.itemIndex
-    }));
-}
-
-function handlePlayerDragOver(e) {
-    e.preventDefault();
-}
-
-async function handlePlayerDrop(e) {
-    e.preventDefault();
-    const lootData = JSON.parse(e.dataTransfer.getData('text/plain'));
-    const playerId = e.currentTarget.dataset.playerId;
-
-    const creature = lootEncounterState.combatants.find(c => c.id === lootData.creatureId);
-    const player = lootEncounterState.combatants.find(c => c.id === playerId);
-    const item = creature.loot[lootData.itemIndex];
-
-    if (!player.loot) {
-        player.loot = [];
+function capitalize(value) {
+    if (!value) {
+        return '';
     }
-
-    player.loot.push(item);
-    creature.loot.splice(lootData.itemIndex, 1);
-
-    try {
-        await fetch(`${API_BASE}/combatants/${player.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(player)
-        });
-
-        await fetch(`${API_BASE}/combatants/${creature.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(creature)
-        });
-
-        loadLootData();
-    } catch (error) {
-        console.error('Error distributing loot:', error);
-    }
+    return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-document.addEventListener('DOMContentLoaded', initLootManager);
+document.addEventListener('DOMContentLoaded', () => {
+    initItemBrowser();
+});

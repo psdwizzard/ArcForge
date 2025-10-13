@@ -80,6 +80,12 @@ function initCharacterBuilder() {
         effectsTabBtn.addEventListener('click', () => switchCrucibleSection('effects'));
         lootTabBtn.addEventListener('click', () => switchCrucibleSection('loot'));
     }
+
+    const crucibleTabs = document.querySelectorAll('#crucible-tabs .codex-tab-btn');
+
+    crucibleTabs.forEach(btn => {
+        btn.addEventListener('click', () => switchCrucibleSection(btn.dataset.section));
+    });
 }
 
 // Populate skills list
@@ -164,7 +170,7 @@ function switchView(view) {
     const crucibleView = document.getElementById('crucible-view');
     const crucibleChar = document.getElementById('crucible-character-section');
     const crucibleEffects = document.getElementById('crucible-effects-section');
-    const crucibleLoot = document.getElementById('crucible-loot-section');
+    const crucibleItems = document.getElementById('crucible-items-section');
     const atlasView = document.getElementById('atlas-view');
     const codexView = document.getElementById('codex-view');
 
@@ -192,7 +198,7 @@ function switchView(view) {
         if (arenaBtn) {
             arenaBtn.classList.add('active');
         }
-        if (crucibleChar && crucibleEffects && crucibleLoot) {
+        if (crucibleChar && crucibleEffects && crucibleItems) {
             switchCrucibleSection('character');
         }
     } else if (view === 'crucible') {
@@ -202,7 +208,7 @@ function switchView(view) {
         if (crucibleBtn) {
             crucibleBtn.classList.add('active');
         }
-        if (crucibleChar && crucibleEffects && crucibleLoot) {
+        if (crucibleChar && crucibleEffects && crucibleItems) {
             const activeTab = document.querySelector('.crucible-tab-btn.active');
             const activeSection = (activeTab && activeTab.dataset.section) || 'character';
             switchCrucibleSection(activeSection);
@@ -228,7 +234,7 @@ function switchCrucibleSection(section) {
     const sections = {
         character: document.getElementById('crucible-character-section'),
         effects: document.getElementById('crucible-effects-section'),
-        loot: document.getElementById('crucible-loot-section')
+        items: document.getElementById('crucible-items-section')
     };
 
     Object.values(sections).forEach(sec => {
@@ -250,16 +256,16 @@ function switchCrucibleSection(section) {
             if (typeof loadSavedEffects === 'function') {
                 loadSavedEffects();
             }
-        } else if (section === 'loot') {
-            if (typeof loadLootData === 'function') {
-                loadLootData();
+        } else if (section === 'items') {
+            if (typeof loadItemsData === 'function') {
+                loadItemsData();
             }
         }
     }
 
-    document.querySelectorAll('.crucible-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#crucible-tabs .codex-tab-btn').forEach(btn => btn.classList.remove('active'));
 
-    const tabBtn = document.getElementById(`crucible-${section}-btn`);
+    const tabBtn = document.querySelector(`#crucible-tabs .codex-tab-btn[data-section="${section}"]`);
     if (tabBtn) {
         tabBtn.classList.add('active');
     }

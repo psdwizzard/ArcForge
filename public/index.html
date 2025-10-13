@@ -67,41 +67,45 @@
 
         <main id="crucible-view" style="display: none;">
             <div class="crucible-layout">
-                <div class="crucible-tabs">
-                    <button id="crucible-character-btn" class="crucible-tab-btn active" data-section="character">Character Builder</button>
-                    <button id="crucible-effects-btn" class="crucible-tab-btn" data-section="effects">Effects Builder</button>
-                    <button id="crucible-loot-btn" class="crucible-tab-btn" data-section="loot">Loot Manager</button>
-                </div>
+                <div class="codex-container">
+                    <div class="codex-tabs" id="crucible-tabs">
+                        <button id="crucible-character-btn" class="codex-tab-btn active" data-section="character">Character Builder</button>
+                        <button id="crucible-effects-btn" class="codex-tab-btn" data-section="effects">Effects Builder</button>
+                        <button id="crucible-items-btn" class="codex-tab-btn" data-section="items">Items</button>
+                    </div>
 
-                <div id="crucible-character-section" class="crucible-section active">
-                    <div class="character-builder-container" id="character-builder-container">
-                        <section class="character-form-section">
-                            <form id="character-form">
-                                <!-- Agent Type Selection -->
-                                <div class="form-group">
-                                    <label for="char-agent-type">Agent Type</label>
-                                    <select id="char-agent-type">
-                                        <option value="p">Player Character</option>
-                                        <option value="n">NPC</option>
-                                        <option value="e">Enemy/Monster</option>
-                                    </select>
-                                </div>
+                    <div id="crucible-character-section" class="crucible-section active">
+                        <div class="character-builder-container" id="character-builder-container">
+                            <section class="character-form-section">
+                                <form id="character-form">
+                                    <!-- Agent Type Selection -->
+                                    <div class="form-group agent-type-inline">
+                                        <label for="char-agent-type" class="sr-only">Agent Type</label>
+                                        <div class="agent-type-select-wrapper">
+                                            <select id="char-agent-type" aria-label="Agent Type">
+                                                <option value="p">Player Character</option>
+                                                <option value="n">NPC</option>
+                                                <option value="e">Enemy/Monster</option>
+                                            </select>
+                                            <span class="agent-type-label">Agent Type</span>
+                                        </div>
+                                    </div>
 
-                                <!-- Basic Info -->
-                                <div class="form-section">
-                                    <h3>Basic Information</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="char-image">Character Image</label>
-                                    <input type="file" id="char-image" accept="image/*">
-                                    <input type="hidden" id="char-image-path">
-                                    <span id="char-image-status" class="image-status-text"></span>
+                                    <!-- Basic Info -->
+                                    <div class="form-section">
+                                        <h3>Basic Information</h3>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="char-image">Character Image</label>
+                                        <input type="file" id="char-image" accept="image/*">
+                                        <input type="hidden" id="char-image-path">
+                                        <span id="char-image-status" class="image-status-text"></span>
+                                    </div>
+                                    <div class="form-group image-preview-group">
+                                        <label>Preview</label>
+                                        <img id="char-image-preview" class="image-preview" alt="Character preview" style="display:none;">
+                                    </div>
                                 </div>
-                                <div class="form-group image-preview-group">
-                                    <label>Preview</label>
-                                    <img id="char-image-preview" class="image-preview" alt="Character preview" style="display:none;">
-                                </div>
-                            </div>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="char-name">Character Name *</label>
@@ -257,7 +261,7 @@
                     </div>
                 </div>
 
-                <div id="crucible-effects-section" class="crucible-section">
+                    <div id="crucible-effects-section" class="crucible-section">
                     <div class="effects-builder-container">
                         <section class="effects-form-section">
                             <h2>Effects Builder</h2>
@@ -426,24 +430,18 @@
                     </div>
                 </div>
 
-                <div id="crucible-loot-section" class="crucible-section">
-                    <div class="loot-container">
-                        <div class="loot-header">
-                            <h2>Loot Distribution</h2>
-                            <button id="distribute-gold-btn" class="btn btn-success">Distribute Gold</button>
-                        </div>
-                        <div class="loot-main">
-                            <div class="loot-pool-section">
-                                <h3>Collected Loot</h3>
-                                <div id="loot-pool" class="loot-pool"></div>
+                    <div id="crucible-items-section" class="crucible-section">
+                        <div class="items-container">
+                            <div class="items-header">
+                                <h2>Item Catalog</h2>
+                                <div class="item-catalog-actions">
+                                    <label for="item-category-filter">Category</label>
+                                    <select id="item-category-filter" class="form-input"></select>
+                                </div>
                             </div>
-                            <div class="party-inventory-section">
-                                <h3>Party Inventory</h3>
-                                <div id="party-inventory" class="party-inventory"></div>
-                            </div>
+                            <div id="item-browser" class="item-browser"></div>
                         </div>
                     </div>
-                </div>
             </div>
         </main>
 
