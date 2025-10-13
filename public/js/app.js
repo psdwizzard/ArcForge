@@ -22,6 +22,9 @@ window.combatantAttackState = combatantAttackState;
 const combatantCollapseState = {};
 window.combatantCollapseState = combatantCollapseState;
 
+let lastActiveCombatantId = null;
+window.lastActiveCombatantId = lastActiveCombatantId;
+
 // Helper function to convert type codes to full names
 function getTypeDisplayName(type) {
     const typeMap = {
@@ -361,6 +364,16 @@ function renderCombatantsList() {
 
     container.innerHTML = '';
 
+    const activeCombatantId = encounterState.combatActive && encounterState.combatants.length > 0
+        ? encounterState.combatants[encounterState.currentTurnIndex].id
+        : null;
+
+    if (lastActiveCombatantId && lastActiveCombatantId !== activeCombatantId) {
+        if (combatantCollapseState[lastActiveCombatantId] === false) {
+            combatantCollapseState[lastActiveCombatantId] = true;
+        }
+    }
+
     // If combat is active, reorder display so current turn is first
     let displayOrder = [...encounterState.combatants];
     if (encounterState.combatActive && encounterState.currentTurnIndex > 0) {
@@ -378,6 +391,9 @@ function renderCombatantsList() {
         container.appendChild(card);
         syncAttackUIWithState(combatant.id);
     });
+
+    lastActiveCombatantId = activeCombatantId;
+    window.lastActiveCombatantId = lastActiveCombatantId;
 
     updateCombatButtons();
 }
@@ -676,26 +692,18 @@ function createCombatantCard(combatant, isCurrentTurn) {
     card.className = 'combatant-card';
     card.dataset.combatantId = combatant.id;
 
-    let isCollapsed;
+    const storedState = combatantCollapseState[combatant.id];
+    const isCollapsed = !isCurrentTurn && storedState !== false;
+
     if (isCurrentTurn) {
         card.classList.add('current-turn');
-        card.classList.remove('collapsed');
-        isCollapsed = false;
         combatantCollapseState[combatant.id] = false;
-    } else {
-        const storedState = combatantCollapseState[combatant.id];
-        if (storedState === undefined) {
-            isCollapsed = true;
-            combatantCollapseState[combatant.id] = true;
-        } else {
-            isCollapsed = storedState;
-        }
+    }
 
-        if (isCollapsed) {
-            card.classList.add('collapsed');
-        } else {
-            card.classList.remove('collapsed');
-        }
+    if (isCollapsed) {
+        card.classList.add('collapsed');
+    } else {
+        card.classList.remove('collapsed');
     }
 
     // Determine HP color class
