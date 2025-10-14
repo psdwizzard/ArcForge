@@ -16,6 +16,7 @@ function toggleAgentDetails(agentId) {
 // API Base URL
 // Use current hostname so it works on LAN
 const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
+const DISPLAY_SOCKET_PATH = '/display';
 
 // State
 let encounterState = {
@@ -632,6 +633,7 @@ async function init() {
 
     initCodex();
     attachAtlasEventListeners();
+    initAtlasMapModule();
 }
 
 // Load encounter state from server
@@ -2271,6 +2273,715 @@ function switchAtlasSection(section) {
     });
 }
 
+// Atlas Map Module
+const atlasMapState = {
+    maps: [],
+    settings: null,
+    activeMapId: null,
+    preview: {
+        fit: 'fit',
+        showGrid: true
+    },
+    displayConnected: false,
+    ruler: {
+        enabled: false,
+        draggingPoint: null,
+        start: { x: 120, y: 120 },
+        end: { x: 240, y: 120 }
+    }
+};
+
+function getAtlasElements() {
+    return {
+        uploadInput: document.getElementById('atlas-map-upload-input'),
+        listContainer: document.getElementById('atlas-map-list'),
+        resolutionWidth: document.getElementById('atlas-resolution-width'),
+        resolutionHeight: document.getElementById('atlas-resolution-height'),
+        refreshRate: document.getElementById('atlas-refresh-rate'),
+        diagonal: document.getElementById('atlas-diagonal'),
+        ppi: document.getElementById('atlas-ppi'),
+        autoCalibrateBtn: document.getElementById('atlas-auto-calibrate-btn'),
+        manualCalibrateBtn: document.getElementById('atlas-manual-calibrate-btn'),
+        gridInches: document.getElementById('atlas-grid-inches'),
+        gridLine: document.getElementById('atlas-grid-line'),
+        gridOpacity: document.getElementById('atlas-grid-opacity'),
+        gridColor: document.getElementById('atlas-grid-color'),
+        gridEnabled: document.getElementById('atlas-grid-enabled'),
+        saveSettingsBtn: document.getElementById('atlas-save-settings-btn'),
+        pushDisplayBtn: document.getElementById('atlas-push-display-btn'),
+        previewCanvas: document.getElementById('atlas-preview-canvas'),
+        previewEmpty: document.getElementById('atlas-preview-empty'),
+        previewFit: document.getElementById('atlas-preview-fit'),
+        previewGridToggle: document.getElementById('atlas-preview-grid'),
+        previewZoomIn: document.getElementById('atlas-preview-zoom-in'),
+        previewZoomOut: document.getElementById('atlas-preview-zoom-out'),
+        previewZoomReset: document.getElementById('atlas-preview-zoom-reset'),
+        displayStatus: document.getElementById('atlas-display-status'),
+        atlasSection: document.getElementById('atlas-map-section')
+    };
+}
+
+function initAtlasMapModule() {
+    const elements = getAtlasElements();
+    if (!elements.atlasSection) {
+        return;
+    }
+
+    setupAtlasSockets();
+    bindAtlasMapEvents();
+    loadAtlasInitialData();
+    injectDisplayLaunchButton();
+}
+
+function setupAtlasSockets() {
+    if (window.io) {
+        atlasMapState.socket = io('/', { path: '/socket.io' });
+        atlasMapState.socket.on('connect', () => {
+            atlasMapState.displayConnected = true;
+            atlasMapState.socket.emit('display:hello', {
+                role: 'control'
+            });
+            updateDisplayStatus();
+        });
+        atlasMapState.socket.on('display:state', (payload) => {
+            atlasMapState.displayConnected = true;
+            if (payload) {
+                updateAtlasStateFromSocket(payload);
+            }
+        });
+        atlasMapState.socket.on('disconnect', () => {
+            atlasMapState.displayConnected = false;
+            updateDisplayStatus();
+        });
+    }
+}
+
+function loadAtlasInitialData() {
+    Promise.all([
+        fetch(`${API_BASE}/maps`).then((res) => res.json()),
+        fetch(`${API_BASE}/atlas/settings`).then((res) => res.json())
+    ]).then(([maps, settings]) => {
+        atlasMapState.maps = maps || [];
+        atlasMapState.settings = settings || null;
+        atlasMapState.activeMapId = settings?.active_map_id || null;
+        renderAtlasMapList();
+        populateSettingsForm();
+        drawAtlasPreview();
+    }).catch((error) => {
+        console.error('[Atlas] Failed to load initial data:', error);
+    });
+}
+
+function bindAtlasMapEvents() {
+    const elements = getAtlasElements();
+    if (!elements.atlasSection) {
+        return;
+    }
+
+    elements.uploadInput?.addEventListener('change', handleAtlasMapUpload);
+    elements.saveSettingsBtn?.addEventListener('click', handleAtlasSaveSettings);
+    elements.pushDisplayBtn?.addEventListener('click', handleAtlasPushToDisplay);
+    elements.previewFit?.addEventListener('change', (event) => {
+        atlasMapState.preview.fit = event.target.value;
+        drawAtlasPreview();
+    });
+    elements.previewGridToggle?.addEventListener('change', (event) => {
+        atlasMapState.preview.showGrid = event.target.checked;
+        drawAtlasPreview();
+    });
+    elements.previewZoomIn?.addEventListener('click', () => {
+        atlasMapState.preview.zoom = Math.min(atlasMapState.preview.zoom + 0.1, 5);
+        drawAtlasPreview();
+    });
+    elements.previewZoomOut?.addEventListener('click', () => {
+        atlasMapState.preview.zoom = Math.max(atlasMapState.preview.zoom - 0.1, 0.1);
+        drawAtlasPreview();
+    });
+    elements.previewZoomReset?.addEventListener('click', () => {
+        atlasMapState.preview.zoom = 1;
+        atlasMapState.preview.offset.x = 0;
+        atlasMapState.preview.offset.y = 0;
+        drawAtlasPreview();
+    });
+    elements.autoCalibrateBtn?.addEventListener('click', handleAtlasAutoCalibrate);
+    elements.manualCalibrateBtn?.addEventListener('click', toggleAtlasManualCalibration);
+    window.addEventListener('resize', handleAtlasResize);
+    elements.previewCanvas?.addEventListener('wheel', handlePreviewWheel, { passive: false });
+    elements.previewCanvas?.addEventListener('mousedown', startPreviewDrag);
+    elements.previewCanvas?.addEventListener('mousemove', handlePreviewDrag);
+    elements.previewCanvas?.addEventListener('mouseup', endPreviewDrag);
+    elements.previewCanvas?.addEventListener('mouseleave', endPreviewDrag);
+}
+
+function handleAtlasResize() {
+    drawAtlasPreview();
+}
+
+function injectDisplayLaunchButton() {
+    const library = document.querySelector('.atlas-map-library');
+    if (!library || library.querySelector('.atlas-open-display')) {
+        return;
+    }
+
+    const openBtn = document.createElement('a');
+    openBtn.href = `${window.location.protocol}//${window.location.hostname}:3001/display`;
+    openBtn.target = '_blank';
+    openBtn.rel = 'noopener';
+    openBtn.className = 'btn btn-secondary atlas-open-display';
+    openBtn.textContent = 'Open Player Display';
+
+    library.appendChild(openBtn);
+}
+
+function handleAtlasMapUpload(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) {
+        return;
+    }
+
+    files.forEach((file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        uploadSingleMap(formData);
+    });
+
+    event.target.value = '';
+}
+
+function uploadSingleMap(formData) {
+    fetch(`${API_BASE}/maps`, {
+        method: 'POST',
+        body: formData
+    })
+        .then((res) => {
+            if (!res.ok) {
+                return res.json()
+                    .then((data) => {
+                        const message = data?.error || `Upload failed: ${res.status}`;
+                        throw new Error(message);
+                    })
+                    .catch(() => {
+                        throw new Error(`Upload failed: ${res.status}`);
+                    });
+            }
+            return res.json();
+        })
+        .then((record) => {
+            atlasMapState.maps.push(record);
+            renderAtlasMapList();
+            atlasMapState.activeMapId = record.id;
+            drawAtlasPreview();
+            updateDisplayStatus();
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to upload map:', error);
+            alert(error.message || 'Failed to upload map. Please try again.');
+        });
+}
+
+function renderAtlasMapList() {
+    const { listContainer } = getAtlasElements();
+    if (!listContainer) {
+        return;
+    }
+
+    if (!atlasMapState.maps.length) {
+        listContainer.innerHTML = '<div class="atlas-empty-state">Upload a map to get started.</div>';
+        return;
+    }
+
+    listContainer.innerHTML = '';
+    atlasMapState.maps.forEach((map) => {
+        const item = document.createElement('div');
+        item.className = 'atlas-map-item';
+        item.dataset.mapId = map.id;
+        if (atlasMapState.activeMapId === map.id) {
+            item.classList.add('active');
+        }
+
+        const thumbnail = document.createElement('img');
+        thumbnail.src = map.file;
+        thumbnail.alt = `${map.name} thumbnail`;
+        thumbnail.className = 'atlas-map-thumbnail';
+        thumbnail.loading = 'lazy';
+
+        const meta = document.createElement('div');
+        meta.className = 'atlas-map-meta';
+        const nameEl = document.createElement('div');
+        nameEl.className = 'atlas-map-name';
+        nameEl.textContent = map.name;
+
+        const detailsEl = document.createElement('div');
+        detailsEl.className = 'atlas-map-details';
+        if (map.width_px && map.height_px) {
+            detailsEl.textContent = `${map.width_px} × ${map.height_px} px`;
+        } else {
+            detailsEl.textContent = 'Dimensions pending';
+        }
+
+        const actions = document.createElement('div');
+        actions.className = 'atlas-map-actions';
+        const activateBtn = document.createElement('button');
+        activateBtn.className = 'btn btn-primary btn-small';
+        activateBtn.textContent = map.id === atlasMapState.activeMapId ? 'Active' : 'Set Active';
+        activateBtn.disabled = map.id === atlasMapState.activeMapId;
+        activateBtn.addEventListener('click', () => setAtlasActiveMap(map.id));
+
+        const renameBtn = document.createElement('button');
+        renameBtn.className = 'btn btn-secondary btn-small';
+        renameBtn.textContent = 'Rename';
+        renameBtn.addEventListener('click', () => renameAtlasMap(map));
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-danger btn-small';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => deleteAtlasMap(map.id));
+
+        actions.append(activateBtn, renameBtn, deleteBtn);
+        meta.append(nameEl, detailsEl, actions);
+        item.append(thumbnail, meta);
+
+        item.addEventListener('click', (event) => {
+            if (event.target.tagName.toLowerCase() === 'button') {
+                return;
+            }
+            atlasMapState.activeMapId = map.id;
+            drawAtlasPreview();
+            renderAtlasMapList();
+        });
+
+        listContainer.appendChild(item);
+    });
+}
+
+function renameAtlasMap(map) {
+    const newName = prompt('Enter map name:', map.name);
+    if (!newName || newName === map.name) {
+        return;
+    }
+
+    fetch(`${API_BASE}/maps/${map.id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+    }).then((res) => {
+        if (!res.ok) {
+            throw new Error('Rename failed');
+        }
+        map.name = newName;
+        renderAtlasMapList();
+    }).catch((error) => {
+        console.error('[Atlas] Failed to rename map:', error);
+        alert('Failed to rename map.');
+    });
+}
+
+function deleteAtlasMap(mapId) {
+    if (!confirm('Delete this map? This cannot be undone.')) {
+        return;
+    }
+
+    fetch(`${API_BASE}/maps/${mapId}`, { method: 'DELETE' })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Delete failed');
+            }
+            atlasMapState.maps = atlasMapState.maps.filter((entry) => entry.id !== mapId);
+            if (atlasMapState.activeMapId === mapId) {
+                atlasMapState.activeMapId = null;
+                drawAtlasPreview();
+            }
+            renderAtlasMapList();
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to delete map:', error);
+            alert('Failed to delete map.');
+        });
+}
+
+function setAtlasActiveMap(mapId) {
+    fetch(`${API_BASE}/atlas/active-map`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ mapId })
+    })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Failed to set active map');
+            }
+            atlasMapState.activeMapId = mapId;
+            renderAtlasMapList();
+            drawAtlasPreview();
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to set active map:', error);
+            alert('Failed to set active map.');
+        });
+}
+
+function populateSettingsForm() {
+    const elements = getAtlasElements();
+    const settings = atlasMapState.settings;
+    if (!elements || !settings) {
+        return;
+    }
+
+    const resolution = settings.display?.resolution || { w: 1920, h: 1080 };
+    elements.resolutionWidth.value = resolution.w;
+    elements.resolutionHeight.value = resolution.h;
+    elements.refreshRate.value = settings.display?.resolution?.refresh ?? '';
+    elements.diagonal.value = settings.display?.physical?.diagonal_in ?? 42;
+    const ppi = settings.display?.physical?.ppi_override ?? settings.display?.grid?.pixels_per_inch ?? '';
+    elements.ppi.value = ppi;
+
+    elements.gridInches.value = settings.display?.grid?.inches_per_cell ?? 1;
+    elements.gridLine.value = settings.display?.grid?.line_px ?? 2;
+    elements.gridOpacity.value = settings.display?.grid?.opacity ?? 0.25;
+    if (settings.display?.grid?.color) {
+        elements.gridColor.value = settings.display.grid.color;
+    }
+    elements.gridEnabled.checked = settings.display?.grid?.enabled ?? true;
+    atlasMapState.preview.showGrid = elements.previewGridToggle.checked = settings.display?.grid?.enabled ?? true;
+    atlasMapState.preview.fit = settings.display?.viewport?.fit || 'fit';
+    atlasMapState.preview.zoom = settings.display?.viewport?.zoom || 1;
+    atlasMapState.preview.offset = {
+        x: settings.display?.viewport?.offset?.x || 0,
+        y: settings.display?.viewport?.offset?.y || 0
+    };
+    const fitSelect = elements.previewFit;
+    if (fitSelect) {
+        fitSelect.value = atlasMapState.preview.fit;
+    }
+}
+
+function gatherSettingsPayload() {
+    const elements = getAtlasElements();
+    return {
+        active_map_id: atlasMapState.activeMapId,
+        display: {
+            resolution: {
+                w: Number(elements.resolutionWidth.value) || 1920,
+                h: Number(elements.resolutionHeight.value) || 1080,
+                refresh: elements.refreshRate.value ? Number(elements.refreshRate.value) : undefined
+            },
+            physical: {
+                diagonal_in: Number(elements.diagonal.value) || 42,
+                ppi_override: elements.ppi.value ? Number(elements.ppi.value) : null
+            },
+            grid: {
+                inches_per_cell: Number(elements.gridInches.value) || 1,
+                line_px: Number(elements.gridLine.value) || 2,
+                opacity: Number(elements.gridOpacity.value) || 0.25,
+                color: elements.gridColor.value || '#3aaaff',
+                enabled: elements.gridEnabled.checked
+            },
+            viewport: {
+                fit: atlasMapState.preview.fit,
+                zoom: atlasMapState.preview.zoom,
+                offset: atlasMapState.preview.offset
+            }
+        }
+    };
+}
+
+function handleAtlasSaveSettings() {
+    const payload = gatherSettingsPayload();
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+        .then((res) => res.json())
+        .then((settings) => {
+            atlasMapState.settings = settings;
+            populateSettingsForm();
+            alert('Display settings saved.');
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to save settings:', error);
+            alert('Failed to save settings.');
+        });
+}
+
+function handleAtlasPushToDisplay() {
+    const payload = gatherSettingsPayload();
+    fetch(`${API_BASE}/atlas/active-map`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ mapId: payload.active_map_id })
+    }).then((res) => {
+        if (!res.ok) {
+            throw new Error('Failed to push display state');
+        }
+        alert('Map pushed to display.');
+    }).catch((error) => {
+        console.error('[Atlas] Failed to push display state:', error);
+        alert('Failed to push display state.');
+    });
+}
+
+function handleAtlasAutoCalibrate() {
+    const elements = getAtlasElements();
+    const width = Number(elements.resolutionWidth.value);
+    const height = Number(elements.resolutionHeight.value);
+    const diagonal = Number(elements.diagonal.value);
+    if (!width || !height || !diagonal) {
+        alert('Enter resolution width/height and diagonal first.');
+        return;
+    }
+    const ppi = Math.sqrt((width ** 2) + (height ** 2)) / diagonal;
+    elements.ppi.value = ppi.toFixed(2);
+    atlasMapState.settings.display.physical.ppi_override = ppi;
+}
+
+function toggleAtlasManualCalibration() {
+    const elements = getAtlasElements();
+    const wrapper = elements.previewCanvas?.parentElement;
+    if (!wrapper) {
+        return;
+    }
+
+    atlasMapState.ruler.enabled = !atlasMapState.ruler.enabled;
+    wrapper.classList.toggle('atlas-calibrating', atlasMapState.ruler.enabled);
+    drawAtlasPreview();
+
+    if (atlasMapState.ruler.enabled) {
+        alert('Drag the ruler endpoints to match a real-world inch on your display, then enter the measured inches to calibrate.');
+    }
+}
+
+function updateDisplayStatus() {
+    const { displayStatus } = getAtlasElements();
+    if (!displayStatus) {
+        return;
+    }
+    const connected = atlasMapState.displayConnected || (atlasMapState.lastDisplayState?.connected ?? false);
+    displayStatus.textContent = connected ? 'Display connected' : 'Display not connected';
+    displayStatus.classList.toggle('atlas-status-connected', connected);
+    displayStatus.classList.toggle('atlas-status-disconnected', !connected);
+}
+
+function applyDisplayResolution(viewport) {
+    const elements = getAtlasElements();
+    if (!viewport || !elements.resolutionWidth) {
+        return;
+    }
+    elements.resolutionWidth.value = viewport.w;
+    elements.resolutionHeight.value = viewport.h;
+}
+
+function applyDisplayGrid(grid) {
+    const elements = getAtlasElements();
+    if (!grid) {
+        return;
+    }
+    elements.gridColor.value = grid.color || '#3aaaff';
+    elements.gridLine.value = grid.line_px || 2;
+    elements.gridOpacity.value = grid.opacity || 0.25;
+    elements.gridEnabled.checked = grid.enabled ?? true;
+    if (grid.cell_px && atlasMapState.settings?.display?.physical?.ppi_override) {
+        const inches = grid.cell_px / atlasMapState.settings.display.physical.ppi_override;
+        elements.gridInches.value = inches.toFixed(2);
+    }
+}
+
+function drawAtlasPreview() {
+    const { previewCanvas, previewEmpty } = getAtlasElements();
+    if (!previewCanvas) {
+        return;
+    }
+    const container = previewCanvas.parentElement;
+    if (container) {
+        previewCanvas.width = container.clientWidth;
+        previewCanvas.height = container.clientHeight;
+    }
+    const ctx = previewCanvas.getContext('2d');
+    const activeMap = atlasMapState.maps.find((entry) => entry.id === atlasMapState.activeMapId);
+    if (!activeMap) {
+        previewEmpty.style.display = 'block';
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+        return;
+    }
+
+    previewEmpty.style.display = 'none';
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.addEventListener('error', () => {
+        console.error('[Atlas] Failed to load preview image:', activeMap.file);
+        previewEmpty.style.display = 'block';
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+    });
+    image.onload = () => {
+        const dpr = window.devicePixelRatio || 1;
+        previewCanvas.width = (container?.clientWidth || previewCanvas.width) * dpr;
+        previewCanvas.height = (container?.clientHeight || previewCanvas.height) * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+        const clientWidth = previewCanvas.width / dpr;
+        const clientHeight = previewCanvas.height / dpr;
+        const scale = calculatePreviewScale(image, clientWidth, clientHeight, atlasMapState.preview.fit, atlasMapState.preview.zoom);
+        const drawWidth = scale ? image.width * scale : clientWidth;
+        const drawHeight = scale ? image.height * scale : clientHeight;
+        const offsetX = (clientWidth - drawWidth) / 2 + atlasMapState.preview.offset.x;
+        const offsetY = (clientHeight - drawHeight) / 2 + atlasMapState.preview.offset.y;
+
+        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+        if (atlasMapState.preview.showGrid && atlasMapState.settings?.display?.grid?.enabled) {
+            drawGridOnContext(ctx, {
+                x: offsetX,
+                y: offsetY,
+                width: drawWidth,
+                height: drawHeight,
+                scale: scale || 1
+            });
+        }
+
+        if (atlasMapState.ruler.enabled) {
+            drawCalibrationRuler(ctx, scale || 1);
+            enableRulerInteractions(previewCanvas);
+        }
+    };
+    image.src = activeMap.file;
+}
+
+function calculatePreviewScale(image, containerWidth, containerHeight, fitMode, zoom = 1) {
+    switch (fitMode) {
+        case 'fill':
+            return Math.max(containerWidth / image.width, containerHeight / image.height) * zoom;
+        case 'stretch':
+            return null;
+        case 'pixel':
+            return 1 * zoom;
+        case 'fit':
+        default:
+            return Math.min(containerWidth / image.width, containerHeight / image.height) * zoom;
+    }
+}
+
+function drawGridOnContext(ctx, area) {
+    const settings = atlasMapState.settings;
+    if (!settings?.display?.grid) {
+        return;
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell * area.scale : grid.cell_px || 50;
+
+    ctx.save();
+    ctx.globalAlpha = grid.opacity ?? 0.25;
+    ctx.strokeStyle = grid.color || '#3aaaff';
+    ctx.lineWidth = grid.line_px || 2;
+    ctx.beginPath();
+
+    if (!cellPx || !Number.isFinite(cellPx)) {
+        ctx.restore();
+        return;
+    }
+
+    for (let x = area.x; x <= area.x + area.width; x += cellPx) {
+        ctx.moveTo(x, area.y);
+        ctx.lineTo(x, area.y + area.height);
+    }
+
+    for (let y = area.y; y <= area.y + area.height; y += cellPx) {
+        ctx.moveTo(area.x, y);
+        ctx.lineTo(area.x + area.width, y);
+    }
+
+    ctx.stroke();
+    ctx.restore();
+}
+
+function drawCalibrationRuler(ctx, scale) {
+    const elements = getAtlasElements();
+    const wrapper = elements.previewCanvas?.parentElement;
+    if (!wrapper) {
+        return;
+    }
+
+    let overlay = wrapper.querySelector('.atlas-ruler-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'atlas-ruler-overlay';
+        wrapper.appendChild(overlay);
+    }
+
+    overlay.innerHTML = '';
+    const startPoint = createRulerPoint(atlasMapState.ruler.start);
+    const endPoint = createRulerPoint(atlasMapState.ruler.end);
+    overlay.append(startPoint, endPoint);
+
+    const line = document.createElement('div');
+    line.className = 'atlas-ruler-line';
+    const dx = atlasMapState.ruler.end.x - atlasMapState.ruler.start.x;
+    const dy = atlasMapState.ruler.end.y - atlasMapState.ruler.start.y;
+    const length = Math.sqrt((dx ** 2) + (dy ** 2));
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+    line.style.width = `${length}px`;
+    line.style.left = `${atlasMapState.ruler.start.x}px`;
+    line.style.top = `${atlasMapState.ruler.start.y}px`;
+    line.style.transform = `rotate(${angle}deg)`;
+    overlay.appendChild(line);
+
+    const measuredPixels = length * (window.devicePixelRatio || 1);
+    const settings = atlasMapState.settings;
+    const ppi = settings.display?.physical?.ppi_override || settings.display?.grid?.pixels_per_inch;
+    if (ppi) {
+        const inches = measuredPixels / ppi;
+        console.log(`[Atlas] Calibration measurement: ${inches.toFixed(2)} inches`);
+    }
+}
+
+function createRulerPoint(position) {
+    const point = document.createElement('div');
+    point.className = 'atlas-ruler-point';
+    point.style.left = `${position.x - 8}px`;
+    point.style.top = `${position.y - 8}px`;
+    return point;
+}
+
+function enableRulerInteractions(canvas) {
+    const wrapper = canvas.parentElement;
+    const overlay = wrapper.querySelector('.atlas-ruler-overlay');
+    if (!overlay) {
+        return;
+    }
+
+    overlay.querySelectorAll('.atlas-ruler-point').forEach((point, index) => {
+        point.addEventListener('pointerdown', (event) => {
+            atlasMapState.ruler.draggingPoint = point;
+            point.setPointerCapture(event.pointerId);
+        });
+        point.addEventListener('pointermove', (event) => {
+            if (atlasMapState.ruler.draggingPoint !== point) {
+                return;
+            }
+            const rect = overlay.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            point.style.left = `${x - 8}px`;
+            point.style.top = `${y - 8}px`;
+            const position = index === 0 ? atlasMapState.ruler.start : atlasMapState.ruler.end;
+            position.x = x;
+            position.y = y;
+        });
+        point.addEventListener('pointerup', () => {
+            atlasMapState.ruler.draggingPoint = null;
+        });
+    });
+}
+
 // Dev restart button handler
 document.getElementById('dev-restart-btn')?.addEventListener('click', async () => {
     if (!confirm('Restart server and reload page?')) return;
@@ -2289,3 +3000,56 @@ document.getElementById('dev-restart-btn')?.addEventListener('click', async () =
         alert('Failed to restart server. You may need to restart manually.');
     }
 });
+
+function updateAtlasStateFromSocket(payload) {
+    atlasMapState.lastDisplayState = payload;
+    if (payload?.grid) {
+        applyDisplayGrid(payload.grid);
+    }
+    if (payload?.viewport) {
+        applyDisplayResolution(payload.viewport);
+    }
+    if (typeof payload?.connected === 'boolean') {
+        atlasMapState.displayConnected = payload.connected;
+        updateDisplayStatus();
+    }
+}
+
+function handlePreviewWheel(event) {
+    if (!atlasMapState.preview) {
+        return;
+    }
+    event.preventDefault();
+    const delta = event.deltaY < 0 ? 0.1 : -0.1;
+    const newZoom = Math.min(Math.max(atlasMapState.preview.zoom + delta, 0.1), 5);
+    if (newZoom !== atlasMapState.preview.zoom) {
+        atlasMapState.preview.zoom = newZoom;
+        drawAtlasPreview();
+    }
+}
+
+function startPreviewDrag(event) {
+    if (!atlasMapState.preview) {
+        return;
+    }
+    atlasMapState.preview.dragging = true;
+    atlasMapState.preview.dragStart = { x: event.clientX, y: event.clientY };
+    atlasMapState.preview.originalOffset = { ...atlasMapState.preview.offset };
+}
+
+function handlePreviewDrag(event) {
+    if (!atlasMapState.preview || !atlasMapState.preview.dragging) {
+        return;
+    }
+    const dx = event.clientX - atlasMapState.preview.dragStart.x;
+    const dy = event.clientY - atlasMapState.preview.dragStart.y;
+    atlasMapState.preview.offset.x = atlasMapState.preview.originalOffset.x + dx;
+    atlasMapState.preview.offset.y = atlasMapState.preview.originalOffset.y + dy;
+    drawAtlasPreview();
+}
+
+function endPreviewDrag() {
+    if (atlasMapState.preview) {
+        atlasMapState.preview.dragging = false;
+    }
+}

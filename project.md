@@ -14,20 +14,25 @@
 
 ## Current State Snapshot
 - Core features cover combat tracker, attack workflow, character/effects builders, loot manager, and local persistence.
-- Items catalog now loads from `data/DBs/items.json` with filtering, searching, and inventory assignment.
-- Monsters catalog pulls from `data/creatures/library/monsters_clean_with_images.json`, including token art, full stats, traits/actions, and direct “Add to Combat” support.
+- Items catalog loads from `data/DBs/items.json` with filtering, searching, and inventory assignment.
+- Monster catalog pulls from `data/creatures/library/monsters_clean_with_images.json`, including token art, full stats, traits/actions, and direct “Add to Combat” support.
 - Combatants store `sourceId` so Arena cards retrieve attacks/effects from catalog data.
 - Codex defaults to Character tab; stat summary cards tightened for consistency.
-- No automated tests yet per `README.md`; testing strategy remains an open gap.
+- **Atlas Map Module** now supports image uploads, library management, per-display viewport controls (fit/zoom/pan), and broadcasts state to a dedicated player view at `:3001`.
+- Display handshake tracks active viewers, allowing instant push of map/grid updates across LAN.
+- Map and display settings persist to JSON (`data/maps.json`, `data/atlas_settings.json`) for quick restart recovery.
+- No automated tests yet; testing strategy remains an open gap per `README.md`.
 
 ## Active Focus & Next Steps
-- Verify monster attacks/effects integrate seamlessly with Arena rolls and damage confirmation.
+- Polish Atlas encounter tooling (token placement, visibility toggles, duplicating combatants onto the map canvas).
+- Extend map display profiles to allow naming multiple screens/devices and switching resolutions quickly.
 - Expand monster filtering (CR, environment, alignment) and prepare Atlas hook for map-aware AoE targeting.
-- Plan incremental introduction of testing (Jest/Vitest) covering initiative, attack flows, and catalog loaders.
-- Document architectural decisions (catalog normalization, sourceId usage) and future enhancements here to keep team alignment.
+- Plan incremental introduction of testing (Jest/Vitest) covering initiative, attack flows, catalog loaders, and map broadcasting.
+- Document architectural decisions (catalog normalization, `sourceId` usage, display socket contract) and future enhancements here to keep team alignment.
 
 ## Open Questions
 - What UX do we want for large monster libraries in Arena (search, favorites, encounter presets)?
+- How should multiple display profiles be represented in the UI and persisted? (Per-device naming/lookups?)
 - Are there pending features or bug reports not captured in version control or `todo.md`?
 - Any upcoming UX changes that require additional asset or data restructuring?
 

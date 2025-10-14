@@ -3,10 +3,33 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const http = require('http');
 const multer = require('multer');
+const { Server } = require('socket.io');
+const { imageSize } = require('image-size');
+const crypto = require('crypto');
 
 const app = express();
+const displayApp = express();
 const PORT = 3000;
+const DISPLAY_PORT = 3001;
+
+const ROOT_DIR = path.join(__dirname, '..');
+const DATA_DIR = path.join(ROOT_DIR, 'data');
+const MAPS_DIR = path.join(ROOT_DIR, 'maps');
+const DISPLAY_PUBLIC_DIR = path.join(ROOT_DIR, 'public-display');
+const MAPS_DB_PATH = path.join(DATA_DIR, 'maps.json');
+const ATLAS_SETTINGS_PATH = path.join(DATA_DIR, 'atlas_settings.json');
+
+fs.mkdirSync(DATA_DIR, { recursive: true });
+fs.mkdirSync(MAPS_DIR, { recursive: true });
+fs.mkdirSync(DISPLAY_PUBLIC_DIR, { recursive: true });
+
+displayApp.use(express.static(DISPLAY_PUBLIC_DIR));
+displayApp.use('/maps', express.static(MAPS_DIR));
+displayApp.get('*', (req, res) => {
+  res.sendFile(path.join(DISPLAY_PUBLIC_DIR, 'index.html'));
+});
 
 // Middleware
 app.use(cors());
@@ -25,21 +48,66 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/db-assets', express.static(path.join(__dirname, '../data/DBs')));
 app.use('/data/creatures/library', express.static(path.join(__dirname, '../data/DBs')));
 app.use('/data', express.static(path.join(__dirname, '../data')));
+app.use('/maps', express.static(MAPS_DIR));
 
 const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
+  destination: function destination(req, file, cb) {
     const targetDir = path.join(__dirname, '../uploads', file.fieldname || 'misc');
     fs.mkdirSync(targetDir, { recursive: true });
     cb(null, targetDir);
   },
-  filename: function(req, file, cb) {
+  filename: function filename(req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname) || '';
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
   }
 });
 
 const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// Paths and persistence helpers for Atlas map management
+
+const mapStorage = multer.diskStorage({
+  destination: function destination(req, file, cb) {
+    cb(null, MAPS_DIR);
+  },
+  filename: function filename(req, file, cb) {
+    const id = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+    const ext = path.extname(file.originalname) || '';
+    cb(null, `${id}${ext}`);
+  }
+});
+
+const mapUpload = multer({
+  storage: mapStorage,
+  limits: { fileSize: 25 * 1024 * 1024 }
+});
+
+function readJsonFile(filePath, fallback) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return fallback;
+    }
+    const raw = fs.readFileSync(filePath, 'utf8');
+    return JSON.parse(raw);
+  } catch (error) {
+    console.error(`[Atlas] Failed to read JSON file ${filePath}:`, error);
+    return fallback;
+  }
+}
+
+function writeJsonFile(filePath, payload) {
+  try {
+    fs.writeFileSync(filePath, JSON.stringify(payload, null, 2));
+  } catch (error) {
+    console.error(`[Atlas] Failed to write JSON file ${filePath}:`, error);
+  }
+}
+
+function generateId(prefix) {
+  const base = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+  return prefix ? `${prefix}-${base}` : base;
+}
 
 // In-memory encounter state
 let currentEncounter = {
@@ -83,6 +151,276 @@ function applyEffects(combatant, timing) {
     }
   });
 }
+
+// Atlas map state
+let mapsState = readJsonFile(MAPS_DB_PATH, []);
+let atlasSettings = readJsonFile(ATLAS_SETTINGS_PATH, {
+  display: {
+    resolution: { w: 1920, h: 1080 },
+    physical: { diagonal_in: 42, ppi_override: null },
+    grid: {
+      inches_per_cell: 1,
+      pixels_per_inch: 52.45,
+      color: '#3aaaff',
+      opacity: 0.25,
+      line_px: 2
+    },
+    viewport: {
+      fit: 'fit',
+      zoom: 1,
+      offset: { x: 0, y: 0 }
+    }
+  },
+  active_map_id: null
+});
+
+function ensureAtlasDefaults() {
+  atlasSettings.display = atlasSettings.display || {};
+  atlasSettings.display.resolution = atlasSettings.display.resolution || { w: 1920, h: 1080 };
+  atlasSettings.display.physical = atlasSettings.display.physical || { diagonal_in: 42, ppi_override: null };
+  atlasSettings.display.grid = {
+    inches_per_cell: 1,
+    pixels_per_inch: 52.45,
+    color: '#3aaaff',
+    opacity: 0.25,
+    line_px: 2,
+    ...(atlasSettings.display.grid || {})
+  };
+  atlasSettings.display.viewport = {
+    fit: 'fit',
+    zoom: 1,
+    offset: { x: 0, y: 0 },
+    ...(atlasSettings.display.viewport || {})
+  };
+}
+
+ensureAtlasDefaults();
+
+function computePixelsPerInch(resolution, diagonal) {
+  if (!resolution || !resolution.w || !resolution.h || !diagonal) {
+    return 52.45;
+  }
+
+  const pixelDiagonal = Math.sqrt((resolution.w ** 2) + (resolution.h ** 2));
+  return Number((pixelDiagonal / diagonal).toFixed(2));
+}
+
+function buildDisplayState() {
+  const activeMap = mapsState.find((entry) => entry.id === atlasSettings.active_map_id) || null;
+  const resolution = atlasSettings.display?.resolution || { w: 1920, h: 1080 };
+  const diagonal = atlasSettings.display?.physical?.diagonal_in || 42;
+  const ppi = atlasSettings.display?.physical?.ppi_override ?? computePixelsPerInch(resolution, diagonal);
+  const inchesPerCell = atlasSettings.display?.grid?.inches_per_cell ?? 1;
+  const cellPx = ppi * inchesPerCell;
+
+  return {
+    type: 'DISPLAY_STATE',
+    connected: displayConnectionCount > 0,
+    map: activeMap
+      ? { url: activeMap.file, w: activeMap.width_px, h: activeMap.height_px }
+      : null,
+    viewport: {
+      w: resolution.w,
+      h: resolution.h,
+      fit: atlasSettings.display?.viewport?.fit || 'fit',
+      zoom: atlasSettings.display?.viewport?.zoom || 1,
+      offset: atlasSettings.display?.viewport?.offset || { x: 0, y: 0 }
+    },
+    grid: {
+      enabled: Boolean(atlasSettings.display?.grid?.enabled ?? true),
+      cell_px: Number(cellPx.toFixed(2)),
+      line_px: atlasSettings.display?.grid?.line_px ?? 2,
+      color: atlasSettings.display?.grid?.color ?? '#3aaaff',
+      opacity: atlasSettings.display?.grid?.opacity ?? 0.25
+    }
+  };
+}
+
+// Socket.IO setup for display broadcast
+const controlServer = http.createServer(app);
+const mainIo = new Server(controlServer, {
+  cors: {
+    origin: '*'
+  }
+});
+
+const displayServer = http.createServer(displayApp);
+const displayIo = new Server(displayServer, {
+  cors: {
+    origin: '*'
+  }
+});
+
+let displayConnectionCount = 0;
+
+function broadcastDisplayState() {
+  const payload = buildDisplayState();
+  mainIo.emit('display:state', payload);
+  displayIo.emit('display:state', payload);
+}
+
+mainIo.on('connection', (socket) => {
+  socket.on('display:hello', (payload) => {
+    if (payload && payload.resolution) {
+      atlasSettings.display = atlasSettings.display || {};
+      atlasSettings.display.resolution = payload.resolution;
+      writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+    }
+    socket.emit('display:state', buildDisplayState());
+  });
+});
+
+displayIo.on('connection', (socket) => {
+  displayConnectionCount += 1;
+  socket.on('display:hello', (payload) => {
+    if (payload && payload.resolution) {
+      atlasSettings.display = atlasSettings.display || {};
+      atlasSettings.display.resolution = payload.resolution;
+      writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+    }
+    socket.emit('display:state', buildDisplayState());
+    broadcastDisplayState();
+  });
+  socket.on('disconnect', () => {
+    displayConnectionCount = Math.max(0, displayConnectionCount - 1);
+    broadcastDisplayState();
+  });
+});
+
+// Map management endpoints
+app.get('/api/maps', (req, res) => {
+  res.json(mapsState);
+});
+
+app.post('/api/maps', mapUpload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file provided' });
+  }
+
+  try {
+    const storedPath = path.join(req.file.destination, req.file.filename);
+    let dimensions = null;
+    try {
+      dimensions = imageSize(storedPath);
+    } catch (dimError) {
+      console.warn('[Atlas] Could not determine image size, continuing without dimensions:', dimError.message);
+      try {
+        const fileBuffer = fs.readFileSync(storedPath);
+        dimensions = imageSize(fileBuffer);
+      } catch (bufferError) {
+        console.warn('[Atlas] Buffer fallback also failed:', bufferError.message);
+      }
+    }
+    const record = {
+      id: generateId('map'),
+      name: req.body?.name || path.parse(req.file.originalname).name,
+      file: `/maps/${req.file.filename}`,
+      width_px: dimensions?.width ?? null,
+      height_px: dimensions?.height ?? null,
+      created_at: new Date().toISOString(),
+      meta: req.body?.meta || {}
+    };
+
+    mapsState.push(record);
+    writeJsonFile(MAPS_DB_PATH, mapsState);
+    broadcastDisplayState();
+    res.json(record);
+  } catch (error) {
+    console.error('[Atlas] Failed to process uploaded map:', error);
+    res.status(500).json({ error: 'Failed to process map' });
+  }
+});
+
+app.patch('/api/maps/:id', (req, res) => {
+  const target = mapsState.find((entry) => entry.id === req.params.id);
+  if (!target) {
+    return res.status(404).json({ error: 'Map not found' });
+  }
+
+  if (req.body?.name) {
+    target.name = req.body.name;
+  }
+  if (req.body?.meta) {
+    target.meta = {
+      ...target.meta,
+      ...req.body.meta
+    };
+  }
+
+  writeJsonFile(MAPS_DB_PATH, mapsState);
+  res.json(target);
+});
+
+app.delete('/api/maps/:id', (req, res) => {
+  const index = mapsState.findIndex((entry) => entry.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ error: 'Map not found' });
+  }
+
+  const [removed] = mapsState.splice(index, 1);
+  if (removed && removed.file) {
+    try {
+      const filesystemPath = path.join(__dirname, '..', removed.file.replace(/^\//, ''));
+      if (fs.existsSync(filesystemPath)) {
+        fs.unlinkSync(filesystemPath);
+      }
+    } catch (error) {
+      console.error('[Atlas] Failed to delete map file from disk:', error);
+    }
+  }
+
+  if (atlasSettings.active_map_id === req.params.id) {
+    atlasSettings.active_map_id = null;
+    writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+    broadcastDisplayState();
+  }
+
+  writeJsonFile(MAPS_DB_PATH, mapsState);
+  res.json({ success: true });
+});
+
+app.get('/api/atlas/settings', (req, res) => {
+  res.json(atlasSettings);
+});
+
+app.patch('/api/atlas/settings', (req, res) => {
+  atlasSettings = {
+    ...atlasSettings,
+    ...req.body
+  };
+
+  if (!atlasSettings.display?.physical?.ppi_override) {
+    const computed = computePixelsPerInch(
+      atlasSettings.display?.resolution,
+      atlasSettings.display?.physical?.diagonal_in
+    );
+    atlasSettings.display.physical.ppi_override = null;
+    atlasSettings.display.grid = atlasSettings.display.grid || {};
+    atlasSettings.display.grid.pixels_per_inch = computed;
+  }
+
+  writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+  broadcastDisplayState();
+  res.json(atlasSettings);
+});
+
+app.post('/api/atlas/active-map', (req, res) => {
+  const { mapId } = req.body || {};
+  if (!mapId) {
+    return res.status(400).json({ error: 'mapId is required' });
+  }
+
+  const target = mapsState.find((entry) => entry.id === mapId);
+  if (!target) {
+    return res.status(404).json({ error: 'Map not found' });
+  }
+
+  atlasSettings.active_map_id = mapId;
+  writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+  broadcastDisplayState();
+
+  res.json({ success: true });
+});
 
 // Routes
 
@@ -805,10 +1143,23 @@ app.post('/api/dev/restart', (req, res) => {
   }, 500);
 });
 
+app.get('/api/atlas/displays', (req, res) => {
+  const sockets = Array.from(displayIo.sockets.sockets.values()).map((socket) => ({
+    id: socket.id,
+    handshake: {
+      address: socket.handshake.address,
+      issued: socket.handshake.issued
+    }
+  }));
+  res.json({ count: sockets.length, displays: sockets });
+});
 
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
+controlServer.listen(PORT, () => {
   const address = `http://${process.env.HOSTNAME || 'localhost'}:${PORT}`;
-  console.log(`ArcForge server running on all interfaces (primary: ${address})`);
-  console.log(`Ready to track initiative and manage combat!`);
+  console.log(`ArcForge control server listening on ${address}`);
+});
+
+displayServer.listen(DISPLAY_PORT, () => {
+  console.log(`ArcForge display server listening on port ${DISPLAY_PORT}`);
 });

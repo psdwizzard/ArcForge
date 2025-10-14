@@ -481,7 +481,122 @@
                 </div>
 
                 <section id="atlas-map-section" class="atlas-section active">
-                    <div class="atlas-section-placeholder">Map tools coming soon.</div>
+                    <div class="atlas-map-layout">
+                        <aside class="atlas-map-library">
+                            <header class="atlas-panel-header">
+                                <h3>Map Library</h3>
+                                <label class="atlas-upload-btn">
+                                    <input type="file" id="atlas-map-upload-input" accept=".png,.jpg,.jpeg,.webp" multiple>
+                                    <span>Upload</span>
+                                </label>
+                            </header>
+                            <div id="atlas-map-list" class="atlas-list">
+                                <div class="atlas-empty-state">Upload a map to get started.</div>
+                            </div>
+                            <a href="http://localhost:3001/display" target="_blank" rel="noopener" class="btn btn-secondary atlas-open-display">Open Player Display</a>
+                        </aside>
+
+                        <section class="atlas-map-settings">
+                            <header class="atlas-panel-header">
+                                <h3>Display Settings</h3>
+                                <div id="atlas-display-status" class="atlas-status atlas-status-disconnected">Display not connected</div>
+                            </header>
+
+                            <div class="atlas-settings-group">
+                                <h4>Resolution</h4>
+                                <div class="atlas-settings-grid">
+                                    <label>
+                                        Width (px)
+                                        <input type="number" id="atlas-resolution-width" min="1" step="1">
+                                    </label>
+                                    <label>
+                                        Height (px)
+                                        <input type="number" id="atlas-resolution-height" min="1" step="1">
+                                    </label>
+                                    <label>
+                                        Refresh Rate (Hz)
+                                        <input type="number" id="atlas-refresh-rate" min="1" step="1" placeholder="Optional">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="atlas-settings-group">
+                                <h4>Physical Size</h4>
+                                <div class="atlas-settings-grid">
+                                    <label>
+                                        Diagonal (in)
+                                        <input type="number" id="atlas-diagonal" min="1" step="0.1" value="42">
+                                    </label>
+                                    <label>
+                                        Pixels Per Inch
+                                        <input type="number" id="atlas-ppi" min="1" step="0.01" placeholder="Auto" disabled>
+                                    </label>
+                                </div>
+                                <div class="atlas-settings-actions">
+                                    <button id="atlas-auto-calibrate-btn" class="btn btn-secondary">Auto Compute</button>
+                                    <button id="atlas-manual-calibrate-btn" class="btn btn-secondary">Manual Calibrate</button>
+                                </div>
+                            </div>
+
+                            <div class="atlas-settings-group">
+                                <h4>Grid</h4>
+                                <div class="atlas-settings-grid">
+                                    <label>
+                                        Grid Size (in)
+                                        <input type="number" id="atlas-grid-inches" min="0.1" step="0.05" value="1">
+                                    </label>
+                                    <label>
+                                        Line Width (px)
+                                        <input type="number" id="atlas-grid-line" min="1" step="1" value="2">
+                                    </label>
+                                    <label>
+                                        Opacity
+                                        <input type="number" id="atlas-grid-opacity" min="0" max="1" step="0.05" value="0.25">
+                                    </label>
+                                    <label>
+                                        Color
+                                        <input type="color" id="atlas-grid-color" value="#3aaaff">
+                                    </label>
+                                </div>
+                                <label class="atlas-checkbox">
+                                    <input type="checkbox" id="atlas-grid-enabled" checked>
+                                    <span>Show grid on display</span>
+                                </label>
+                            </div>
+
+                            <div class="atlas-settings-actions">
+                                <button id="atlas-save-settings-btn" class="btn btn-primary">Save Settings</button>
+                                <button id="atlas-push-display-btn" class="btn btn-success">Push to Display</button>
+                            </div>
+                        </section>
+
+                        <section class="atlas-map-preview">
+                            <header class="atlas-panel-header">
+                                <h3>Active Map Preview</h3>
+                                <div class="atlas-preview-controls">
+                                    <label class="atlas-checkbox">
+                                        <input type="checkbox" id="atlas-preview-grid" checked>
+                                        <span>Show Grid</span>
+                                    </label>
+                                    <select id="atlas-preview-fit">
+                                        <option value="fit">Fit</option>
+                                        <option value="fill">Fill</option>
+                                        <option value="stretch">Stretch</option>
+                                        <option value="pixel">1:1 Pixel</option>
+                                    </select>
+                                    <div class="atlas-zoom-controls">
+                                        <button type="button" id="atlas-preview-zoom-out" class="btn btn-secondary btn-small">–</button>
+                                        <button type="button" id="atlas-preview-zoom-in" class="btn btn-secondary btn-small">+</button>
+                                        <button type="button" id="atlas-preview-zoom-reset" class="btn btn-secondary btn-small">Reset</button>
+                                    </div>
+                                </div>
+                            </header>
+                            <div class="atlas-preview-canvas-wrapper">
+                                <canvas id="atlas-preview-canvas"></canvas>
+                                <div id="atlas-preview-empty" class="atlas-empty-state">Select a map to preview.</div>
+                            </div>
+                        </section>
+                    </div>
                 </section>
 
                 <section id="atlas-encounters-section" class="atlas-section">
