@@ -22,6 +22,8 @@ app.use((req, res, next) => {
 
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/db-assets', express.static(path.join(__dirname, '../data/DBs')));
+app.use('/data/creatures/library', express.static(path.join(__dirname, '../data/DBs')));
 app.use('/data', express.static(path.join(__dirname, '../data')));
 
 const storage = multer.diskStorage({
@@ -141,7 +143,9 @@ app.post('/api/combatants', (req, res) => {
       successes: 0,
       failures: 0
     },
-    loot: req.body.loot || []
+    loot: req.body.loot || [],
+    attacks: req.body.attacks || [],
+    specialAbilities: req.body.specialAbilities || []
   };
 
   currentEncounter.combatants.push(combatant);
@@ -633,13 +637,19 @@ app.get('/api/creatures', (req, res) => {
 app.get('/api/characters', (req, res) => {
   const charactersDir = path.join(__dirname, '../data/characters');
 
+  console.log(`[API] GET /api/characters from ${req.ip}`);
+  console.log(`[API] Characters directory: ${charactersDir}`);
+
   // Create directory if it doesn't exist
   if (!fs.existsSync(charactersDir)) {
+    console.log('[API] Characters directory does not exist, creating...');
     fs.mkdirSync(charactersDir, { recursive: true });
     return res.json([]);
   }
 
   const files = fs.readdirSync(charactersDir);
+  console.log(`[API] Found ${files.length} files in characters directory:`, files);
+  
   const characters = files
     .filter(f => f.endsWith('.json'))
     .map(f => {
@@ -647,6 +657,7 @@ app.get('/api/characters', (req, res) => {
       return data;
     });
 
+  console.log(`[API] Returning ${characters.length} characters`);
   res.json(characters);
 });
 
@@ -783,9 +794,21 @@ app.get('/api/load', (req, res) => {
     }
 });
 
+// Dev restart endpoint
+app.post('/api/dev/restart', (req, res) => {
+  console.log('[DEV] Restart requested');
+  res.json({ message: 'Server restarting...' });
+  
+  setTimeout(() => {
+    console.log('[DEV] Shutting down...');
+    process.exit(0);
+  }, 500);
+});
+
 
 // Start server
-app.listen(PORT, () => {
-  console.log(`ArcForge server running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  const address = `http://${process.env.HOSTNAME || 'localhost'}:${PORT}`;
+  console.log(`ArcForge server running on all interfaces (primary: ${address})`);
   console.log(`Ready to track initiative and manage combat!`);
 });

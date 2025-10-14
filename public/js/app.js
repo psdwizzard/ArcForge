@@ -14,7 +14,8 @@ function toggleAgentDetails(agentId) {
 }
 
 // API Base URL
-const API_BASE = 'http://localhost:3000/api';
+// Use current hostname so it works on LAN
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
 
 // State
 let encounterState = {
@@ -52,8 +53,57 @@ const codexState = {
     journalEntries: [],
     activeCharacterId: null,
     activeEnemyId: null,
-    activeJournalId: null
+    activeJournalId: null,
+    observers: {
+        characterList: null,
+        enemyList: null
+    }
 };
+
+const CODEX_ICON_FALLBACKS = {
+    'amphibious': 'icons/magic/water/bubbles-air-water-blue.webp',
+    'legendary resistance': 'icons/magic/defensive/illusion-evasion-echo-purple.webp',
+    'legendary actions': 'icons/magic/control/reading-book-purple.webp',
+    'legendary actions options': 'icons/magic/control/reading-book-purple.webp',
+    'multiattack': 'icons/skills/melee/weapons-crossed-swords-purple.webp',
+    'frightful presence': 'icons/creatures/abilities/dragon-head-blue.webp',
+    'acid breath': 'icons/magic/acid/projectile-glowing-bubbles.webp'
+};
+
+function resolveCodexImagePath(imgPath, fallbackKey) {
+    let resolved = imgPath;
+
+    if (!resolved && fallbackKey) {
+        const fallback = CODEX_ICON_FALLBACKS[fallbackKey.toLowerCase()];
+        if (fallback) {
+            resolved = fallback;
+        }
+    }
+
+    if (!resolved) {
+        return null;
+    }
+
+    // Normalize Foundry export paths like "data/creatures/library/icons/..." or "/data/creatures/library/icons/..."
+    // Strip everything up to and including "library/" to get just "icons/..."
+    if (resolved.includes('/library/')) {
+        const beforeTransform = resolved;
+        resolved = resolved.substring(resolved.indexOf('/library/') + '/library/'.length);
+        console.log(`[resolveCodexImagePath] Transformed: ${beforeTransform} → ${resolved}`);
+    }
+
+    if (resolved.startsWith('http://') || resolved.startsWith('https://')) {
+        return resolved;
+    }
+
+    if (resolved.startsWith('/')) {
+        return resolved;
+    }
+
+    const finalPath = `/db-assets/${resolved.replace(/^\/+/, '').replace(/^\/+/, '')}`;
+    console.log(`[resolveCodexImagePath] Final path: ${finalPath}`);
+    return finalPath;
+}
 
 async function loadCodexData() {
     try {
@@ -84,7 +134,31 @@ async function loadCodexData() {
             const sheetId = creature.id || creature.name;
             const exists = mergedEnemySheets.some(existing => (existing.id || existing.name) === sheetId);
             if (!exists) {
-                mergedEnemySheets.push(creature);
+                // Normalize Foundry creature structure to match our sheet format
+                const normalized = {
+                    ...creature,
+                    specialAbilities: creature.items ? creature.items
+                        .filter(item => item.type === 'feat')
+                        .map(item => ({
+                            name: item.name,
+                            img: item.img,
+                            icon: item.img,
+                            description: item.system?.description?.value || ''
+                        })) : [],
+                    actions: creature.items ? creature.items
+                        .filter(item => item.type === 'weapon')
+                        .map(item => ({
+                            name: item.name,
+                            img: item.img,
+                            icon: item.img,
+                            description: item.system?.description?.value || '',
+                            type: item.system?.actionType || '',
+                            attackBonus: item.system?.attack?.bonus || undefined,
+                            damage: item.system?.damage?.parts?.[0]?.[0] || '',
+                            damageRoll: item.system?.damage?.parts?.[0]?.[0] || ''
+                        })) : []
+                };
+                mergedEnemySheets.push(normalized);
             }
         });
 
@@ -112,6 +186,8 @@ function initCodex() {
     // Ensure character tab is active on first render
     codexState.activeSection = 'character';
     renderCodex();
+
+    setupCodexObservers();
 }
 
 function switchCodexSection(section) {
@@ -154,8 +230,9 @@ function renderCodexCharacters() {
         const card = document.createElement('div');
         card.className = 'codex-sheet-card';
         card.dataset.sheetId = char.id;
+        const portraitUrl = resolveCodexImagePath(char.imagePath);
         card.innerHTML = `
-            ${char.imagePath ? `<img class="codex-sheet-portrait" src="${char.imagePath}" alt="${char.name} portrait">` : ''}
+            ${portraitUrl ? `<img class="codex-sheet-portrait" src="${portraitUrl}" alt="${char.name} portrait" loading="lazy">` : ''}
             <div class="codex-sheet-meta">
                 <div class="codex-sheet-name">${char.name}</div>
                 <div class="codex-sheet-sub">${[char.race, char.class ? `${char.class} ${char.level || ''}` : ''].filter(Boolean).join(' • ')}</div>
@@ -178,13 +255,7 @@ function renderCodexCharacters() {
         codexState.activeCharacterId = codexState.characterSheets[0].id;
     }
 
-    const activeChar = codexState.characterSheets.find(char => char.id === codexState.activeCharacterId);
-    if (!activeChar) {
-        detailEl.innerHTML = '<div class="empty-state">Select a character to view their sheet</div>';
-        return;
-    }
-
-    detailEl.innerHTML = getCodexSheetDetailHTML(activeChar, 'character');
+    enqueueCodexDetailRender('character');
 }
 
 function renderCodexEnemies() {
@@ -205,8 +276,9 @@ function renderCodexEnemies() {
         const card = document.createElement('div');
         card.className = 'codex-sheet-card';
         card.dataset.sheetId = enemy.id || enemy.name;
+        const portraitUrl = resolveCodexImagePath(enemy.imagePath);
         card.innerHTML = `
-            ${enemy.imagePath ? `<img class="codex-sheet-portrait" src="${enemy.imagePath}" alt="${enemy.name} portrait">` : ''}
+            ${portraitUrl ? `<img class="codex-sheet-portrait" src="${portraitUrl}" alt="${enemy.name} portrait" loading="lazy">` : ''}
             <div class="codex-sheet-meta">
                 <div class="codex-sheet-name">${enemy.name}</div>
                 <div class="codex-sheet-sub">CR ${enemy.cr || '—'} • ${enemy.type || ''}</div>
@@ -229,17 +301,14 @@ function renderCodexEnemies() {
         codexState.activeEnemyId = codexState.enemySheets[0].id || codexState.enemySheets[0].name;
     }
 
-    const activeEnemy = codexState.enemySheets.find(enemy => (enemy.id || enemy.name) === codexState.activeEnemyId);
-    if (!activeEnemy) {
-        detailEl.innerHTML = '<div class="empty-state">Select an enemy to view their sheet</div>';
-        return;
-    }
-
-    detailEl.innerHTML = getCodexSheetDetailHTML(activeEnemy, 'enemy');
+    enqueueCodexDetailRender('enemy');
 }
 
 function getCodexSheetDetailHTML(sheet, type) {
-    const portraitHTML = sheet.imagePath ? `<img src="${sheet.imagePath}" alt="${sheet.name} portrait">` : '<div class="codex-sheet-placeholder">No Image</div>';
+    const portraitUrl = resolveCodexImagePath(sheet.imagePath);
+    const portraitHTML = portraitUrl
+        ? `<img src="${portraitUrl}" alt="${sheet.name} portrait" loading="lazy">`
+        : '<div class="codex-sheet-placeholder">No Image</div>';
 
     const abilityBlock = sheet.abilities ? Object.entries(sheet.abilities).map(([ability, value]) => `
         <div class="codex-summary-block">
@@ -282,11 +351,16 @@ function getCodexSheetDetailHTML(sheet, type) {
         ? `
             <div class="codex-notes">
                 <h3>Traits</h3>
-                ${sheet.specialAbilities.map(ability => `
+                ${sheet.specialAbilities.map(ability => {
+                    const iconUrl = resolveCodexImagePath(ability.img || ability.icon, ability.name);
+                    return `
                     <div class="codex-trait-block">
-                        <strong>${ability.name}.</strong> ${ability.description}
-                    </div>
-                `).join('')}
+                        ${iconUrl ? `<img class="codex-trait-icon" src="${iconUrl}" alt="${ability.name}" loading="lazy">` : ''}
+                        <div class="codex-trait-body">
+                            <strong>${ability.name}.</strong> ${ability.description || ''}
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>
         `
         : '';
@@ -295,11 +369,23 @@ function getCodexSheetDetailHTML(sheet, type) {
         ? `
             <div class="codex-notes">
                 <h3>Actions</h3>
-                ${sheet.actions.map(action => `
+                ${sheet.actions.map(action => {
+                    const iconUrl = resolveCodexImagePath(action.img || action.icon, action.name);
+                    const actionDetails = [
+                        action.type ? `(${action.type})` : '',
+                        action.attackBonus !== undefined ? `Attack +${action.attackBonus}` : '',
+                        action.damage || action.damageRoll || '',
+                        action.description || ''
+                    ].filter(Boolean).join(' — ');
+
+                    return `
                     <div class="codex-trait-block">
-                        <strong>${action.name}</strong> ${action.type ? `(${action.type})` : ''} — ${action.damage || action.description || ''}
-                    </div>
-                `).join('')}
+                        ${iconUrl ? `<img class="codex-trait-icon" src="${iconUrl}" alt="${action.name}" loading="lazy">` : ''}
+                        <div class="codex-trait-body">
+                            <strong>${action.name}</strong> ${actionDetails}
+                        </div>
+                    </div>`;
+                }).join('')}
             </div>
         `
         : '';
@@ -392,6 +478,77 @@ function renderCodexJournal() {
         editor.value = '';
         editor.placeholder = 'Select a journal entry to view or edit.';
     }
+}
+
+function setupCodexObservers() {
+    const characterList = document.getElementById('codex-character-list');
+    const enemyList = document.getElementById('codex-enemy-list');
+
+    if ('IntersectionObserver' in window) {
+        if (characterList) {
+            codexState.observers.characterList = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const sheetId = entry.target.dataset.sheetId;
+                        if (sheetId && codexState.activeCharacterId !== sheetId) {
+                            codexState.activeCharacterId = sheetId;
+                            enqueueCodexDetailRender('character');
+                        }
+                    }
+                });
+            }, { root: characterList, threshold: 0.9 });
+        }
+
+        if (enemyList) {
+            codexState.observers.enemyList = new IntersectionObserver(entries => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const sheetId = entry.target.dataset.sheetId;
+                        if (sheetId && codexState.activeEnemyId !== sheetId) {
+                            codexState.activeEnemyId = sheetId;
+                            enqueueCodexDetailRender('enemy');
+                        }
+                    }
+                });
+            }, { root: enemyList, threshold: 0.9 });
+        }
+    }
+}
+
+function enqueueCodexDetailRender(type) {
+    window.requestAnimationFrame(() => {
+        if (type === 'character') {
+            renderCharacterDetail();
+        } else if (type === 'enemy') {
+            renderEnemyDetail();
+        }
+    });
+}
+
+function renderCharacterDetail() {
+    const detailEl = document.getElementById('codex-character-detail');
+    if (!detailEl) return;
+
+    const activeChar = codexState.characterSheets.find(char => char.id === codexState.activeCharacterId);
+    if (!activeChar) {
+        detailEl.innerHTML = '<div class="empty-state">Select a character to view their sheet</div>';
+        return;
+    }
+
+    detailEl.innerHTML = getCodexSheetDetailHTML(activeChar, 'character');
+}
+
+function renderEnemyDetail() {
+    const detailEl = document.getElementById('codex-enemy-detail');
+    if (!detailEl) return;
+
+    const activeEnemy = codexState.enemySheets.find(enemy => (enemy.id || enemy.name) === codexState.activeEnemyId);
+    if (!activeEnemy) {
+        detailEl.innerHTML = '<div class="empty-state">Select an enemy to view their sheet</div>';
+        return;
+    }
+
+    detailEl.innerHTML = getCodexSheetDetailHTML(activeEnemy, 'enemy');
 }
 
 function selectJournalEntry(entryId) {
@@ -509,10 +666,13 @@ async function loadEncounterState() {
 // Load saved agents (characters)
 async function loadSavedAgents() {
     try {
+        console.log('[loadSavedAgents] Fetching from:', `${API_BASE}/characters`);
         const response = await fetch(`${API_BASE}/characters`);
+        console.log('[loadSavedAgents] Response status:', response.status, response.statusText);
         savedAgents = await response.json();
+        console.log('[loadSavedAgents] Loaded agents:', savedAgents.length, savedAgents);
     } catch (error) {
-        console.error('Error loading saved agents:', error);
+        console.error('[loadSavedAgents] Error loading saved agents:', error);
     }
 }
 
@@ -854,22 +1014,29 @@ function getAttacksHTML(combatant) {
         return '';
     }
 
-    // Find the character data from saved agents
-    // Strip " - 01" style suffix from enemy names for legacy lookup
-    const baseName = combatant.name.split(' - ')[0];
-    const character = combatant.sourceId 
-        ? savedAgents.find(a => a.id === combatant.sourceId) 
-        : (savedAgents.find(a => a.name === combatant.name) || savedAgents.find(a => a.name === baseName));
+    // Find attacks from either the combatant itself (Monster Library) or saved agents (Crucible)
+    let attacks = combatant.attacks || [];
+    
+    // If no attacks on combatant, try to find from saved agents
+    if (attacks.length === 0) {
+        const baseName = combatant.name.split(' - ')[0];
+        const character = combatant.sourceId 
+            ? savedAgents.find(a => a.id === combatant.sourceId) 
+            : (savedAgents.find(a => a.name === combatant.name) || savedAgents.find(a => a.name === baseName));
+        
+        if (character && character.attacks) {
+            attacks = character.attacks;
+        }
+    }
 
-    console.log(`[getAttacksHTML] ${combatant.name}: sourceId=${combatant.sourceId}, baseName=${baseName}, found character:`, character);
-    console.log(`[getAttacksHTML] savedAgents count:`, savedAgents.length);
+    console.log(`[getAttacksHTML] ${combatant.name}: sourceId=${combatant.sourceId}, combatant.attacks=${combatant.attacks?.length || 0}, final attacks=${attacks.length}`);
 
-    if (!character || !character.attacks || character.attacks.length === 0) {
-        console.log(`[getAttacksHTML] No attacks for ${combatant.name}: character=${!!character}, attacks=${character?.attacks?.length || 0}`);
+    if (attacks.length === 0) {
+        console.log(`[getAttacksHTML] No attacks found for ${combatant.name}`);
         return '';
     }
 
-    const attackOptions = character.attacks.map((attack, index) => {
+    const attackOptions = attacks.map((attack, index) => {
         const optionLabel = attack.name ? attack.name : `Attack ${index + 1}`;
         return `<option value="${index}">${optionLabel}</option>`;
     }).join('');
@@ -903,8 +1070,53 @@ function getAttacksHTML(combatant) {
                 </div>
                 <div class="attack-result" id="attack-result-${combatant.id}"></div>
             </div>
+            ${getSpecialAbilitiesHTML(combatant)}
         </div>
     `;
+}
+
+// Get special abilities HTML (non-attack actions like Multiattack, Breath Weapons, etc.)
+function getSpecialAbilitiesHTML(combatant) {
+    const specialAbilities = combatant.specialAbilities || [];
+    
+    if (specialAbilities.length === 0) {
+        return '';
+    }
+    
+    const abilitiesList = specialAbilities.map((ability, index) => {
+        const abilityId = `ability-${combatant.id}-${index}`;
+        return `
+            <div class="special-ability-item">
+                <div class="special-ability-header" onclick="toggleSpecialAbility('${abilityId}')">
+                    <span class="special-ability-caret" id="caret-${abilityId}">▸</span>
+                    <strong>${ability.name}</strong>
+                </div>
+                <div class="special-ability-description collapsed" id="${abilityId}">
+                    ${ability.description || 'No description available.'}
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    return `
+        <div class="special-abilities-section">
+            <h4>Special Abilities:</h4>
+            ${abilitiesList}
+        </div>
+    `;
+}
+
+// Toggle special ability description visibility
+function toggleSpecialAbility(abilityId) {
+    const description = document.getElementById(abilityId);
+    const caret = document.getElementById(`caret-${abilityId}`);
+    
+    if (!description || !caret) {
+        return;
+    }
+    
+    const isCollapsed = description.classList.toggle('collapsed');
+    caret.textContent = isCollapsed ? '▸' : '▾';
 }
 
 // Keep attack UI controls aligned with the last known state when re-rendering cards
@@ -1028,17 +1240,25 @@ function rollAttack(attackerId) {
         return;
     }
 
-    const attackerBaseName = attacker.name.split(' - ')[0];
-    const attackerData = attacker.sourceId 
-        ? savedAgents.find(agent => agent.id === attacker.sourceId) 
-        : (savedAgents.find(agent => agent.name === attacker.name) || savedAgents.find(agent => agent.name === attackerBaseName));
-    if (!attackerData || !attackerData.attacks || !attackerData.attacks[attackIndex]) {
+    // Get attacks from combatant or saved agents
+    let attacks = attacker.attacks || [];
+    if (attacks.length === 0) {
+        const attackerBaseName = attacker.name.split(' - ')[0];
+        const attackerData = attacker.sourceId 
+            ? savedAgents.find(agent => agent.id === attacker.sourceId) 
+            : (savedAgents.find(agent => agent.name === attacker.name) || savedAgents.find(agent => agent.name === attackerBaseName));
+        if (attackerData && attackerData.attacks) {
+            attacks = attackerData.attacks;
+        }
+    }
+    
+    if (!attacks || !attacks[attackIndex]) {
         updateAttackResultUI(attackerId, 'Attack data is missing for this combatant.', 'info');
         resetAttackUI(attackerId);
         return;
     }
 
-    const attack = attackerData.attacks[attackIndex];
+    const attack = attacks[attackIndex];
     const attackBonus = Number(attack.attackBonus) || 0;
     const d20Roll = Math.floor(Math.random() * 20) + 1;
     const totalRoll = d20Roll + attackBonus;
@@ -1047,8 +1267,12 @@ function rollAttack(attackerId) {
     const isCriticalMiss = d20Roll === 1;
     const hit = isCritical || (!isCriticalMiss && totalRoll >= targetAC);
 
-    const sanitizedDamage = (attack.damageDice || '').toString().replace(/\s+/g, '');
+    // Support both damageDice (from character builder) and damageRoll (from monster library)
+    const damageFormula = attack.damageRoll || attack.damageDice || '';
+    const sanitizedDamage = damageFormula.toString().replace(/\s+/g, '');
     const rolledDamage = hit ? Math.max(0, rollDice(sanitizedDamage, isCritical)) : 0;
+    
+    console.log(`[rollAttack] Attack: ${attack.name}, damageRoll: ${attack.damageRoll}, damageDice: ${attack.damageDice}, sanitized: ${sanitizedDamage}, rolled: ${rolledDamage}`);
 
     let message = `${attack.name || 'Attack'} vs ${target.name}: rolled ${d20Roll}`;
     message += attackBonus ? ` + ${attackBonus} = ${totalRoll}` : '';
@@ -2046,3 +2270,22 @@ function switchAtlasSection(section) {
         sec.classList.toggle('active', sec.id === `atlas-${section}-section`);
     });
 }
+
+// Dev restart button handler
+document.getElementById('dev-restart-btn')?.addEventListener('click', async () => {
+    if (!confirm('Restart server and reload page?')) return;
+    
+    try {
+        // Trigger server restart
+        await fetch(`${API_BASE}/dev/restart`, { method: 'POST' });
+        
+        // Wait a moment for server to start shutting down
+        setTimeout(() => {
+            // Force reload the page (bypassing cache)
+            window.location.reload(true);
+        }, 1000);
+    } catch (error) {
+        console.error('Error triggering restart:', error);
+        alert('Failed to restart server. You may need to restart manually.');
+    }
+});

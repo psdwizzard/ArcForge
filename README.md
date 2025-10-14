@@ -1,15 +1,38 @@
 # ArcForge
 
-ArcForge is a lightweight, local-first companion app for Dungeon Masters running in-person D&D 5e games. It brings together initiative tracking, combatant management, attack automation, status tracking, and loot handling in a single desktop-friendly interface backed by a minimal Express server.
+ArcForge is a lightweight, local-first companion app for Dungeon Masters running in-person D&D 5e games. It brings together initiative tracking, combatant management, attack automation, status tracking, monster library, and character codex in a single desktop-friendly interface backed by a minimal Express server.
 
 ## Features
 
-- **Combat Tracker:** Manage initiative order with drag-and-drop reordering, round tracking, and current-turn highlighting.
-- **Attack Workflow:** Select an attack and target directly on a combatant card, roll to hit with proper critical handling, preview damage, and confirm application to the defender.
-- **Character Builder:** Create reusable player, NPC, or enemy stat blocks with ability scores, skills, attacks, and notes.
-- **Effects Builder:** Define reusable status effects including automated HP adjustments, roll modifiers, and condition flags.
-- **Loot Manager:** Track party loot pools and distribute rewards after encounters.
-- **Local Persistence:** Encounter, character, and effect data are stored as JSON files so you retain full control of your campaign data.
+### Arena (Combat Tracker)
+- **Initiative Management:** Drag-and-drop reordering, round tracking, and current-turn highlighting
+- **Attack Workflow:** Select attacks and targets directly on combatant cards with automated roll-to-hit, critical handling, and damage application
+- **Monster Attacks:** Automatically extracts attack bonuses and damage rolls from Monster Library creatures
+- **Special Abilities:** View non-attack abilities (Multiattack, Breath Weapons, etc.) with expandable descriptions
+- **Status Effects:** Apply conditions and timed effects with automatic duration tracking
+- **Agent Sidebar:** Quick-add characters from your saved roster with portrait thumbnails
+
+### Crucible (Character & Content Builder)
+- **Character Builder:** Create detailed player, NPC, or enemy stat blocks with ability scores, skills, attacks, and custom portraits
+- **Effects Builder:** Define reusable status effects with automated HP adjustments, roll modifiers, and condition flags
+- **Loot Manager:** Build item templates and treasure pools for distribution
+
+### Atlas (Monster & Item Library)
+- **Monster Library:** Browse 331+ monsters from the SRD with full stat blocks, traits, actions, and abilities
+- **Items Catalog:** Searchable item database with categories and descriptions
+- **Quick Add to Combat:** Add monsters directly to the Arena with all attacks and special abilities pre-configured
+
+### Codex (Reference Sheets)
+- **Character Sheets:** Read-only view of all player characters with compact, two-column layout
+- **Enemy Sheets:** Browse all monsters and custom enemies with full stat blocks and trait icons
+- **Notes System:** Add campaign notes to any character or enemy sheet
+- **Journal:** (Coming soon) Campaign journal entries and session notes
+
+### Network & Persistence
+- **LAN Support:** Server binds to all interfaces - access from any device on your network
+- **Local-First:** All data stored as JSON files for full control and easy backup
+- **Auto-Save:** Encounter state persists automatically
+- **Image Support:** Upload and display character/monster portraits
 
 ## Quick Start
 
@@ -25,7 +48,7 @@ npm install
 npm start
 ```
 
-This starts the Express API on `http://localhost:3000` and serves the front-end from `public/`. On Windows you can also launch `start.bat`, which runs the same `npm start` command.
+This starts the Express API on `http://localhost:3000` and serves the front-end from `public/`. On Windows you can also launch `start.bat`, which runs the same `npm start` command. The server binds to `0.0.0.0`, so other machines on your LAN can reach ArcForge via `http://<your-local-ip>:3000/`.
 
 ### Development Mode
 

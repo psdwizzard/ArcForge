@@ -226,6 +226,7 @@ header {
 .header-logo {
     display: flex;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .logo-image {
@@ -234,6 +235,20 @@ header {
     max-width: 200px;
     object-fit: contain;
     display: block;
+}
+
+.btn-dev {
+    background-color: rgba(255, 165, 0, 0.2);
+    color: var(--text-primary);
+    border: 1px solid rgba(255, 165, 0, 0.4);
+    padding: 0.4rem 0.6rem;
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.btn-dev:hover {
+    background-color: rgba(255, 165, 0, 0.3);
+    border-color: rgba(255, 165, 0, 0.6);
 }
 
 .header-actions {
@@ -2214,4 +2229,114 @@ h2 {
     border-radius: 8px;
     padding: 2rem;
     color: var(--text-secondary);
+}
+
+.codex-trait-block {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.codex-trait-block:last-child {
+    border-bottom: none;
+}
+
+.codex-trait-icon {
+    width: 72px !important;
+    height: 72px !important;
+    max-width: 72px !important;
+    max-height: 72px !important;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-tertiary);
+    flex-shrink: 0;
+}
+
+.codex-trait-body {
+    flex: 1;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+
+/* Monster Library ability icons */
+.monster-ability-header img {
+    width: 72px !important;
+    height: 72px !important;
+    max-width: 72px !important;
+    max-height: 72px !important;
+    object-fit: cover;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-tertiary);
+    flex-shrink: 0;
+}
+
+/* Special Abilities Section */
+.special-abilities-section {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.special-abilities-section h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--accent-primary);
+}
+
+.special-ability-item {
+    margin-bottom: 0.5rem;
+}
+
+.special-ability-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.special-ability-header:hover {
+    background-color: var(--bg-hover);
+}
+
+.special-ability-caret {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    transition: transform 0.2s;
+    width: 12px;
+    display: inline-block;
+}
+
+.special-ability-header strong {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.special-ability-description {
+    padding: 0.75rem;
+    margin-top: 0.25rem;
+    background-color: var(--bg-primary);
+    border-left: 2px solid var(--accent-primary);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    max-height: 500px;
+    overflow-y: auto;
+    transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+}
+
+.special-ability-description.collapsed {
+    max-height: 0;
+    padding: 0 0.75rem;
+    margin: 0;
+    overflow: hidden;
 }

@@ -568,6 +568,99 @@ function renderAbilitySection(title, abilities) {
 
 async function addMonsterToCombat(monster) {
     try {
+        // Extract attacks from monster actions - only include items that have actual attack activities
+        const attacks = (monster.actions || []).filter(action => {
+            const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+            if (rawItem && rawItem.system?.activities) {
+                const activities = Object.values(rawItem.system.activities);
+                return activities.some(a => a.type === 'attack');
+            }
+            return false;
+        }).map(action => {
+            // Try to extract attack bonus and damage from the raw items
+            let attackBonus = 0;
+            let damageRoll = '';
+            
+            // Find the corresponding item in the raw data
+            const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+            if (rawItem && rawItem.system?.activities) {
+                const activities = Object.values(rawItem.system.activities);
+                const attackActivity = activities.find(a => a.type === 'attack');
+                
+                if (attackActivity) {
+                    // Extract attack bonus - calculate from ability if bonus is empty
+                    const bonusStr = attackActivity.attack?.bonus || '';
+                    if (bonusStr && bonusStr.trim() !== '') {
+                        attackBonus = parseInt(bonusStr);
+                    } else {
+                        // Calculate from ability modifier + proficiency
+                        const abilityKey = attackActivity.attack?.ability || 'str';
+                        const abilityScore = monster.abilities?.[abilityKey] || 10;
+                        const abilityMod = modifierFromScore(abilityScore);
+                        const profBonus = Math.floor((monster.cr - 1) / 4) + 2; // Standard proficiency by CR
+                        attackBonus = abilityMod + profBonus;
+                    }
+                    
+                    // Extract damage roll - combine base damage with ability modifier
+                    const baseDamage = rawItem.system?.damage?.base;
+                    if (baseDamage && baseDamage.number && baseDamage.denomination) {
+                        const abilityKey = attackActivity.attack?.ability || 'str';
+                        const abilityScore = monster.abilities?.[abilityKey] || 10;
+                        const abilityMod = modifierFromScore(abilityScore);
+                        damageRoll = `${baseDamage.number}d${baseDamage.denomination}+${abilityMod}`;
+                    }
+                    
+                    // Add additional damage parts (like acid damage for bite)
+                    const damageParts = attackActivity.damage?.parts || [];
+                    if (damageParts.length > 0) {
+                        const extraDamage = damageParts.map(part => {
+                            if (part.number && part.denomination) {
+                                return `${part.number}d${part.denomination}`;
+                            }
+                            return '';
+                        }).filter(Boolean).join(' + ');
+                        if (extraDamage) {
+                            damageRoll = damageRoll ? `${damageRoll} + ${extraDamage}` : extraDamage;
+                        }
+                    }
+                }
+            }
+            
+            return {
+                name: action.name,
+                attackBonus: attackBonus,
+                damageRoll: damageRoll,
+                description: action.description || ''
+            };
+        });
+
+        // Extract special abilities (non-attack actions like Multiattack, Breath Weapons, etc.)
+        const specialAbilities = (monster.actions || []).filter(action => {
+            const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+            if (rawItem && rawItem.system?.activities) {
+                const activities = Object.values(rawItem.system.activities);
+                // Include actions that are NOT attacks (saves, utility, etc.)
+                return !activities.some(a => a.type === 'attack');
+            }
+            return false;
+        }).map(action => ({
+            name: action.name,
+            description: action.description || ''
+        }));
+
+        console.log('[addMonsterToCombat] Monster:', monster.name);
+        console.log('[addMonsterToCombat] Monster actions:', monster.actions);
+        console.log('[addMonsterToCombat] Extracted attacks:', attacks);
+        console.log('[addMonsterToCombat] Extracted special abilities:', specialAbilities);
+        console.log('[addMonsterToCombat] Full payload:', {
+            name: monster.name,
+            type: 'enemy',
+            hp: monster.hp,
+            ac: monster.ac,
+            attacks: attacks,
+            specialAbilities: specialAbilities
+        });
+
         const response = await fetch(`${API_BASE}/combatants`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -578,11 +671,17 @@ async function addMonsterToCombat(monster) {
                 ac: monster.ac ?? 10,
                 dexModifier: modifierFromScore(monster.abilities.dex ?? 10),
                 imagePath: resolveMonsterImage(monster.tokenImage),
-                sourceId: monster.id
+                sourceId: monster.id,
+                attacks: attacks,
+                specialAbilities: specialAbilities
             })
         });
 
         if (response.ok) {
+            // Trigger a refresh of the combat view
+            if (typeof window.loadCombatants === 'function') {
+                await window.loadCombatants();
+            }
             alert(`${monster.name} added to combat.`);
         } else {
             alert('Failed to add monster to combat.');
