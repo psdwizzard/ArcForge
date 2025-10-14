@@ -1,0 +1,66 @@
+{
+  "name": "Sea Horse",
+  "id": "FWSDiq9SZsdiBAa8",
+  "abilities": [
+    {
+      "_id": "PBYkvhJmi5ACi2MO",
+      "name": "Water Breathing",
+      "type": "feat",
+      "img": "icons/magic/water/bubbles-air-water-blue.webp",
+      "system": {
+        "description": {
+          "value": "<p>The sea horse can breathe only underwater.</p>",
+          "chat": ""
+        },
+        "source": {
+          "custom": "",
+          "book": "",
+          "page": "",
+          "license": "CC-BY-4.0",
+          "rules": "2014",
+          "revision": 1
+        },
+        "uses": {
+          "max": "",
+          "spent": 0,
+          "recovery": []
+        },
+        "type": {
+          "value": "",
+          "subtype": ""
+        },
+        "requirements": "",
+        "properties": [],
+        "activities": {},
+        "enchant": {},
+        "prerequisites": {
+          "level": null
+        },
+        "identifier": "water-breathing"
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0
+      },
+      "flags": {
+        "core": {
+          "sourceId": "Compendium.dnd5e.monsterfeatures.c4Q6NDCLJSNcNc9T"
+        }
+      },
+      "_stats": {
+        "compendiumSource": "Compendium.dnd5e.monsterfeatures.c4Q6NDCLJSNcNc9T",
+        "duplicateSource": null,
+        "coreVersion": "12.331",
+        "systemId": "dnd5e",
+        "systemVersion": "4.0.0",
+        "createdTime": null,
+        "modifiedTime": null,
+        "lastModifiedBy": null
+      },
+      "_key": "!actors.items!FWSDiq9SZsdiBAa8.PBYkvhJmi5ACi2MO"
+    }
+  ],
+  "effects": []
+}

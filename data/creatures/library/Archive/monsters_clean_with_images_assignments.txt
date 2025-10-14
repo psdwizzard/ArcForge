@@ -1,0 +1,313 @@
+Aboleth                                  -> tokens/aberration/Aboleth.webp
+Acolyte                                  -> tokens/humanoid/Acolyte.webp
+Adult Black Dragon                       -> tokens/dragon/BlackDragonAdult.webp
+Adult Blue Dragon                        -> tokens/dragon/BlueDragonAdult.webp
+Adult Brass Dragon                       -> tokens/dragon/BrassDragonAdult.webp
+Adult Bronze Dragon                      -> tokens/dragon/BronzeDragonAdult.webp
+Adult Copper Dragon                      -> tokens/dragon/CopperDragonAdult.webp
+Adult Gold Dragon                        -> tokens/dragon/GoldDragonAdult.webp
+Adult Green Dragon                       -> tokens/dragon/GreenDragonAdult.webp
+Adult Red Dragon                         -> tokens/dragon/RedDragonAdult.webp
+Adult Silver Dragon                      -> tokens/dragon/SilverDragonAdult.webp
+Adult White Dragon                       -> tokens/dragon/WhiteDragonAdult.webp
+Ancient Black Dragon                     -> tokens/dragon/YoungBlackDragon.webp
+Ancient Blue Dragon                      -> tokens/dragon/BlueDragonAncient.webp
+Ancient Brass Dragon                     -> tokens/dragon/YoungBrassDragon.webp
+Ancient Bronze Dragon                    -> tokens/dragon/YoungBronzeDragon.webp
+Ancient Copper Dragon                    -> tokens/dragon/YoungCopperDragon.webp
+Ancient Gold Dragon                      -> tokens/dragon/YoungGoldDragon.webp
+Ancient Green Dragon                     -> tokens/dragon/YoungGreenDragon.webp
+Ancient Red Dragon                       -> tokens/dragon/RedDragonAncient.webp
+Ancient Silver Dragon                    -> tokens/dragon/YoungSilverDragon.webp
+Ancient White Dragon                     -> tokens/dragon/YoungWhiteDragon.webp
+Androsphinx                              -> tokens/monstrosity/Androsphinx.webp
+Animated Armor                           -> tokens/construct/AnimatedArmor.webp
+Ankheg                                   -> tokens/monstrosity/Ankheg.webp
+Ape                                      -> tokens/beast/Ape.webp
+Archmage                                 -> tokens/humanoid/Archmage.webp
+Assassin                                 -> tokens/humanoid/Assassin.webp
+Awakened Shrub                           -> tokens/plant/AwakenedShrub.webp
+Axe Beak                                 -> tokens/beast/AxeBeak.webp
+Azer                                     -> tokens/elemental/Azer.webp
+Baboon                                   -> tokens/beast/Baboon.webp
+Badger                                   -> tokens/beast/Badger.webp
+Balor                                    -> tokens/fiend/Balor.webp
+Bandit Captain                           -> tokens/humanoid/BanditCaptain.webp
+Bandit                                   -> tokens/humanoid/Bandit.webp
+Barbed Devil                             -> tokens/fiend/Barbed.webp
+Basilisk                                 -> tokens/monstrosity/Basilisk.webp
+Bat                                      -> tokens/beast/Bat.webp
+Bearded Devil                            -> tokens/fiend/BeardedDevil.webp
+Behir                                    -> tokens/monstrosity/Behir.webp
+Berserker                                -> tokens/humanoid/Berserker.webp
+Black Bear                               -> tokens/beast/BlackBear.webp
+Black Dragon Wyrmling                    -> tokens/dragon/BlackDragonWyrmling.webp
+Black Pudding                            -> tokens/ooze/BlackPudding.webp
+Blink Dog                                -> tokens/fey/BlinkDog.webp
+Blood Hawk                               -> tokens/beast/BloodHawk.webp
+Blue Dragon Wyrmling                     -> tokens/dragon/BlueDragonWyrmling.webp
+Boar                                     -> tokens/beast/Boar.webp
+Bone Devil                               -> tokens/fiend/BoneDevil.webp
+Brass Dragon Wyrmling                    -> tokens/dragon/BrassDragonWyrmling.webp
+Bronze Dragon Wyrmling                   -> tokens/dragon/BronzeDragonWyrmling.webp
+Brown Bear                               -> tokens/beast/BrownBear.webp
+Bugbear                                  -> tokens/humanoid/Bugbear.webp
+Bulette                                  -> tokens/monstrosity/Bulette.webp
+Camel                                    -> tokens/beast/Camel.webp
+Cat                                      -> tokens/beast/CatOrange.webp
+Centaur                                  -> tokens/monstrosity/Centaur.webp
+Chain Devil                              -> tokens/fiend/ChainDevil.webp
+Chimera                                  -> tokens/monstrosity/Chimera.webp
+Chuul                                    -> tokens/aberration/Chuul.webp
+Clay Golem                               -> tokens/construct/ClayGolem.webp
+Cloaker                                  -> tokens/aberration/Cloaker.webp
+Cloud Giant                              -> tokens/giant/CloudGiant.webp
+Cockatrice                               -> tokens/monstrosity/Cockatrice.webp
+Commoner                                 -> tokens/humanoid/Commoner.webp
+Constrictor Snake                        -> tokens/beast/ConstrictorSnake.webp
+Copper Dragon Wyrmling                   -> tokens/dragon/CopperDragonWyrmling.webp
+Couatl                                   -> tokens/celestial/Couatl.webp
+Crab                                     -> tokens/beast/CrabOrange.webp
+Crocodile                                -> tokens/beast/Crocodile.webp
+Cultist                                  -> tokens/humanoid/Cultist.webp
+Cult Fanatic                             -> tokens/humanoid/CultFanatic.webp
+Darkmantle                               -> tokens/monstrosity/Darkmantle.webp
+Death Dog                                -> tokens/monstrosity/DeathDog.webp
+Deep Gnome                               -> tokens/humanoid/DeepGnome.webp
+Deer                                     -> tokens/beast/Deer.webp
+Deva                                     -> tokens/celestial/Deva.webp
+Dire Wolf                                -> tokens/beast/DireWolf.webp
+Djinni                                   -> tokens/elemental/Djinni.webp
+Doppelganger                             -> tokens/monstrosity/Doppelganger.webp
+Draft Horse                              -> tokens/beast/DraftHorse.webp
+Dretch                                   -> tokens/fiend/Dretch.webp
+Drider                                   -> tokens/monstrosity/Drider.webp
+Drow                                     -> tokens/humanoid/Drow.webp
+Druid                                    -> tokens/humanoid/Druid.webp
+Dryad                                    -> tokens/fey/Dryad.webp
+Duergar                                  -> tokens/humanoid/Duergar.webp
+Dust Mephit                              -> tokens/elemental/DustMephit.webp
+Eagle                                    -> tokens/beast/Eagle.webp
+Earth Elemental                          -> tokens/elemental/EarthElemental.webp
+Efreeti                                  -> tokens/elemental/Efreeti.webp
+Elephant                                 -> tokens/beast/Elephant.webp
+Elk                                      -> tokens/beast/Elk.webp
+Erinyes                                  -> tokens/fiend/Erinyes.webp
+Ettercap                                 -> tokens/monstrosity/Ettercap.webp
+Ettin                                    -> tokens/giant/Ettin.webp
+Fire Elemental                           -> tokens/elemental/FireElemental.webp
+Fire Giant                               -> tokens/giant/FireGiant.webp
+Flesh Golem                              -> tokens/construct/FleshGolem.webp
+Flying Snake                             -> tokens/beast/FlyingSnake.webp
+Flying Sword                             -> tokens/construct/FlyingSword.webp
+Frog                                     -> tokens/beast/Frog.webp
+Frost Giant                              -> tokens/giant/FrostGiant.webp
+Gargoyle                                 -> tokens/elemental/Gargoyle.webp
+Gelatinous Cube                          -> tokens/ooze/GelatinousCube.webp
+Ghast                                    -> tokens/undead/Ghast.webp
+Ghost                                    -> tokens/undead/Ghost.webp
+Ghoul                                    -> tokens/undead/Ghoul.webp
+Giant Ape                                -> tokens/beast/GiantApe.webp
+Giant Badger                             -> tokens/beast/GiantBadger.webp
+Giant Bat                                -> tokens/beast/GiantBat.webp
+Giant Boar                               -> tokens/beast/GiantBoar.webp
+Giant Centipede                          -> tokens/beast/GiantCentipede.webp
+Giant Constrictor Snake                  -> tokens/beast/GiantConstrictorSnake.webp
+Giant Crab                               -> tokens/beast/GiantCrab.webp
+Giant Crocodile                          -> tokens/beast/GiantCrocodile.webp
+Giant Eagle                              -> tokens/beast/GiantEagle.webp
+Giant Elk                                -> tokens/beast/GiantElk.webp
+Giant Fire Beetle                        -> tokens/beast/GiantFireBeetle.webp
+Giant Frog                               -> tokens/beast/GiantFrog.webp
+Giant Goat                               -> tokens/beast/GiantGoat.webp
+Giant Hyena                              -> tokens/beast/GiantHyena.webp
+Giant Lizard                             -> tokens/beast/GiantLizard.webp
+Giant Octopus                            -> tokens/beast/GiantOctopus.webp
+Giant Owl                                -> tokens/beast/GiantOwl.webp
+Giant Poisonous Snake                    -> tokens/beast/GiantPoisonousSnake.webp
+Giant Rat                                -> tokens/beast/GiantRat.webp
+Giant Rat (Diseased)                     -> tokens/beast/GiantRat.webp
+Giant Scorpion                           -> tokens/beast/GiantScorpion.webp
+Giant Sea Horse                          -> tokens/beast/GiantSeaHorse.webp
+Giant Shark                              -> tokens/beast/GiantShark.webp
+Giant Spider                             -> tokens/beast/GiantSpider.webp
+Giant Toad                               -> tokens/beast/GiantToad.webp
+Giant Vulture                            -> tokens/beast/GiantVulture.webp
+Giant Wasp                               -> tokens/beast/GiantWasp.webp
+Giant Weasel                             -> tokens/beast/GiantWeasel.webp
+Giant Wolf Spider                        -> tokens/beast/GiantWolfSpider.webp
+Gibbering Mouther                        -> tokens/aberration/GibberingMouther.webp
+Glabrezu                                 -> tokens/fiend/Glabrezu.webp
+Gladiator                                -> tokens/humanoid/Gladiator.webp
+Gnoll                                    -> tokens/humanoid/Gnoll.webp
+Goat                                     -> tokens/beast/Goat.webp
+Goblin                                   -> tokens/humanoid/Goblin.webp
+Gold Dragon Wyrmling                     -> tokens/dragon/GoldDragonWyrmling.webp
+Gorgon                                   -> tokens/monstrosity/Gorgon.webp
+Gray Ooze                                -> tokens/ooze/GrayOoze.webp
+Green Dragon Wyrmling                    -> tokens/dragon/GreenDragonWyrmling.webp
+Green Hag                                -> tokens/fey/GreenHag.webp
+Grick                                    -> tokens/monstrosity/Grick.webp
+Griffon                                  -> tokens/monstrosity/Griffon.webp
+Grimlock                                 -> tokens/humanoid/Grimlock.webp
+Guardian Naga                            -> tokens/monstrosity/GuardianNaga.webp
+Guard                                    -> tokens/humanoid/Guard.webp
+Gynosphinx                               -> tokens/monstrosity/Gynosphinx.webp
+Half-Red Dragon Veteran                  -> tokens/humanoid/HalfRedDragonVeteran.webp
+Harpy                                    -> tokens/monstrosity/Harpy.webp
+Hawk                                     -> tokens/beast/Hawk.webp
+Hell Hound                               -> tokens/fiend/HellHound.webp
+Hezrou                                   -> tokens/fiend/Hezrou.webp
+Hill Giant                               -> tokens/giant/HillGiant.webp
+Hippogriff                               -> tokens/monstrosity/Hippogriff.webp
+Hobgoblin                                -> tokens/humanoid/Hobgoblin.webp
+Horned Devil                             -> tokens/fiend/HornedDevil.webp
+Hunter Shark                             -> tokens/beast/HunterShark.webp
+Hydra                                    -> tokens/monstrosity/Hydra.webp
+Hyena                                    -> tokens/beast/Hyena.webp
+Ice Devil                                -> tokens/fiend/IceDevil.webp
+Ice Mephit                               -> tokens/elemental/IceMephit.webp
+Imp                                      -> tokens/fiend/Imp.webp
+Invisible Stalker                        -> tokens/elemental/InvisibleStalker.webp
+Iron Golem                               -> tokens/construct/IronGolem.webp
+Jackal                                   -> tokens/beast/Jackal.webp
+Killer Whale                             -> tokens/beast/KillerWhale.webp
+Knight                                   -> tokens/humanoid/Knight.webp
+Kobold                                   -> tokens/humanoid/Kobold.webp
+Lamia                                    -> tokens/monstrosity/Lamia.webp
+Lemure                                   -> tokens/fiend/Lemure.webp
+Lich                                     -> tokens/undead/Lich.webp
+Lion                                     -> tokens/beast/Lion.webp
+Lizardfolk                               -> tokens/humanoid/Lizardfolk.webp
+Lizard                                   -> tokens/beast/Lizard.webp
+Mage Hand                                -> tokens/humanoid/Mage.webp
+Mage                                     -> tokens/humanoid/Mage.webp
+Magma Mephit                             -> tokens/elemental/MagmaMephit.webp
+Magmin                                   -> tokens/elemental/Magmin.webp
+Mammoth                                  -> tokens/beast/Mammoth.webp
+Manticore                                -> tokens/monstrosity/Manticore.webp
+Marilith                                 -> tokens/fiend/Marilith.webp
+Mastiff                                  -> tokens/beast/Mastiff.webp
+Medusa                                   -> tokens/monstrosity/Medusa.webp
+Merfolk                                  -> tokens/humanoid/Merfolk.webp
+Merrow                                   -> tokens/monstrosity/Merrow.webp
+Mimic                                    -> tokens/monstrosity/Mimic.webp
+Minotaur                                 -> tokens/monstrosity/Minotaur.webp
+Minotaur Skeleton                        -> tokens/undead/MinotaurSkeleton.webp
+Mule                                     -> tokens/beast/Mule.webp
+Mummy Lord                               -> tokens/undead/MummyLord.webp
+Mummy                                    -> tokens/undead/Mummy.webp
+Nalfeshnee                               -> tokens/fiend/Nalfeshnee.webp
+Nightmare                                -> tokens/fiend/Nightmare.webp
+Night Hag                                -> tokens/fiend/NightHag.webp
+Noble                                    -> tokens/humanoid/Noble.webp
+Ochre Jelly                              -> tokens/ooze/OchreJelly.webp
+Octopus                                  -> tokens/beast/Octopus.webp
+Ogre                                     -> tokens/giant/Ogre.webp
+Ogre Zombie                              -> tokens/undead/OgreZombie.webp
+Oni                                      -> tokens/giant/Oni.webp
+Orc                                      -> tokens/humanoid/Orc.webp
+Otyugh                                   -> tokens/aberration/Otyugh.webp
+Owlbear                                  -> tokens/monstrosity/Owlbear.webp
+Owl                                      -> tokens/beast/Owl.webp
+Panther                                  -> tokens/beast/Panther.webp
+Pegasus                                  -> tokens/celestial/Pegasus.webp
+Phase Spider                             -> tokens/monstrosity/PhaseSpider.webp
+Pit Fiend                                -> tokens/fiend/PitFiend.webp
+Planetar                                 -> tokens/celestial/Planetar.webp
+Plesiosaurus                             -> tokens/beast/Plesiosaurus.webp
+Poisonous Snake                          -> tokens/beast/PoisonousSnake.webp
+Polar Bear                               -> tokens/beast/PolarBear.webp
+Pony                                     -> tokens/beast/Pony.webp
+Priest                                   -> tokens/humanoid/Priest.webp
+Pseudodragon                             -> tokens/dragon/Pseudodragon.webp
+Quasit                                   -> tokens/fiend/Quasit.webp
+Quipper                                  -> tokens/beast/Quipper.webp
+Rakshasa                                 -> tokens/fiend/Rakshasa.webp
+Rat                                      -> tokens/beast/Rat.webp
+Raven                                    -> tokens/beast/Raven.webp
+Red Dragon Wyrmling                      -> tokens/dragon/RedDragonWyrmling.webp
+Reef Shark                               -> tokens/beast/ReefShark.webp
+Remorhaz                                 -> tokens/monstrosity/Remorhaz.webp
+Rhinoceros                               -> tokens/beast/Rhinoceros.webp
+Riding Horse                             -> tokens/beast/RidingHorse.webp
+Roc                                      -> tokens/monstrosity/Roc.webp
+Roper                                    -> tokens/monstrosity/Roper.webp
+Rug of Smothering                        -> tokens/construct/RugOfSmothering.webp
+Rust Monster                             -> tokens/monstrosity/RustMonster.webp
+Saber-Toothed Tiger                      -> tokens/beast/SaberToothedTiger.webp
+Sahuagin                                 -> tokens/humanoid/Sahuagin.webp
+Salamander                               -> tokens/elemental/Salamander.webp
+Satyr                                    -> tokens/fey/Satyr.webp
+Scorpion                                 -> tokens/beast/Scorpion.webp
+Scout                                    -> tokens/humanoid/Scout.webp
+Sea Hag                                  -> tokens/fey/SeaHag.webp
+Sea Horse                                -> tokens/beast/SeaHorse.webp
+Shadow                                   -> tokens/undead/Shadow.webp
+Shambling Mound                          -> tokens/plant/ShamblingMound.webp
+Shield Guardian                          -> tokens/construct/ShieldGuardian.webp
+Shrieker                                 -> tokens/plant/Shrieker.webp
+Silver Dragon Wyrmling                   -> tokens/dragon/SilverDragonWyrmling.webp
+Skeleton                                 -> tokens/undead/Skeleton.webp
+Solar                                    -> tokens/celestial/Solar.webp
+Specter                                  -> tokens/undead/Specter.webp
+Spider                                   -> tokens/beast/Spider.webp
+Spirit Naga                              -> tokens/monstrosity/SpiritNaga.webp
+Sprite                                   -> tokens/fey/Sprite.webp
+Spy                                      -> tokens/humanoid/Spy.webp
+Steam Mephit                             -> tokens/elemental/SteamMephit.webp
+Stirge                                   -> tokens/beast/Stirge.webp
+Stone Giant                              -> tokens/giant/StoneGiant.webp
+Stone Golem                              -> tokens/construct/StoneGolem.webp
+Storm Giant                              -> tokens/giant/StormGiant.webp
+Succubus/Incubus                         -> tokens/fiend/Incubus.webp
+Swarm of Bats                            -> tokens/beast/Bat.webp
+Swarm of Poisonous Snakes                -> tokens/beast/PoisonousSnake.webp
+Swarm of Quippers                        -> tokens/beast/Quipper.webp
+Swarm of Rats                            -> tokens/beast/Rat.webp
+Swarm of Ravens                          -> tokens/beast/Raven.webp
+Swarm of Spiders                         -> tokens/beast/Spider.webp
+Tarrasque                                -> tokens/monstrosity/Tarrasque.webp
+Thug                                     -> tokens/humanoid/Thug.webp
+Tiger                                    -> tokens/beast/Tiger.webp
+Treant                                   -> tokens/plant/Treant.webp
+Tribal Warrior                           -> tokens/humanoid/TribalWarrior.webp
+Triceratops                              -> tokens/beast/Triceratops.webp
+Troll                                    -> tokens/giant/Troll.webp
+Tyrannosaurus Rex                        -> tokens/beast/TyrannosaurusRex.webp
+Unicorn                                  -> tokens/celestial/Unicorn.webp
+Vampire                                  -> tokens/undead/Vampire.webp
+Vampire Spawn                            -> tokens/undead/VampireSpawn.webp
+Veteran                                  -> tokens/humanoid/Veteran.webp
+Violet Fungus                            -> tokens/plant/VioletFungus.webp
+Vrock                                    -> tokens/fiend/Vrock.webp
+Vulture                                  -> tokens/beast/Vulture.webp
+Warhorse Skeleton                        -> tokens/undead/WarhorseSkeleton.webp
+Warhorse                                 -> tokens/beast/Warhorse.webp
+Water Elemental                          -> tokens/elemental/WaterElemental.webp
+Weasel                                   -> tokens/beast/Weasel.webp
+Werebear                                 -> tokens/humanoid/Werebear.webp
+Wereboar                                 -> tokens/humanoid/Wereboar.webp
+Wererat                                  -> tokens/humanoid/Wererat.webp
+Weretiger                                -> tokens/humanoid/Weretiger.webp
+Werewolf                                 -> tokens/humanoid/Werewolf.webp
+White Dragon Wyrmling                    -> tokens/dragon/WhiteDragonWyrmling.webp
+Wight                                    -> tokens/undead/Wight.webp
+Will-o'-Wisp                             -> tokens/undead/WilloWisp.webp
+Winter Wolf                              -> tokens/monstrosity/WinterWolf.webp
+Wolf                                     -> tokens/beast/Wolf.webp
+Worg                                     -> tokens/monstrosity/Worg.webp
+Wraith                                   -> tokens/undead/Wraith.webp
+Wyvern                                   -> tokens/dragon/Wyvern.webp
+Xorn                                     -> tokens/elemental/Xorn.webp
+Young Black Dragon                       -> tokens/dragon/YoungBlackDragon.webp
+Young Blue Dragon                        -> tokens/dragon/YoungBlueDragon.webp
+Young Brass Dragon                       -> tokens/dragon/YoungBrassDragon.webp
+Young Bronze Dragon                      -> tokens/dragon/YoungBronzeDragon.webp
+Young Copper Dragon                      -> tokens/dragon/YoungCopperDragon.webp
+Young Gold Dragon                        -> tokens/dragon/YoungGoldDragon.webp
+Young Green Dragon                       -> tokens/dragon/YoungGreenDragon.webp
+Young Red Dragon                         -> tokens/dragon/YoungRedDragon.webp
+Young Silver Dragon                      -> tokens/dragon/YoungSilverDragon.webp
+Young White Dragon                       -> tokens/dragon/YoungWhiteDragon.webp
+Zombie                                   -> tokens/undead/Zombie.webp
