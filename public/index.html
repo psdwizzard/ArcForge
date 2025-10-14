@@ -73,40 +73,40 @@
                         <button id="crucible-effects-btn" class="codex-tab-btn" data-section="effects">Effects Builder</button>
                         <button id="crucible-items-btn" class="codex-tab-btn" data-section="items">Items</button>
                         <button id="crucible-monsters-btn" class="codex-tab-btn" data-section="monsters">Monsters</button>
-                    </div>
+                </div>
 
-                    <div id="crucible-character-section" class="crucible-section active">
-                        <div class="character-builder-container" id="character-builder-container">
-                            <section class="character-form-section">
-                                <form id="character-form">
-                                    <!-- Agent Type Selection -->
+                <div id="crucible-character-section" class="crucible-section active">
+                    <div class="character-builder-container" id="character-builder-container">
+                        <section class="character-form-section">
+                            <form id="character-form">
+                                <!-- Agent Type Selection -->
                                     <div class="form-group agent-type-inline">
                                         <label for="char-agent-type" class="sr-only">Agent Type</label>
                                         <div class="agent-type-select-wrapper">
                                             <select id="char-agent-type" aria-label="Agent Type">
-                                                <option value="p">Player Character</option>
-                                                <option value="n">NPC</option>
-                                                <option value="e">Enemy/Monster</option>
-                                            </select>
+                                        <option value="p">Player Character</option>
+                                        <option value="n">NPC</option>
+                                        <option value="e">Enemy/Monster</option>
+                                    </select>
                                             <span class="agent-type-label">Agent Type</span>
                                         </div>
-                                    </div>
-
-                                    <!-- Basic Info -->
-                                    <div class="form-section">
-                                        <h3>Basic Information</h3>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="char-image">Character Image</label>
-                                        <input type="file" id="char-image" accept="image/*">
-                                        <input type="hidden" id="char-image-path">
-                                        <span id="char-image-status" class="image-status-text"></span>
-                                    </div>
-                                    <div class="form-group image-preview-group">
-                                        <label>Preview</label>
-                                        <img id="char-image-preview" class="image-preview" alt="Character preview" style="display:none;">
-                                    </div>
                                 </div>
+
+                                <!-- Basic Info -->
+                                <div class="form-section">
+                                    <h3>Basic Information</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="char-image">Character Image</label>
+                                    <input type="file" id="char-image" accept="image/*">
+                                    <input type="hidden" id="char-image-path">
+                                    <span id="char-image-status" class="image-status-text"></span>
+                                </div>
+                                <div class="form-group image-preview-group">
+                                    <label>Preview</label>
+                                    <img id="char-image-preview" class="image-preview" alt="Character preview" style="display:none;">
+                                </div>
+                            </div>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="char-name">Character Name *</label>
@@ -262,7 +262,7 @@
                     </div>
                 </div>
 
-                    <div id="crucible-effects-section" class="crucible-section">
+                <div id="crucible-effects-section" class="crucible-section">
                     <div class="effects-builder-container">
                         <section class="effects-form-section">
                             <h2>Effects Builder</h2>
@@ -458,16 +458,16 @@
                                     <input type="text" id="monster-search-input" class="form-input" placeholder="Search monsters..." aria-label="Search monsters">
                                     <label for="monster-category-filter">Category</label>
                                     <select id="monster-category-filter" class="form-input"></select>
-                                </div>
+                        </div>
                             </div>
                             <div class="monsters-content">
                                 <div class="monster-list" id="monster-list"></div>
                                 <aside class="monster-detail" id="monster-detail">
                                     <div class="monster-detail-empty">Select a monster to view details.</div>
                                 </aside>
-                            </div>
                         </div>
                     </div>
+                </div>
             </div>
         </main>
 

@@ -13,18 +13,21 @@
 - Validate and persist encounter/creature data without corruption; prefer JSON unless complexity demands more.
 
 ## Current State Snapshot
-- Core features already cover combat tracker, attack workflow, character/effects builders, loot manager, and local persistence.
-- Data directories suggest existing content for encounters, characters, creatures, effects, and media assets.
+- Core features cover combat tracker, attack workflow, character/effects builders, loot manager, and local persistence.
+- Items catalog now loads from `data/DBs/items.json` with filtering, searching, and inventory assignment.
+- Monsters catalog pulls from `data/creatures/library/monsters_clean_with_images.json`, including token art, full stats, traits/actions, and direct “Add to Combat” support.
+- Combatants store `sourceId` so Arena cards retrieve attacks/effects from catalog data.
+- Codex defaults to Character tab; stat summary cards tightened for consistency.
 - No automated tests yet per `README.md`; testing strategy remains an open gap.
 
 ## Active Focus & Next Steps
-- Audit current initiative and turn-order implementation against Phase 1 guidelines and DM workflow expectations.
-- Identify gaps in combat stats management (HP adjustments, status effect durations) to align with Phase 2 requirements.
-- Plan incremental introduction of testing (pytest for Python tooling, or Jest/Vitest for JS) covering initiative and attack flows.
-- Document architectural decisions and future enhancements here to keep team alignment.
+- Verify monster attacks/effects integrate seamlessly with Arena rolls and damage confirmation.
+- Expand monster filtering (CR, environment, alignment) and prepare Atlas hook for map-aware AoE targeting.
+- Plan incremental introduction of testing (Jest/Vitest) covering initiative, attack flows, and catalog loaders.
+- Document architectural decisions (catalog normalization, sourceId usage) and future enhancements here to keep team alignment.
 
 ## Open Questions
+- What UX do we want for large monster libraries in Arena (search, favorites, encounter presets)?
 - Are there pending features or bug reports not captured in version control or `todo.md`?
-- What automated testing framework should we standardize on for the JavaScript stack?
 - Any upcoming UX changes that require additional asset or data restructuring?
 
