@@ -1,4 +1,4 @@
-# Project Plan – ArcForge Battle Tracker
+﻿# Project Plan – ArcForge Battle Tracker
 
 ## Context
 - Local-first D&D 5e companion app combining initiative tracking, combat automation, status management, and loot workflows (see `README.md`).
@@ -23,10 +23,12 @@
 - Map and display settings persist to JSON (`data/maps.json`, `data/atlas_settings.json`) for quick restart recovery.
 - No automated tests yet; testing strategy remains an open gap per `README.md`.
 
+- Atlas encounter setup allows zoom-tuned starting areas that persist to display viewports.
+- Encounter view includes a side-by-side enemy library with search/filter across monster data and saved enemies, plus staging for on-map placement.
 ## Active Focus & Next Steps
-- Polish Atlas encounter tooling (token placement, visibility toggles, duplicating combatants onto the map canvas).
+- Wire staged enemies into on-map placement tools (tokens, visibility toggles, duplication).
 - Extend map display profiles to allow naming multiple screens/devices and switching resolutions quickly.
-- Expand monster filtering (CR, environment, alignment) and prepare Atlas hook for map-aware AoE targeting.
+- Extend monster filtering (CR, environment, alignment) and add map-aware AoE targeting heuristics.
 - Plan incremental introduction of testing (Jest/Vitest) covering initiative, attack flows, catalog loaders, and map broadcasting.
 - Document architectural decisions (catalog normalization, `sourceId` usage, display socket contract) and future enhancements here to keep team alignment.
 
@@ -35,4 +37,5 @@
 - How should multiple display profiles be represented in the UI and persisted? (Per-device naming/lookups?)
 - Are there pending features or bug reports not captured in version control or `todo.md`?
 - Any upcoming UX changes that require additional asset or data restructuring?
+
 
