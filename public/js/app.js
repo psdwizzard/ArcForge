@@ -673,6 +673,7 @@ async function loadSavedAgents() {
         console.log('[loadSavedAgents] Response status:', response.status, response.statusText);
         savedAgents = await response.json();
         console.log('[loadSavedAgents] Loaded agents:', savedAgents.length, savedAgents);
+        refreshEncounterEnemyAgents();
     } catch (error) {
         console.error('[loadSavedAgents] Error loading saved agents:', error);
     }
@@ -1758,6 +1759,7 @@ async function removeCombatant(combatantId) {
 
 // Render agents list
 function renderAgentsList() {
+    refreshEncounterEnemyAgents();
     const container = document.getElementById('agents-list');
 
     if (savedAgents.length === 0) {
@@ -2307,7 +2309,18 @@ const atlasMapState = {
         minAreaZoom: 0.25,
         maxAreaZoom: 4,
         dirty: false,
-        render: null
+        render: null,
+        selectedEnemy: null,
+        enemies: {
+            monsters: [],
+            agents: [],
+            combined: [],
+            filter: 'all',
+            search: '',
+            loading: false,
+            loaded: false,
+            error: null
+        }
     },
     imageCache: new Map()
 };
@@ -2355,7 +2368,16 @@ function getAtlasElements() {
         startAreaResolutionLabel: document.getElementById('atlas-start-area-resolution'),
         startAreaCoordsLabel: document.getElementById('atlas-start-area-coords'),
         startAreaGridLabel: document.getElementById('atlas-start-area-grid'),
-        startAreaStatus: document.getElementById('atlas-start-area-status')
+        startAreaStatus: document.getElementById('atlas-start-area-status'),
+        enemyPanel: document.getElementById('atlas-enemy-panel'),
+        enemyList: document.getElementById('atlas-enemy-list'),
+        enemyEmpty: document.getElementById('atlas-enemy-empty'),
+        enemyDetail: document.getElementById('atlas-enemy-detail'),
+        enemySearch: document.getElementById('atlas-enemy-search'),
+        enemyFilterAll: document.getElementById('atlas-enemy-filter-all'),
+        enemyFilterLibrary: document.getElementById('atlas-enemy-filter-library'),
+        enemyFilterCustom: document.getElementById('atlas-enemy-filter-custom'),
+        enemyRefreshBtn: document.getElementById('atlas-enemy-refresh')
     };
 }
 
@@ -2963,6 +2985,12 @@ function initAtlasEncounterModule() {
     elements.encounterGridOut?.addEventListener('click', () => changeEncounterGridZoom(-0.1));
     elements.encounterGridReset?.addEventListener('click', resetEncounterGridZoom);
 
+    elements.enemySearch?.addEventListener('input', handleEncounterEnemySearch);
+    elements.enemyFilterAll?.addEventListener('click', () => setEncounterEnemyFilter('all'));
+    elements.enemyFilterLibrary?.addEventListener('click', () => setEncounterEnemyFilter('library'));
+    elements.enemyFilterCustom?.addEventListener('click', () => setEncounterEnemyFilter('custom'));
+    elements.enemyRefreshBtn?.addEventListener('click', () => loadEncounterEnemyLibrary(true));
+
     elements.placeStartAreaBtn?.addEventListener('click', () => {
         if (!atlasMapState.activeMapId) {
             alert('Select an active map to place a starting area.');
@@ -2995,6 +3023,9 @@ function initAtlasEncounterModule() {
     window.addEventListener('mouseup', endEncounterDrag);
     canvas.addEventListener('mouseleave', endEncounterDrag);
     canvas.addEventListener('click', handleEncounterCanvasClick);
+    updateEncounterEnemyFilterButtons();
+    applyEncounterEnemyFilters();
+    loadEncounterEnemyLibrary();
     updateEncounterControls();
     updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
 }
@@ -3139,6 +3170,386 @@ function updateEncounterSummary(rect) {
     elements.startAreaStatus.textContent = (atlasMapState.encounter.dirty ? 'Unsaved changes' : 'Starting area saved') + zoomStatus;
 }
 
+
+
+function updateEncounterEnemyFilterButtons() {
+    const elements = getAtlasElements();
+    const active = atlasMapState.encounter.enemies.filter || 'all';
+    [
+        [elements.enemyFilterAll, 'all'],
+        [elements.enemyFilterLibrary, 'library'],
+        [elements.enemyFilterCustom, 'custom']
+    ].forEach(([button, value]) => {
+        if (!button) {
+            return;
+        }
+        button.classList.toggle('btn-toggle-active', active === value);
+    });
+}
+
+function handleEncounterEnemySearch(event) {
+    atlasMapState.encounter.enemies.search = (event.target?.value || '').trim();
+    applyEncounterEnemyFilters();
+}
+
+function setEncounterEnemyFilter(filter) {
+    const state = atlasMapState.encounter.enemies;
+    const next = filter || 'all';
+    if (state.filter === next) {
+        updateEncounterEnemyFilterButtons();
+        return;
+    }
+    state.filter = next;
+    updateEncounterEnemyFilterButtons();
+    applyEncounterEnemyFilters();
+}
+
+async function loadEncounterEnemyLibrary(force = false) {
+    const state = atlasMapState.encounter.enemies;
+    if (state.loading && !force) {
+        return;
+    }
+    state.loading = true;
+    state.error = null;
+    updateEncounterEnemyLoadingState();
+    applyEncounterEnemyFilters();
+    try {
+        await fetchEncounterMonsters(force);
+        refreshEncounterEnemyAgents();
+        state.loaded = true;
+    } catch (error) {
+        console.error('[Atlas][Encounter] Failed to load enemy library:', error);
+        state.error = error;
+    } finally {
+        state.loading = false;
+        applyEncounterEnemyFilters();
+    }
+}
+
+async function fetchEncounterMonsters(force = false) {
+    const state = atlasMapState.encounter.enemies;
+    if (state.monsters.length > 0 && !force) {
+        return;
+    }
+    try {
+        const response = await fetch('/data/creatures/library/monsters_clean_with_images.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        if (!Array.isArray(data)) {
+            throw new Error('Unexpected monster payload');
+        }
+        state.monsters = data.map(normalizeEncounterMonster).filter(Boolean);
+    } catch (error) {
+        state.monsters = [];
+        throw error;
+    }
+}
+
+function buildEncounterEnemySearchKey(...parts) {
+    return parts
+        .filter((part) => part !== undefined && part !== null)
+        .map((part) => String(part).toLowerCase())
+        .join(' ');
+}
+
+function resolveEncounterMonsterImage(monster) {
+    const candidate = monster?.tokenImage || monster?.image || monster?.img;
+    if (!candidate) {
+        return null;
+    }
+    if (candidate.startsWith('http://') || candidate.startsWith('https://')) {
+        return candidate;
+    }
+    if (candidate.startsWith('/')) {
+        return candidate;
+    }
+    const normalized = candidate.replace(/^\+/g, '').replace(/^\/+/, '');
+    return `/data/creatures/library/${encodeURI(normalized)}`;
+}
+
+function normalizeEncounterMonster(monster) {
+    if (!monster) {
+        return null;
+    }
+    const crValue = monster.crText ?? monster.cr ?? monster.challenge_rating ?? null;
+    const acValue = monster.ac ?? monster.armor_class ?? null;
+    const hpValue = monster.hp ?? monster.hit_points ?? null;
+    const typeValue = monster.type || monster.subtype || 'Unknown';
+    const alignmentValue = monster.alignment || '';
+    const name = monster.name || 'Unnamed Monster';
+    return {
+        id: monster.id || name,
+        name,
+        source: 'library',
+        type: typeValue,
+        alignment: alignmentValue,
+        cr: crValue,
+        ac: acValue,
+        hp: hpValue,
+        image: resolveEncounterMonsterImage(monster),
+        raw: monster,
+        searchKey: buildEncounterEnemySearchKey(name, typeValue, alignmentValue, crValue)
+    };
+}
+
+function normalizeEncounterAgent(agent) {
+    if (!agent) {
+        return null;
+    }
+    const typeLabel = getTypeDisplayName(agent.agentType || 'enemy');
+    const name = agent.name || 'Unnamed Enemy';
+    return {
+        id: agent.id || name,
+        name,
+        source: 'custom',
+        type: typeLabel,
+        alignment: agent.alignment || '',
+        level: agent.level ?? null,
+        ac: agent.ac ?? null,
+        hp: agent.hp ?? null,
+        image: agent.imagePath || agent.avatar || null,
+        raw: agent,
+        searchKey: buildEncounterEnemySearchKey(name, typeLabel, agent.level, agent.alignment)
+    };
+}
+
+function refreshEncounterEnemyAgents() {
+    const state = atlasMapState.encounter.enemies;
+    const enemies = (savedAgents || []).filter((agent) => isEnemyType(agent.agentType));
+    state.agents = enemies.map(normalizeEncounterAgent).filter(Boolean);
+    if (!state.loading) {
+        applyEncounterEnemyFilters();
+    }
+}
+
+function applyEncounterEnemyFilters() {
+    const elements = getAtlasElements();
+    if (!elements.enemyList) {
+        return;
+    }
+    const state = atlasMapState.encounter.enemies;
+    const filter = state.filter || 'all';
+    const searchTerm = (state.search || '').toLowerCase();
+
+    let list = [];
+    if (filter === 'all' || filter === 'library') {
+        list = list.concat(state.monsters);
+    }
+    if (filter === 'all' || filter === 'custom') {
+        list = list.concat(state.agents);
+    }
+
+    if (searchTerm) {
+        list = list.filter((enemy) => enemy.searchKey.includes(searchTerm));
+    }
+
+    list.sort((a, b) => a.name.localeCompare(b.name));
+    state.combined = list;
+
+    const currentSelection = atlasMapState.encounter.selectedEnemy;
+    let activeSelection = null;
+    if (currentSelection) {
+        activeSelection = list.find((enemy) => enemy.id === currentSelection.id && enemy.source === currentSelection.source) || null;
+    }
+    if (!activeSelection && list.length > 0) {
+        activeSelection = list[0];
+    }
+    atlasMapState.encounter.selectedEnemy = activeSelection;
+
+    renderEncounterEnemyList(list);
+    renderEncounterEnemyDetail(activeSelection);
+    updateEncounterEnemyFilterButtons();
+    updateEncounterEnemyLoadingState();
+}
+
+function updateEncounterEnemyLoadingState() {
+    const elements = getAtlasElements();
+    const state = atlasMapState.encounter.enemies;
+    if (!elements.enemyEmpty) {
+        return;
+    }
+    if (state.loading) {
+        elements.enemyEmpty.textContent = 'Loading enemies...';
+        elements.enemyEmpty.style.display = 'flex';
+        return;
+    }
+    if (state.error) {
+        elements.enemyEmpty.textContent = 'Failed to load enemies. Try refreshing.';
+        elements.enemyEmpty.style.display = 'flex';
+        return;
+    }
+}
+
+function renderEncounterEnemyList(enemies) {
+    const elements = getAtlasElements();
+    if (!elements.enemyList || !elements.enemyEmpty) {
+        return;
+    }
+    const state = atlasMapState.encounter.enemies;
+
+    elements.enemyList.innerHTML = '';
+
+    if (state.loading) {
+        elements.enemyEmpty.textContent = 'Loading enemies...';
+        elements.enemyEmpty.style.display = 'flex';
+        return;
+    }
+
+    if (state.error) {
+        elements.enemyEmpty.textContent = 'Failed to load enemies. Try refreshing.';
+        elements.enemyEmpty.style.display = 'flex';
+        return;
+    }
+
+    if (!enemies || enemies.length === 0) {
+        const hasAgents = state.agents.length > 0;
+        const hasMonsters = state.monsters.length > 0;
+        const message = state.search
+            ? 'No enemies match your search.'
+            : (!hasAgents && !hasMonsters)
+                ? 'No enemies available yet. Create enemies in the Crucible or load the monster library.'
+                : 'No enemies in this view.';
+        elements.enemyEmpty.textContent = message;
+        elements.enemyEmpty.style.display = 'flex';
+        return;
+    }
+
+    elements.enemyEmpty.style.display = 'none';
+
+    const selection = atlasMapState.encounter.selectedEnemy;
+
+    enemies.forEach((enemy) => {
+        const row = document.createElement('div');
+        row.className = 'atlas-enemy-row';
+        row.dataset.enemyId = enemy.id;
+        row.dataset.enemySource = enemy.source;
+        row.setAttribute('role', 'button');
+        row.setAttribute('tabindex', '0');
+
+        if (selection && selection.id === enemy.id && selection.source === enemy.source) {
+            row.classList.add('selected');
+        }
+
+        const metaParts = [];
+        if (enemy.source === 'library' && enemy.cr !== null && enemy.cr !== undefined) {
+            metaParts.push(`CR ${enemy.cr}`);
+        }
+        if (enemy.source === 'custom' && enemy.level !== null && enemy.level !== undefined) {
+            metaParts.push(`Level ${enemy.level}`);
+        }
+        if (enemy.ac !== null && enemy.ac !== undefined) {
+            metaParts.push(`AC ${enemy.ac}`);
+        }
+        if (enemy.hp !== null && enemy.hp !== undefined) {
+            metaParts.push(`HP ${enemy.hp}`);
+        }
+
+        const imgSrc = enemy.image ? sanitizeEncounterText(enemy.image) : null;
+        row.innerHTML = `
+            ${imgSrc ? `<img src="${imgSrc}" alt="${sanitizeEncounterText(enemy.name)}">` : '<div class="atlas-enemy-avatar">?</div>'}
+            <div class="atlas-enemy-info">
+                <div class="atlas-enemy-name">${sanitizeEncounterText(enemy.name)}</div>
+                <div class="atlas-enemy-subtext">${sanitizeEncounterText(getEncounterEnemySourceLabel(enemy.source))}</div>
+            </div>
+            <div class="atlas-enemy-meta">${sanitizeEncounterText(metaParts.join(' • ')) || '—'}</div>
+        `;
+
+        const selectHandler = () => selectEncounterEnemy(enemy);
+        row.addEventListener('click', selectHandler);
+        row.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectHandler();
+            }
+        });
+
+        elements.enemyList.appendChild(row);
+
+    });
+}
+
+function renderEncounterEnemyDetail(enemy) {
+    const elements = getAtlasElements();
+    if (!elements.enemyDetail) {
+        return;
+    }
+    if (!enemy) {
+        elements.enemyDetail.innerHTML = '<div class="atlas-enemy-detail-empty">Select an enemy to view its summary.</div>';
+        return;
+    }
+
+    const origin = getEncounterEnemySourceLabel(enemy.source);
+    const metaParts = [];
+    if (enemy.source === 'library' && enemy.cr !== null && enemy.cr !== undefined) {
+        metaParts.push(`CR ${enemy.cr}`);
+    }
+    if (enemy.source === 'custom' && enemy.level !== null && enemy.level !== undefined) {
+        metaParts.push(`Level ${enemy.level}`);
+    }
+    if (enemy.type) {
+        metaParts.push(enemy.type);
+    }
+    if (enemy.alignment) {
+        metaParts.push(enemy.alignment);
+    }
+
+    const defenses = [];
+    if (enemy.ac !== null && enemy.ac !== undefined) {
+        defenses.push(`AC ${enemy.ac}`);
+    }
+    if (enemy.hp !== null && enemy.hp !== undefined) {
+        defenses.push(`HP ${enemy.hp}`);
+    }
+
+    const imageSrc = enemy.image ? sanitizeEncounterText(enemy.image) : null;
+    const imageMarkup = imageSrc
+        ? `<img src="${imageSrc}" alt="${sanitizeEncounterText(enemy.name)}">`
+        : '<div class="atlas-enemy-detail-avatar">?</div>';
+
+    elements.enemyDetail.innerHTML = `
+        <div class="atlas-enemy-detail-header">
+            ${imageMarkup}
+            <div>
+                <div class="atlas-enemy-detail-title">${sanitizeEncounterText(enemy.name)}</div>
+                <div class="atlas-enemy-detail-origin">${sanitizeEncounterText(origin)}</div>
+            </div>
+        </div>
+        <div class="atlas-enemy-detail-body">
+            <div class="atlas-enemy-detail-meta">${sanitizeEncounterText(metaParts.join(' • ')) || '—'}</div>
+            <div class="atlas-enemy-detail-meta">${sanitizeEncounterText(defenses.join(' • ')) || '—'}</div>
+        </div>
+    `;
+}
+
+function selectEncounterEnemy(enemy) {
+    atlasMapState.encounter.selectedEnemy = enemy;
+    renderEncounterEnemyList(atlasMapState.encounter.enemies.combined);
+    renderEncounterEnemyDetail(enemy);
+}
+
+function getEncounterEnemySourceLabel(source) {
+    if (source === 'library') {
+        return 'Monster Library';
+    }
+    if (source === 'custom') {
+        return 'Crucible Enemy';
+    }
+    return 'Enemy';
+}
+
+function sanitizeEncounterText(value) {
+    if (value === null || value === undefined) {
+        return '';
+    }
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+}
+
+window.refreshEncounterEnemyAgents = refreshEncounterEnemyAgents;
 
 function getActiveEncounterMap() {
     return atlasMapState.maps.find((entry) => entry.id === atlasMapState.activeMapId) || null;

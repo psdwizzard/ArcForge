@@ -2948,6 +2948,193 @@ h2 {
     color: var(--text-secondary);
 }
 
+.atlas-enemy-panel {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.45);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+}
+
+.atlas-enemy-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.atlas-enemy-panel-header h4 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.atlas-enemy-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.atlas-enemy-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.atlas-enemy-search {
+    flex: 1 1 200px;
+    min-width: 160px;
+}
+
+.atlas-enemy-search input {
+    width: 100%;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid rgba(100, 116, 139, 0.4);
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.65);
+    color: var(--text-primary);
+}
+
+.atlas-enemy-list-wrapper {
+    position: relative;
+    min-height: 180px;
+}
+
+.atlas-enemy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-height: 240px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.atlas-enemy-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    background: rgba(15, 23, 42, 0.35);
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.atlas-enemy-row:hover {
+    border-color: rgba(148, 163, 184, 0.4);
+}
+
+.atlas-enemy-row.selected {
+    border-color: var(--accent-primary);
+    background: rgba(59, 130, 246, 0.18);
+}
+
+.atlas-enemy-row img,
+.atlas-enemy-row .atlas-enemy-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: rgba(30, 41, 59, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.atlas-enemy-info {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.atlas-enemy-name {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.atlas-enemy-subtext {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.atlas-enemy-meta {
+    font-size: 0.8rem;
+    color: var(--text-tertiary, #94a3b8);
+    text-align: right;
+    white-space: nowrap;
+}
+
+.atlas-enemy-detail {
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 8px;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.35);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.atlas-enemy-detail-empty {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.atlas-enemy-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.atlas-enemy-detail-header img,
+.atlas-enemy-detail-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 10px;
+    object-fit: cover;
+    background: rgba(30, 41, 59, 0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.atlas-enemy-detail-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.atlas-enemy-detail-origin {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.atlas-enemy-detail-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+.atlas-enemy-detail-meta {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+
+@media (max-width: 1024px) {
+    .atlas-enemy-list {
+        max-height: 180px;
+    }
+}
+
 .btn-toggle-active {
     background-color: var(--accent-primary);
     border-color: var(--accent-primary);
