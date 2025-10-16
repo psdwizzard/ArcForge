@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArcForge - Initiative Tracker</title>
-    <link rel="stylesheet" href="css/styles.css?v=3">
+    <link rel="stylesheet" href="css/styles.css?v=4">
 </head>
 <body>
     <div class="app-container">
@@ -512,7 +512,10 @@
                         <section class="atlas-map-settings">
                             <header class="atlas-panel-header">
                                 <h3>Display Settings</h3>
-                                <div id="atlas-display-status" class="atlas-status atlas-status-disconnected">Display not connected</div>
+                                <div class="atlas-display-status-wrapper">
+                                    <div id="atlas-display-status" class="atlas-status atlas-status-disconnected">Display not connected</div>
+                                    <button id="atlas-refresh-status-btn" class="btn btn-small btn-secondary" title="Refresh connection status">🔄</button>
+                                </div>
                             </header>
 
                             <div class="atlas-settings-group">
@@ -578,7 +581,6 @@
                             </div>
 
                             <div class="atlas-settings-actions">
-                                <button id="atlas-save-settings-btn" class="btn btn-primary">Save Settings</button>
                                 <button id="atlas-push-display-btn" class="btn btn-success">Push to Display</button>
                             </div>
                         </section>
@@ -598,9 +600,15 @@
                                         <option value="pixel">1:1 Pixel</option>
                                     </select>
                                     <div class="atlas-zoom-controls">
+                                        <span class="zoom-label">Map:</span>
                                         <button type="button" id="atlas-preview-zoom-out" class="btn btn-secondary btn-small">–</button>
                                         <button type="button" id="atlas-preview-zoom-in" class="btn btn-secondary btn-small">+</button>
                                         <button type="button" id="atlas-preview-zoom-reset" class="btn btn-secondary btn-small">Reset</button>
+                                        <span class="zoom-separator">|</span>
+                                        <span class="zoom-label">Grid:</span>
+                                        <button type="button" id="atlas-grid-zoom-out" class="btn btn-secondary btn-small">–</button>
+                                        <button type="button" id="atlas-grid-zoom-in" class="btn btn-secondary btn-small">+</button>
+                                        <button type="button" id="atlas-grid-zoom-reset" class="btn btn-secondary btn-small">Reset</button>
                                     </div>
                                 </div>
                             </header>
@@ -952,7 +960,7 @@
     </div>
 
     <script src="js/session-manager.js?v=1"></script>
-    <script src="js/app.js?v=13"></script>
+    <script src="js/app.js?v=16"></script>
     <script src="js/character-builder.js?v=3"></script>
     <script src="js/effects-builder.js?v=2"></script>
     <script src="js/loot-manager.js?v=2"></script>

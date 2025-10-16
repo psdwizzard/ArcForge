@@ -1,0 +1,65 @@
+{
+  "id": "id_1760625757197_zz0950vd2",
+  "name": "t1",
+  "description": "",
+  "createdAt": "2025-10-16T14:42:37.197Z",
+  "encounters": [
+    {
+      "id": "id_1760625775893_mdml8fw5p",
+      "name": "s1",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-16T14:42:55.893Z",
+      "combatants": [
+        {
+          "id": "combatant-1760626171711-44wa9y7jp",
+          "name": "Pig - 01",
+          "type": "e",
+          "initiative": 14,
+          "dexModifier": 4,
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "sourceId": null,
+          "hp": {
+            "current": 33,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760626170472-44n68rmqu",
+          "name": "Todd",
+          "type": "p",
+          "initiative": 7,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356841744-226858974.png",
+          "sourceId": null,
+          "hp": {
+            "current": 50,
+            "max": 52,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 1
+    }
+  ]
+}

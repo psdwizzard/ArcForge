@@ -174,6 +174,7 @@ let atlasSettings = readJsonFile(ATLAS_SETTINGS_PATH, {
     viewport: {
       fit: 'fit',
       zoom: 1,
+      gridZoom: 1,
       offset: { x: 0, y: 0 }
     }
   },
@@ -195,6 +196,7 @@ function ensureAtlasDefaults() {
   atlasSettings.display.viewport = {
     fit: 'fit',
     zoom: 1,
+    gridZoom: 1,
     offset: { x: 0, y: 0 },
     ...(atlasSettings.display.viewport || {})
   };
@@ -217,7 +219,8 @@ function buildDisplayState() {
   const diagonal = atlasSettings.display?.physical?.diagonal_in || 42;
   const ppi = atlasSettings.display?.physical?.ppi_override ?? computePixelsPerInch(resolution, diagonal);
   const inchesPerCell = atlasSettings.display?.grid?.inches_per_cell ?? 1;
-  const cellPx = ppi * inchesPerCell;
+  const gridZoom = atlasSettings.display?.viewport?.gridZoom || 1;
+  const cellPx = ppi * inchesPerCell * gridZoom;
 
   return {
     type: 'DISPLAY_STATE',

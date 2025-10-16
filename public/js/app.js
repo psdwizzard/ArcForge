@@ -2280,7 +2280,10 @@ const atlasMapState = {
     activeMapId: null,
     preview: {
         fit: 'fit',
-        showGrid: true
+        showGrid: true,
+        zoom: 1,
+        gridZoom: 1,
+        offset: { x: 0, y: 0 }
     },
     displayConnected: false,
     ruler: {
@@ -2379,8 +2382,14 @@ function bindAtlasMapEvents() {
     }
 
     elements.uploadInput?.addEventListener('change', handleAtlasMapUpload);
-    elements.saveSettingsBtn?.addEventListener('click', handleAtlasSaveSettings);
     elements.pushDisplayBtn?.addEventListener('click', handleAtlasPushToDisplay);
+
+    // Add refresh button event listener
+    const refreshStatusBtn = document.getElementById('atlas-refresh-status-btn');
+    if (refreshStatusBtn) {
+        refreshStatusBtn.addEventListener('click', refreshDisplayStatus);
+    }
+
     elements.previewFit?.addEventListener('change', (event) => {
         atlasMapState.preview.fit = event.target.value;
         drawAtlasPreview();
@@ -2403,6 +2412,33 @@ function bindAtlasMapEvents() {
         atlasMapState.preview.offset.y = 0;
         drawAtlasPreview();
     });
+
+    // Grid zoom controls
+    const gridZoomIn = document.getElementById('atlas-grid-zoom-in');
+    const gridZoomOut = document.getElementById('atlas-grid-zoom-out');
+    const gridZoomReset = document.getElementById('atlas-grid-zoom-reset');
+
+    if (gridZoomIn) {
+        gridZoomIn.addEventListener('click', () => {
+            atlasMapState.preview.gridZoom = Math.min(atlasMapState.preview.gridZoom + 0.1, 3);
+            drawAtlasPreview();
+        });
+    }
+
+    if (gridZoomOut) {
+        gridZoomOut.addEventListener('click', () => {
+            atlasMapState.preview.gridZoom = Math.max(atlasMapState.preview.gridZoom - 0.1, 0.1);
+            drawAtlasPreview();
+        });
+    }
+
+    if (gridZoomReset) {
+        gridZoomReset.addEventListener('click', () => {
+            atlasMapState.preview.gridZoom = 1;
+            drawAtlasPreview();
+        });
+    }
+
     elements.autoCalibrateBtn?.addEventListener('click', handleAtlasAutoCalibrate);
     elements.manualCalibrateBtn?.addEventListener('click', toggleAtlasManualCalibration);
     window.addEventListener('resize', handleAtlasResize);
@@ -2682,6 +2718,7 @@ function gatherSettingsPayload() {
             viewport: {
                 fit: atlasMapState.preview.fit,
                 zoom: atlasMapState.preview.zoom,
+                gridZoom: atlasMapState.preview.gridZoom,
                 offset: atlasMapState.preview.offset
             }
         }
@@ -2711,21 +2748,38 @@ function handleAtlasSaveSettings() {
 
 function handleAtlasPushToDisplay() {
     const payload = gatherSettingsPayload();
-    fetch(`${API_BASE}/atlas/active-map`, {
-        method: 'POST',
+
+    // First save the settings
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ mapId: payload.active_map_id })
-    }).then((res) => {
-        if (!res.ok) {
-            throw new Error('Failed to push display state');
-        }
-        alert('Map pushed to display.');
-    }).catch((error) => {
-        console.error('[Atlas] Failed to push display state:', error);
-        alert('Failed to push display state.');
-    });
+        body: JSON.stringify(payload)
+    })
+        .then((res) => res.json())
+        .then((settings) => {
+            atlasMapState.settings = settings;
+
+            // Then push the active map to display
+            return fetch(`${API_BASE}/atlas/active-map`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ mapId: payload.active_map_id })
+            });
+        })
+        .then((res) => {
+            if (!res.ok) {
+                throw new Error('Failed to push display state');
+            }
+            alert('Settings saved and map pushed to display.');
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to push display state:', error);
+            alert('Failed to push display state.');
+        });
 }
 
 function handleAtlasAutoCalibrate() {
@@ -2767,6 +2821,45 @@ function updateDisplayStatus() {
     displayStatus.textContent = connected ? 'Display connected' : 'Display not connected';
     displayStatus.classList.toggle('atlas-status-connected', connected);
     displayStatus.classList.toggle('atlas-status-disconnected', !connected);
+}
+
+async function refreshDisplayStatus() {
+    const refreshBtn = document.getElementById('atlas-refresh-status-btn');
+    if (refreshBtn) {
+        refreshBtn.disabled = true;
+        refreshBtn.textContent = '⏳';
+    }
+
+    try {
+        // Query the server for connected displays
+        const response = await fetch(`${API_BASE}/atlas/displays`);
+        if (response.ok) {
+            const data = await response.json();
+            const isConnected = data.count > 0;
+
+            // Update the state
+            atlasMapState.displayConnected = isConnected;
+
+            // Force socket to emit a hello message to refresh state
+            if (atlasMapState.socket && atlasMapState.socket.connected) {
+                atlasMapState.socket.emit('display:hello', { role: 'control' });
+            }
+
+            // Update the UI
+            updateDisplayStatus();
+
+            console.log(`[Atlas] Display status refreshed: ${isConnected ? 'connected' : 'not connected'} (${data.count} display(s))`);
+        } else {
+            console.error('[Atlas] Failed to fetch display status');
+        }
+    } catch (error) {
+        console.error('[Atlas] Error refreshing display status:', error);
+    } finally {
+        if (refreshBtn) {
+            refreshBtn.disabled = false;
+            refreshBtn.textContent = '🔄';
+        }
+    }
 }
 
 function applyDisplayResolution(viewport) {
@@ -2876,7 +2969,17 @@ function drawGridOnContext(ctx, area) {
 
     const grid = settings.display.grid;
     const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
-    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell * area.scale : grid.cell_px || 50;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+
+    // Apply grid zoom if set (defaults to 1)
+    const gridZoom = atlasMapState.preview.gridZoom || 1;
+
+    // Scale the cell size for rendering on the preview canvas
+    const scaledCellPx = cellPx * area.scale * gridZoom;
+
+    if (!scaledCellPx || !Number.isFinite(scaledCellPx) || scaledCellPx <= 0) {
+        return;
+    }
 
     ctx.save();
     ctx.globalAlpha = grid.opacity ?? 0.25;
@@ -2884,17 +2987,12 @@ function drawGridOnContext(ctx, area) {
     ctx.lineWidth = grid.line_px || 2;
     ctx.beginPath();
 
-    if (!cellPx || !Number.isFinite(cellPx)) {
-        ctx.restore();
-        return;
-    }
-
-    for (let x = area.x; x <= area.x + area.width; x += cellPx) {
+    for (let x = area.x; x <= area.x + area.width; x += scaledCellPx) {
         ctx.moveTo(x, area.y);
         ctx.lineTo(x, area.y + area.height);
     }
 
-    for (let y = area.y; y <= area.y + area.height; y += cellPx) {
+    for (let y = area.y; y <= area.y + area.height; y += scaledCellPx) {
         ctx.moveTo(area.x, y);
         ctx.lineTo(area.x + area.width, y);
     }
@@ -2984,20 +3082,44 @@ function enableRulerInteractions(canvas) {
 
 // Dev restart button handler
 document.getElementById('dev-restart-btn')?.addEventListener('click', async () => {
-    if (!confirm('Restart server and reload page?')) return;
-    
+    if (!confirm('Restart server and reload page?\n\nNote: Server must be running with start.bat for automatic restart.')) return;
+
     try {
+        // Show a loading indicator
+        const restartBtn = document.getElementById('dev-restart-btn');
+        const originalText = restartBtn.textContent;
+        restartBtn.textContent = '⏳';
+        restartBtn.disabled = true;
+
         // Trigger server restart
         await fetch(`${API_BASE}/dev/restart`, { method: 'POST' });
-        
-        // Wait a moment for server to start shutting down
-        setTimeout(() => {
-            // Force reload the page (bypassing cache)
-            window.location.reload(true);
-        }, 1000);
+
+        // Wait for server to restart (nodemon will handle the restart)
+        let attempts = 0;
+        const maxAttempts = 20;
+
+        const checkServer = setInterval(async () => {
+            attempts++;
+            try {
+                const response = await fetch(`${API_BASE}/encounter`, { method: 'HEAD' });
+                if (response.ok) {
+                    clearInterval(checkServer);
+                    // Server is back up, reload the page
+                    window.location.reload();
+                }
+            } catch (error) {
+                // Server not ready yet
+                if (attempts >= maxAttempts) {
+                    clearInterval(checkServer);
+                    restartBtn.textContent = originalText;
+                    restartBtn.disabled = false;
+                    alert('Server restart timed out. Please check if the server is running with start.bat');
+                }
+            }
+        }, 500);
     } catch (error) {
         console.error('Error triggering restart:', error);
-        alert('Failed to restart server. You may need to restart manually.');
+        alert('Failed to restart server. Please ensure the server is running with start.bat for auto-restart support.');
     }
 });
 

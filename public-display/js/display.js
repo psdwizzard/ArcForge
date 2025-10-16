@@ -149,9 +149,15 @@ document.addEventListener('DOMContentLoaded', () => {
   socket.on('connect', () => {
     state.connected = true;
     setStatus('Display connected', true);
+    // Use screen dimensions instead of window dimensions for accurate resolution
+    // This gives the actual monitor resolution, not just the browser window size
+    const screenWidth = window.screen.width;
+    const screenHeight = window.screen.height;
+    console.log('[Display] Reporting resolution:', screenWidth, 'x', screenHeight);
+    console.log('[Display] Window size:', window.innerWidth, 'x', window.innerHeight);
     socket.emit('display:hello', {
       role: 'display',
-      resolution: { w: window.innerWidth, h: window.innerHeight }
+      resolution: { w: screenWidth, h: screenHeight }
     });
   });
 

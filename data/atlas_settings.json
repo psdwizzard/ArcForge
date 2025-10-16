@@ -1,0 +1,29 @@
+{
+  "display": {
+    "resolution": {
+      "w": 720,
+      "h": 1280
+    },
+    "physical": {
+      "diagonal_in": 8,
+      "ppi_override": 183.58
+    },
+    "grid": {
+      "inches_per_cell": 1,
+      "line_px": 2,
+      "opacity": 0.25,
+      "color": "#3aaaff",
+      "enabled": true
+    },
+    "viewport": {
+      "fit": "fit",
+      "zoom": 2.5000000000000013,
+      "gridZoom": 0.1,
+      "offset": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  },
+  "active_map_id": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+}
