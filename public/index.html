@@ -642,32 +642,34 @@
                                 <button type="button" id="atlas-start-area-save" class="btn btn-primary btn-small">Save</button>
                             </div>
                         </header>
-                        <div class="atlas-encounter-stage">
-                            <canvas id="atlas-encounter-canvas"></canvas>
-                            <div id="atlas-encounter-empty" class="atlas-empty-state">Select an active map to configure the encounter.</div>
-                            <div id="atlas-start-area-hint" class="atlas-start-area-hint">Click Place Starting Area or drag the map to choose where the display begins.</div>
-                        </div>
-                        <section id="atlas-enemy-panel" class="atlas-enemy-panel">
-                            <header class="atlas-enemy-panel-header">
-                                <h4>Enemy Library</h4>
-                                <button type="button" id="atlas-enemy-refresh" class="btn btn-secondary btn-small">Refresh</button>
-                            </header>
-                            <div class="atlas-enemy-controls">
-                                <div class="atlas-enemy-filters">
-                                    <button type="button" id="atlas-enemy-filter-all" class="btn btn-secondary btn-small btn-toggle-active">All</button>
-                                    <button type="button" id="atlas-enemy-filter-library" class="btn btn-secondary btn-small">Library</button>
-                                    <button type="button" id="atlas-enemy-filter-custom" class="btn btn-secondary btn-small">Custom</button>
-                                </div>
-                                <div class="atlas-enemy-search">
-                                    <input type="search" id="atlas-enemy-search" placeholder="Search enemies..." autocomplete="off">
-                                </div>
+                        <div class="atlas-encounter-layout">
+                            <div class="atlas-encounter-stage">
+                                <canvas id="atlas-encounter-canvas"></canvas>
+                                <div id="atlas-encounter-empty" class="atlas-empty-state">Select an active map to configure the encounter.</div>
+                                <div id="atlas-start-area-hint" class="atlas-start-area-hint">Click Place Starting Area or drag the map to choose where the display begins.</div>
                             </div>
-                            <div class="atlas-enemy-list-wrapper">
-                                <div id="atlas-enemy-empty" class="atlas-empty-state">Loading enemies...</div>
-                                <div id="atlas-enemy-list" class="atlas-enemy-list"></div>
-                            </div>
-                            <div id="atlas-enemy-detail" class="atlas-enemy-detail">Select an enemy to view details.</div>
+                            <section id="atlas-enemy-panel" class="atlas-enemy-panel">
+                                <header class="atlas-enemy-panel-header">
+                                    <h4>Enemy Library</h4>
+                                    <button type="button" id="atlas-enemy-refresh" class="btn btn-secondary btn-small">Refresh</button>
+                                </header>
+                                <div class="atlas-enemy-controls">
+                                    <div class="atlas-enemy-filters">
+                                        <button type="button" id="atlas-enemy-filter-all" class="btn btn-secondary btn-small btn-toggle-active">All</button>
+                                        <button type="button" id="atlas-enemy-filter-library" class="btn btn-secondary btn-small">Library</button>
+                                        <button type="button" id="atlas-enemy-filter-custom" class="btn btn-secondary btn-small">Custom</button>
+                                    </div>
+                                    <div class="atlas-enemy-search">
+                                        <input type="search" id="atlas-enemy-search" placeholder="Search enemies..." autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="atlas-enemy-list-wrapper">
+                                    <div id="atlas-enemy-empty" class="atlas-empty-state">Loading enemies...</div>
+                                    <div id="atlas-enemy-list" class="atlas-enemy-list"></div>
+                                </div>
+                                <div id="atlas-enemy-detail" class="atlas-enemy-detail">Select an enemy to view details.</div>
                         </section>
+                        </div>
                         <footer class="atlas-encounter-footer">
                             <div class="atlas-start-area-metrics">
                                 <span><strong>Display:</strong> <span id="atlas-start-area-resolution">--</span></span>
@@ -1021,3 +1023,4 @@
     <script src="js/data-manager.js?v=2"></script>
 </body>
 </html>
+

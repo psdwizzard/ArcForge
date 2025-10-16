@@ -2311,6 +2311,7 @@ const atlasMapState = {
         dirty: false,
         render: null,
         selectedEnemy: null,
+        pending: [],
         enemies: {
             monsters: [],
             agents: [],
@@ -3380,6 +3381,7 @@ function updateEncounterEnemyLoadingState() {
         elements.enemyEmpty.style.display = 'flex';
         return;
     }
+    elements.enemyEmpty.style.display = 'none';
 }
 
 function renderEncounterEnemyList(enemies) {
@@ -3475,8 +3477,18 @@ function renderEncounterEnemyDetail(enemy) {
     if (!elements.enemyDetail) {
         return;
     }
+
+    const pendingCount = atlasMapState.encounter.pending?.length || 0;
+
     if (!enemy) {
-        elements.enemyDetail.innerHTML = '<div class="atlas-enemy-detail-empty">Select an enemy to view its summary.</div>';
+        elements.enemyDetail.innerHTML = `
+            <div class="atlas-enemy-detail-empty">Select an enemy to view its summary.</div>
+            <div class="atlas-enemy-detail-actions">
+                <span class="atlas-enemy-staging-count">Pending: ${pendingCount}</span>
+            </div>
+            <div class="atlas-enemy-detail-status" id="atlas-enemy-detail-status"></div>
+        `;
+        updateEncounterEnemyStagingCount();
         return;
     }
 
@@ -3520,8 +3532,22 @@ function renderEncounterEnemyDetail(enemy) {
             <div class="atlas-enemy-detail-meta">${sanitizeEncounterText(metaParts.join(' • ')) || '—'}</div>
             <div class="atlas-enemy-detail-meta">${sanitizeEncounterText(defenses.join(' • ')) || '—'}</div>
         </div>
+        <div class="atlas-enemy-detail-actions">
+            <button type="button" id="atlas-enemy-add" class="btn btn-primary btn-small">Add to Encounter</button>
+            <span class="atlas-enemy-staging-count">Pending: ${pendingCount}</span>
+        </div>
+        <div class="atlas-enemy-detail-status" id="atlas-enemy-detail-status"></div>
     `;
+
+    const addBtn = document.getElementById('atlas-enemy-add');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => handleEncounterEnemyAdd(enemy));
+    }
+
+    updateEncounterEnemyStagingCount();
 }
+
+
 
 function selectEncounterEnemy(enemy) {
     atlasMapState.encounter.selectedEnemy = enemy;
@@ -3529,6 +3555,42 @@ function selectEncounterEnemy(enemy) {
     renderEncounterEnemyDetail(enemy);
 }
 
+function handleEncounterEnemyAdd(enemy) {
+    if (!enemy) {
+        return;
+    }
+    atlasMapState.encounter.pending = atlasMapState.encounter.pending || [];
+    const entry = {
+        id: `enc-enemy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: enemy.name,
+        source: enemy.source,
+        payload: enemy.raw || enemy
+    };
+    atlasMapState.encounter.pending.push(entry);
+    atlasMapState.encounter.dirty = true;
+    updateEncounterEnemyStagingCount('Added to encounter queue');
+}
+
+function updateEncounterEnemyStagingCount(message) {
+    const elements = getAtlasElements();
+    const count = atlasMapState.encounter.pending?.length || 0;
+    if (elements.enemyDetail) {
+        const countLabel = elements.enemyDetail.querySelector('.atlas-enemy-staging-count');
+        if (countLabel) {
+            countLabel.textContent = `Pending: ${count}`;
+        }
+        const status = elements.enemyDetail.querySelector('#atlas-enemy-detail-status');
+        if (status) {
+            if (message) {
+                status.textContent = message;
+                status.style.display = 'block';
+            } else {
+                status.textContent = '';
+                status.style.display = 'none';
+            }
+        }
+    }
+}
 function getEncounterEnemySourceLabel(source) {
     if (source === 'library') {
         return 'Monster Library';
