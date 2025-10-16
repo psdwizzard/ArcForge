@@ -651,6 +651,26 @@ async function loadEncounterState() {
         encounterState = data;
         window.encounterState = encounterState; // Ensure it's accessible
         updateCombatButtons();
+
+        // Sync combatants to Atlas after loading (only if we have a session/encounter)
+        console.log('[loadEncounterState] Checking sync conditions:', {
+            hasSessionState: !!window.sessionState,
+            hasCurrentEncounter: !!(window.sessionState?.currentEncounter),
+            hasSyncFunction: typeof window.syncCombatantsToAtlas === 'function',
+            hasAtlasMapState: !!window.atlasMapState
+        });
+
+        if (window.sessionState && window.sessionState.currentEncounter && typeof window.syncCombatantsToAtlas === 'function') {
+            console.log('[loadEncounterState] Calling syncCombatantsToAtlas');
+            window.syncCombatantsToAtlas();
+
+            // Trigger auto-save to persist the sync
+            if (typeof saveCurrentEncounter === 'function') {
+                await saveCurrentEncounter();
+            }
+        } else {
+            console.log('[loadEncounterState] Skipping sync - conditions not met');
+        }
     } catch (error) {
         console.error('Error loading encounter state:', error);
         // Set a default state if loading fails
@@ -664,6 +684,9 @@ async function loadEncounterState() {
 
     updateCombatButtons();
 }
+
+// Expose as window.loadCombatants for other modules
+window.loadCombatants = loadEncounterState;
 
 // Load saved agents (characters)
 async function loadSavedAgents() {
@@ -2312,6 +2335,9 @@ const atlasMapState = {
         render: null,
         selectedEnemy: null,
         pending: [],
+        placementMode: false,
+        placementEntry: null,
+        selectedToken: null,
         enemies: {
             monsters: [],
             agents: [],
@@ -2378,7 +2404,9 @@ function getAtlasElements() {
         enemyFilterAll: document.getElementById('atlas-enemy-filter-all'),
         enemyFilterLibrary: document.getElementById('atlas-enemy-filter-library'),
         enemyFilterCustom: document.getElementById('atlas-enemy-filter-custom'),
-        enemyRefreshBtn: document.getElementById('atlas-enemy-refresh')
+        enemyRefreshBtn: document.getElementById('atlas-enemy-refresh'),
+        enemyStagingList: document.getElementById('atlas-enemy-staging-list'),
+        stagingClearAll: document.getElementById('atlas-staging-clear-all')
     };
 }
 
@@ -2991,6 +3019,7 @@ function initAtlasEncounterModule() {
     elements.enemyFilterLibrary?.addEventListener('click', () => setEncounterEnemyFilter('library'));
     elements.enemyFilterCustom?.addEventListener('click', () => setEncounterEnemyFilter('custom'));
     elements.enemyRefreshBtn?.addEventListener('click', () => loadEncounterEnemyLibrary(true));
+    elements.stagingClearAll?.addEventListener('click', handleClearAllStagedEnemies);
 
     elements.placeStartAreaBtn?.addEventListener('click', () => {
         if (!atlasMapState.activeMapId) {
@@ -3024,6 +3053,10 @@ function initAtlasEncounterModule() {
     window.addEventListener('mouseup', endEncounterDrag);
     canvas.addEventListener('mouseleave', endEncounterDrag);
     canvas.addEventListener('click', handleEncounterCanvasClick);
+
+    // Add keyboard handler for arrow keys
+    window.addEventListener('keydown', handleEncounterKeydown);
+
     updateEncounterEnemyFilterButtons();
     applyEncounterEnemyFilters();
     loadEncounterEnemyLibrary();
@@ -3050,6 +3083,12 @@ function syncEncounterStateFromSettings(force) {
         atlasMapState.encounter.startArea.zoom = atlasMapState.encounter.areaZoom;
     }
     atlasMapState.preview.zoom = atlasMapState.settings?.display?.viewport?.zoom || atlasMapState.encounter.areaZoom || 1;
+
+    // Load placed enemies from current encounter (not from atlas settings)
+    // This will be handled by loadEncounter in session-manager.js
+    // Don't touch the pending array here - it will be populated when encounter loads
+    console.log('[Atlas] syncEncounterStateFromSettings called, current pending:', atlasMapState.encounter.pending);
+
     atlasMapState.encounter.dirty = false;
     atlasMapState.encounter.placing = false;
 }
@@ -3564,11 +3603,13 @@ function handleEncounterEnemyAdd(enemy) {
         id: `enc-enemy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         name: enemy.name,
         source: enemy.source,
-        payload: enemy.raw || enemy
+        payload: enemy.raw || enemy,
+        placed: false
     };
     atlasMapState.encounter.pending.push(entry);
     atlasMapState.encounter.dirty = true;
     updateEncounterEnemyStagingCount('Added to encounter queue');
+    renderStagedEnemiesList();
 }
 
 function updateEncounterEnemyStagingCount(message) {
@@ -3590,6 +3631,372 @@ function updateEncounterEnemyStagingCount(message) {
             }
         }
     }
+}
+
+function renderStagedEnemiesList() {
+    const elements = getAtlasElements();
+    if (!elements.enemyStagingList) {
+        return;
+    }
+
+    const pending = atlasMapState.encounter.pending || [];
+
+    if (pending.length === 0) {
+        elements.enemyStagingList.innerHTML = '<div class="atlas-empty-state">No enemies staged yet</div>';
+        return;
+    }
+
+    elements.enemyStagingList.innerHTML = '';
+
+    pending.forEach((entry, index) => {
+        const row = document.createElement('div');
+        row.className = 'atlas-staged-enemy-item';
+        row.dataset.entryId = entry.id;
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'atlas-staged-enemy-name';
+
+        // Add placement status indicator
+        if (entry.placed && entry.position) {
+            const statusIcon = document.createElement('span');
+            statusIcon.textContent = '✓ ';
+            statusIcon.style.color = '#4ade80';
+            statusIcon.style.fontWeight = 'bold';
+            statusIcon.title = 'Placed on map at (' + Math.round(entry.position.x) + ', ' + Math.round(entry.position.y) + ')';
+            nameSpan.appendChild(statusIcon);
+        }
+
+        const nameText = document.createTextNode(entry.name);
+        nameSpan.appendChild(nameText);
+
+        const actions = document.createElement('div');
+        actions.className = 'atlas-staged-enemy-actions';
+
+        const locationBtn = document.createElement('button');
+        locationBtn.type = 'button';
+        locationBtn.className = 'btn btn-secondary btn-small';
+        locationBtn.textContent = entry.placed ? 'Reposition' : 'Location';
+        locationBtn.title = entry.placed ? 'Change position on map' : 'Place on map';
+        locationBtn.addEventListener('click', () => handleStagedEnemyLocation(entry.id));
+
+        const cloneBtn = document.createElement('button');
+        cloneBtn.type = 'button';
+        cloneBtn.className = 'btn btn-secondary btn-small';
+        cloneBtn.textContent = 'Clone';
+        cloneBtn.title = 'Duplicate this enemy';
+        cloneBtn.addEventListener('click', () => handleStagedEnemyClone(entry.id));
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'btn btn-secondary btn-small';
+        editBtn.textContent = 'Edit';
+        editBtn.title = 'Edit this enemy (coming soon)';
+        editBtn.disabled = true;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn btn-danger btn-small';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.title = 'Remove from staging';
+        deleteBtn.addEventListener('click', () => handleStagedEnemyDelete(entry.id));
+
+        actions.appendChild(locationBtn);
+        actions.appendChild(cloneBtn);
+        actions.appendChild(editBtn);
+        actions.appendChild(deleteBtn);
+
+        row.appendChild(nameSpan);
+        row.appendChild(actions);
+
+        elements.enemyStagingList.appendChild(row);
+    });
+}
+
+function handleStagedEnemyLocation(entryId) {
+    const pending = atlasMapState.encounter.pending || [];
+    const entry = pending.find(e => e.id === entryId);
+    if (!entry) {
+        return;
+    }
+
+    if (!atlasMapState.activeMapId) {
+        alert('Please select an active map before placing enemies.');
+        return;
+    }
+
+    // Enter placement mode
+    atlasMapState.encounter.placementMode = true;
+    atlasMapState.encounter.placementEntry = entry;
+    atlasMapState.encounter.placing = false; // Disable starting area placement
+
+    // Visual feedback
+    updateEncounterSummary(null, 'Click on the map to place ' + entry.name);
+    drawAtlasEncounter();
+}
+
+function snapToGridCenter(mapX, mapY) {
+    // Calculate cell size the same way the grid does
+    const settings = atlasMapState.settings;
+    if (!settings?.display?.grid) {
+        return { x: mapX, y: mapY };
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
+
+    // Cell size in map pixels (not canvas pixels - no scale applied here)
+    const cellSize = cellPx * gridZoom;
+    const halfCell = cellSize / 2;
+
+    // Get grid offset if any (default to 0,0)
+    const offsetX = grid.offset_x || 0;
+    const offsetY = grid.offset_y || 0;
+
+    // Adjust for offset, snap to nearest grid cell corner, then add half cell to get CENTER
+    const adjustedX = mapX - offsetX;
+    const adjustedY = mapY - offsetY;
+
+    const gridX = Math.round(adjustedX / cellSize);
+    const gridY = Math.round(adjustedY / cellSize);
+
+    // Add half cell to move from corner to CENTER of the square
+    return {
+        x: gridX * cellSize + halfCell + offsetX,
+        y: gridY * cellSize + halfCell + offsetY
+    };
+}
+
+function placeEnemyToken(rawMapX, rawMapY) {
+    const entry = atlasMapState.encounter.placementEntry;
+    if (!entry) {
+        return;
+    }
+
+    // Snap to grid center
+    const snapped = snapToGridCenter(rawMapX, rawMapY);
+
+    // Update the entry with position data
+    entry.position = {
+        x: snapped.x,
+        y: snapped.y,
+        mapId: atlasMapState.activeMapId
+    };
+    entry.placed = true;
+
+    // Exit placement mode
+    atlasMapState.encounter.placementMode = false;
+    atlasMapState.encounter.placementEntry = null;
+    atlasMapState.encounter.dirty = true;
+
+    // Update UI
+    updateEncounterSummary(null, entry.name + ' placed at (' + Math.round(snapped.x) + ', ' + Math.round(snapped.y) + ')');
+    renderStagedEnemiesList();
+    drawAtlasEncounter();
+
+    // Add to Arena combat tracker
+    addPlacedEnemyToCombat(entry);
+
+    // Trigger encounter save
+    if (typeof saveCurrentEncounter === 'function') {
+        saveCurrentEncounter();
+    }
+}
+
+async function addPlacedEnemyToCombat(entry) {
+    // Check if this enemy has already been added to combat
+    if (window.encounterState && window.encounterState.combatants) {
+        const existing = window.encounterState.combatants.find(c => c.atlasTokenId === entry.id);
+        if (existing) {
+            console.log('[Atlas] Enemy already in combat, skipping:', entry.name);
+            return;
+        }
+    }
+
+    // Get the monster data if available (for enemies from library)
+    let monster = null;
+    if (entry.source === 'library' && entry.payload && typeof monstersById !== 'undefined') {
+        monster = monstersById.get(entry.payload.id);
+    }
+
+    try {
+        const combatantData = {
+            name: entry.name,
+            type: 'enemy',
+            atlasTokenId: entry.id, // Link back to the placed token
+            hp: monster ? (monster.hp ?? 0) : 0,
+            ac: monster ? (monster.ac ?? 10) : 10,
+            dexModifier: monster ? modifierFromScore(monster.abilities?.dex ?? 10) : 0,
+            imagePath: monster ? resolveMonsterImage(monster.tokenImage) : null,
+            sourceId: monster ? monster.id : null
+        };
+
+        // Extract attacks if we have monster data
+        if (monster && monster.actions) {
+            combatantData.attacks = (monster.actions || []).filter(action => {
+                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+                if (rawItem && rawItem.system?.activities) {
+                    const activities = Object.values(rawItem.system.activities);
+                    return activities.some(a => a.type === 'attack');
+                }
+                return false;
+            }).map(action => {
+                let attackBonus = 0;
+                let damageRoll = '';
+
+                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+                if (rawItem && rawItem.system?.activities) {
+                    const activities = Object.values(rawItem.system.activities);
+                    const attackActivity = activities.find(a => a.type === 'attack');
+
+                    if (attackActivity) {
+                        const bonusStr = attackActivity.attack?.bonus || '';
+                        if (bonusStr && bonusStr.trim() !== '') {
+                            attackBonus = parseInt(bonusStr);
+                        } else {
+                            const abilityKey = attackActivity.attack?.ability || 'str';
+                            const abilityScore = monster.abilities?.[abilityKey] || 10;
+                            const abilityMod = modifierFromScore(abilityScore);
+                            const profBonus = Math.floor((monster.cr - 1) / 4) + 2;
+                            attackBonus = abilityMod + profBonus;
+                        }
+
+                        const baseDamage = rawItem.system?.damage?.base;
+                        if (baseDamage && baseDamage.number && baseDamage.denomination) {
+                            const abilityKey = attackActivity.attack?.ability || 'str';
+                            const abilityScore = monster.abilities?.[abilityKey] || 10;
+                            const abilityMod = modifierFromScore(abilityScore);
+                            damageRoll = `${baseDamage.number}d${baseDamage.denomination}+${abilityMod}`;
+                        }
+
+                        const damageParts = attackActivity.damage?.parts || [];
+                        if (damageParts.length > 0) {
+                            const extraDamage = damageParts.map(part => {
+                                if (part.number && part.denomination) {
+                                    return `${part.number}d${part.denomination}`;
+                                }
+                                return '';
+                            }).filter(Boolean).join(' + ');
+                            if (extraDamage) {
+                                damageRoll = damageRoll ? `${damageRoll} + ${extraDamage}` : extraDamage;
+                            }
+                        }
+                    }
+                }
+
+                return {
+                    name: action.name,
+                    attackBonus: attackBonus,
+                    damageRoll: damageRoll,
+                    description: action.description || ''
+                };
+            });
+
+            combatantData.specialAbilities = (monster.actions || []).filter(action => {
+                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
+                if (rawItem && rawItem.system?.activities) {
+                    const activities = Object.values(rawItem.system.activities);
+                    return !activities.some(a => a.type === 'attack');
+                }
+                return false;
+            }).map(action => ({
+                name: action.name,
+                description: action.description || ''
+            }));
+        }
+
+        console.log('[Atlas] Adding placed enemy to combat:', combatantData);
+
+        const response = await fetch(`${API_BASE}/combatants`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(combatantData)
+        });
+
+        if (response.ok) {
+            // Trigger a refresh of the combat view
+            if (typeof window.loadCombatants === 'function') {
+                await window.loadCombatants();
+            }
+            console.log('[Atlas] Successfully added to combat:', entry.name);
+        } else {
+            console.error('[Atlas] Failed to add to combat');
+        }
+    } catch (error) {
+        console.error('[Atlas] Error adding to combat:', error);
+    }
+}
+
+// Helper function to calculate ability modifier
+function modifierFromScore(score) {
+    return Math.floor((score - 10) / 2);
+}
+
+// Helper function to resolve monster images (use same logic as loot-manager)
+function resolveMonsterImage(path) {
+    if (!path) {
+        return null;
+    }
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+        return path;
+    }
+    const MONSTER_IMAGE_ROOT = '/data/creatures/library/';
+    const normalized = path.startsWith('/') ? path.slice(1) : path;
+    return `${MONSTER_IMAGE_ROOT}${encodeURI(normalized)}`;
+}
+
+function handleStagedEnemyClone(entryId) {
+    const pending = atlasMapState.encounter.pending || [];
+    const original = pending.find(e => e.id === entryId);
+    if (!original) {
+        return;
+    }
+
+    const clone = {
+        id: `enc-enemy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name: original.name,
+        source: original.source,
+        payload: { ...original.payload },
+        placed: false
+    };
+
+    atlasMapState.encounter.pending.push(clone);
+    atlasMapState.encounter.dirty = true;
+    updateEncounterEnemyStagingCount(`Cloned ${original.name}`);
+    renderStagedEnemiesList();
+}
+
+function handleStagedEnemyDelete(entryId) {
+    const pending = atlasMapState.encounter.pending || [];
+    const index = pending.findIndex(e => e.id === entryId);
+    if (index === -1) {
+        return;
+    }
+
+    pending.splice(index, 1);
+    atlasMapState.encounter.dirty = true;
+    updateEncounterEnemyStagingCount();
+    renderStagedEnemiesList();
+    drawAtlasEncounter();
+
+    // Trigger encounter save
+    if (typeof saveCurrentEncounter === 'function') {
+        saveCurrentEncounter();
+    }
+}
+
+function handleClearAllStagedEnemies() {
+    if (atlasMapState.encounter.pending?.length > 0) {
+        if (!confirm('Clear all staged enemies?')) {
+            return;
+        }
+    }
+
+    atlasMapState.encounter.pending = [];
+    atlasMapState.encounter.dirty = true;
+    updateEncounterEnemyStagingCount();
+    renderStagedEnemiesList();
 }
 function getEncounterEnemySourceLabel(source) {
     if (source === 'library') {
@@ -3788,6 +4195,127 @@ function drawStartAreaOverlay(ctx, rect) {
     ctx.restore();
 }
 
+function findTokenAtPosition(mapX, mapY) {
+    const pending = atlasMapState.encounter.pending || [];
+    const activeMapId = atlasMapState.activeMapId;
+
+    if (!activeMapId) {
+        return null;
+    }
+
+    // Calculate cell size for hit detection
+    const settings = atlasMapState.settings;
+    if (!settings?.display?.grid) {
+        return null;
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
+    const cellSize = cellPx * gridZoom;
+    const tokenRadius = cellSize * 0.4;
+
+    // Check each token from front to back
+    for (let i = pending.length - 1; i >= 0; i--) {
+        const entry = pending[i];
+        if (!entry.placed || !entry.position || entry.position.mapId !== activeMapId) {
+            continue;
+        }
+
+        const dx = mapX - entry.position.x;
+        const dy = mapY - entry.position.y;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance <= tokenRadius) {
+            return entry;
+        }
+    }
+
+    return null;
+}
+
+function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
+    const pending = atlasMapState.encounter.pending || [];
+    const activeMapId = atlasMapState.activeMapId;
+    const selectedToken = atlasMapState.encounter.selectedToken;
+
+    if (!activeMapId) {
+        return;
+    }
+
+    // Calculate cell size the same way the grid does
+    const settings = atlasMapState.settings;
+    if (!settings?.display?.grid) {
+        return;
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
+
+    // This is the cell size on the canvas (matches grid drawing)
+    const scaledCellPx = cellPx * scale * gridZoom;
+
+    // Token should be 80% of cell diameter (40% radius)
+    const tokenRadius = scaledCellPx * 0.4;
+
+    ctx.save();
+
+    pending.forEach(entry => {
+        if (!entry.placed || !entry.position) {
+            return;
+        }
+
+        // Only draw tokens on the current map
+        if (entry.position.mapId !== activeMapId) {
+            return;
+        }
+
+        const isSelected = selectedToken && selectedToken.id === entry.id;
+
+        // Convert map coordinates to canvas coordinates
+        const canvasX = offsetX + (entry.position.x * scale);
+        const canvasY = offsetY + (entry.position.y * scale);
+
+        // Draw selection highlight if selected
+        if (isSelected) {
+            ctx.beginPath();
+            ctx.arc(canvasX, canvasY, tokenRadius + 4, 0, Math.PI * 2);
+            ctx.strokeStyle = '#fbbf24'; // Yellow highlight
+            ctx.lineWidth = 4;
+            ctx.stroke();
+        }
+
+        // Draw token circle
+        ctx.beginPath();
+        ctx.arc(canvasX, canvasY, tokenRadius, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.7)'; // Red with transparency
+        ctx.fill();
+        ctx.strokeStyle = isSelected ? '#fbbf24' : '#dc2626'; // Yellow border if selected
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Draw name label - scale font based on token size
+        const fontSize = Math.max(8, Math.min(14, tokenRadius * 0.35));
+        ctx.font = `${fontSize}px sans-serif`;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Truncate name if too long
+        let displayName = entry.name;
+        if (displayName.length > 12) {
+            displayName = displayName.substring(0, 10) + '...';
+        }
+
+        ctx.fillText(displayName, canvasX, canvasY);
+    });
+
+    ctx.restore();
+}
+
 function drawAtlasEncounter() {
     const { encounterCanvas, encounterEmpty, startAreaHint } = getAtlasElements();
     if (!encounterCanvas) {
@@ -3892,14 +4420,32 @@ function drawAtlasEncounter() {
             drawStartAreaOverlay(ctx, rect);
         }
 
+        // Draw placed enemy tokens
+        drawEnemyTokens(ctx, scale, actualX, actualY);
+
+        // Update cursor based on mode
+        if (atlasMapState.encounter.placementMode) {
+            encounterCanvas.style.cursor = 'crosshair';
+        } else if (atlasMapState.encounter.placing) {
+            encounterCanvas.style.cursor = 'crosshair';
+        } else {
+            encounterCanvas.style.cursor = 'grab';
+        }
+
         if (startAreaHint) {
             startAreaHint.style.display = 'block';
-            if (atlasMapState.encounter.placing) {
+            if (atlasMapState.encounter.placementMode && atlasMapState.encounter.placementEntry) {
+                startAreaHint.textContent = 'Click on the map to place ' + atlasMapState.encounter.placementEntry.name + ' (will snap to grid).';
+                startAreaHint.style.color = '#fbbf24'; // Yellow color for placement mode
+            } else if (atlasMapState.encounter.placing) {
                 startAreaHint.textContent = 'Click on the map to set the starting area.';
+                startAreaHint.style.color = ''; // Reset color
             } else if (rect) {
                 startAreaHint.textContent = 'Drag to pan or place a new starting area when needed.';
+                startAreaHint.style.color = ''; // Reset color
             } else {
                 startAreaHint.textContent = 'Click Place Starting Area to choose where play begins.';
+                startAreaHint.style.color = ''; // Reset color
             }
         }
 
@@ -3969,17 +4515,118 @@ function handleEncounterCanvasClick(event) {
     if (!atlasMapState.activeMapId) {
         return;
     }
-    if (!atlasMapState.encounter.placing && atlasMapState.encounter.startArea) {
-        return;
-    }
+
     const pointer = getEncounterPointer(event);
     if (!pointer) {
+        return;
+    }
+
+    // Handle enemy placement mode
+    if (atlasMapState.encounter.placementMode && atlasMapState.encounter.placementEntry) {
+        placeEnemyToken(pointer.mapX, pointer.mapY);
+        return;
+    }
+
+    // Check if clicking on a placed token
+    const clickedToken = findTokenAtPosition(pointer.mapX, pointer.mapY);
+    if (clickedToken) {
+        atlasMapState.encounter.selectedToken = clickedToken;
+        drawAtlasEncounter();
+        return;
+    }
+
+    // Deselect token if clicking empty space
+    if (atlasMapState.encounter.selectedToken) {
+        atlasMapState.encounter.selectedToken = null;
+        drawAtlasEncounter();
+        return;
+    }
+
+    // Handle starting area placement mode
+    if (!atlasMapState.encounter.placing && atlasMapState.encounter.startArea) {
         return;
     }
     positionEncounterStartArea(pointer.mapX, pointer.mapY);
     atlasMapState.encounter.dirty = true;
     updateEncounterControls();
     drawAtlasEncounter();
+}
+
+function handleEncounterKeydown(event) {
+    // Only handle arrow keys when in Atlas Encounters view
+    const activeView = document.querySelector('.atlas-section.active');
+    if (!activeView || activeView.id !== 'atlas-encounters-section') {
+        return;
+    }
+
+    // Check if user is typing in an input field
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        return;
+    }
+
+    // Only handle if a token is selected
+    const selectedToken = atlasMapState.encounter.selectedToken;
+    if (!selectedToken || !selectedToken.position) {
+        return;
+    }
+
+    // Check if this is an arrow key or escape - if so, prevent default first
+    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key);
+    if (!isArrowKey) {
+        return;
+    }
+
+    // Prevent default page scrolling for arrow keys
+    event.preventDefault();
+
+    // Calculate grid cell size
+    const settings = atlasMapState.settings;
+    if (!settings?.display?.grid) {
+        return;
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
+    const cellSize = cellPx * gridZoom;
+
+    let moved = false;
+
+    switch (event.key) {
+        case 'ArrowUp':
+            selectedToken.position.y -= cellSize;
+            moved = true;
+            break;
+        case 'ArrowDown':
+            selectedToken.position.y += cellSize;
+            moved = true;
+            break;
+        case 'ArrowLeft':
+            selectedToken.position.x -= cellSize;
+            moved = true;
+            break;
+        case 'ArrowRight':
+            selectedToken.position.x += cellSize;
+            moved = true;
+            break;
+        case 'Escape':
+            // Deselect token on Escape
+            atlasMapState.encounter.selectedToken = null;
+            drawAtlasEncounter();
+            return;
+    }
+
+    if (moved) {
+        atlasMapState.encounter.dirty = true;
+        renderStagedEnemiesList(); // Update coordinates display
+        drawAtlasEncounter();
+
+        // Trigger encounter save
+        if (typeof saveCurrentEncounter === 'function') {
+            saveCurrentEncounter();
+        }
+    }
 }
 
 function changeEncounterFrameZoom(delta) {
@@ -4147,9 +4794,38 @@ function saveEncounterStartArea() {
         delete startAreas[mapId];
     }
 
+    // Save placed enemies (serialize the pending array)
+    const placedEnemies = (atlasMapState.encounter.pending || []).map(entry => ({
+        id: entry.id,
+        name: entry.name,
+        source: entry.source,
+        payload: entry.payload,
+        placed: entry.placed || false,
+        position: entry.position ? {
+            x: Number(entry.position.x.toFixed(2)),
+            y: Number(entry.position.y.toFixed(2)),
+            mapId: entry.position.mapId
+        } : null
+    }));
+
+    console.log('[Atlas] Saving placed enemies:', placedEnemies);
+
+    // Preserve the current gridZoom setting
+    const currentGridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || 1;
+
     const payload = {
-        ...encounterSettings,
-        startingAreas: startAreas
+        encounter: {
+            ...encounterSettings,
+            startingAreas: startAreas,
+            placedEnemies: placedEnemies
+        },
+        display: {
+            ...atlasMapState.settings?.display,
+            viewport: {
+                ...atlasMapState.settings?.display?.viewport,
+                gridZoom: Number(currentGridZoom.toFixed(2))
+            }
+        }
     };
 
     if (elements.saveStartAreaBtn) {
@@ -4162,10 +4838,12 @@ function saveEncounterStartArea() {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ encounter: payload })
+        body: JSON.stringify(payload)
     })
         .then((res) => res.json())
         .then((settings) => {
+            console.log('[Atlas] Settings saved successfully. Received back:', settings);
+            console.log('[Atlas] Placed enemies in saved settings:', settings.encounter?.placedEnemies);
             atlasMapState.settings = settings;
             syncEncounterStateFromSettings(true);
             populateSettingsForm();

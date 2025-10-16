@@ -35,6 +35,13 @@ function initSessionManager() {
 
     // Load sessions list on startup
     loadSessionsList();
+
+    // Auto-load last session
+    const lastSessionId = localStorage.getItem('lastSessionId');
+    if (lastSessionId) {
+        console.log('Auto-loading last session:', lastSessionId);
+        loadSession(lastSessionId);
+    }
 }
 
 // === SESSION MANAGEMENT ===
@@ -86,13 +93,15 @@ async function handleCreateSession(e) {
 
             // Set as current session
             sessionState.currentSession = savedSession;
+
+            // Save to localStorage for auto-load next time
+            localStorage.setItem('lastSessionId', savedSession.id);
+
             updateSessionDisplay();
 
             // Clear form and refresh list
             e.target.reset();
             loadSessionsList();
-
-            alert(`Session "${sessionData.name}" created successfully!`);
         } else {
             throw new Error('Failed to create session');
         }
@@ -159,15 +168,30 @@ async function loadSession(sessionId) {
             sessionState.currentSession = session;
             sessionState.encounters = session.encounters || [];
 
-            // Clear current encounter when loading a new session
-            sessionState.currentEncounter = null;
+            // Save to localStorage for auto-load next time
+            localStorage.setItem('lastSessionId', sessionId);
 
             updateSessionDisplay();
             updateEncounterDisplay();
             closeSessionModal();
 
             console.log('Session loaded:', session);
-            alert(`Session "${session.name}" loaded!`);
+
+            // Auto-load the last encounter if one exists
+            const lastEncounterId = localStorage.getItem('lastEncounterId_' + sessionId);
+            if (lastEncounterId && session.encounters && session.encounters.length > 0) {
+                const encounterExists = session.encounters.find(e => e.id === lastEncounterId);
+                if (encounterExists) {
+                    console.log('Auto-loading last encounter:', lastEncounterId);
+                    loadEncounter(lastEncounterId);
+                } else {
+                    // Clear current encounter if the saved one doesn't exist
+                    sessionState.currentEncounter = null;
+                }
+            } else {
+                // Clear current encounter when loading a new session
+                sessionState.currentEncounter = null;
+            }
         } else {
             throw new Error('Failed to load session');
         }
@@ -199,7 +223,6 @@ async function deleteSession(sessionId) {
             }
 
             loadSessionsList();
-            alert('Session deleted successfully.');
         } else {
             throw new Error('Failed to delete session');
         }
@@ -307,8 +330,6 @@ async function handleCreateEncounter(e) {
             // Clear form and refresh list
             e.target.reset();
             renderEncountersList();
-
-            alert(`Encounter "${encounterData.name}" created successfully!`);
         } else {
             throw new Error('Failed to create encounter');
         }
@@ -368,6 +389,9 @@ async function loadEncounter(encounterId) {
 
         if (response.ok) {
             const encounter = await response.json();
+            console.log('[Session] Full encounter data received:', encounter);
+            console.log('[Session] Encounter.placedEnemies:', encounter.placedEnemies);
+
             sessionState.currentEncounter = encounter;
 
             // Load encounter data into the main encounter state
@@ -380,13 +404,63 @@ async function loadEncounter(encounterId) {
                 if (typeof renderCombatantsList === 'function') {
                     renderCombatantsList();
                 }
+
+                // Sync combatants to Atlas (so enemies added in Arena show up in Atlas)
+                // Retry until atlasMapState is ready
+                let retryCount = 0;
+                const maxRetries = 20; // Try for 2 seconds
+                const syncInterval = setInterval(() => {
+                    retryCount++;
+                    if (window.atlasMapState) {
+                        console.log('[Session] atlasMapState is ready, calling syncCombatantsToAtlas');
+                        clearInterval(syncInterval);
+                        syncCombatantsToAtlas();
+                    } else if (retryCount >= maxRetries) {
+                        console.log('[Session] atlasMapState still not ready after', retryCount * 100, 'ms');
+                        clearInterval(syncInterval);
+                    }
+                }, 100);
+            }
+
+            // Load placed enemies into Atlas state
+            const savedEnemies = encounter.placedEnemies || [];
+            console.log('[Session] Loading placed enemies from encounter:', savedEnemies);
+
+            if (window.atlasMapState && window.atlasMapState.encounter) {
+                window.atlasMapState.encounter.pending = savedEnemies.map(entry => ({
+                    ...entry,
+                    position: entry.position ? { ...entry.position } : null
+                }));
+                console.log('[Session] Restored to Atlas pending array:', window.atlasMapState.encounter.pending);
+
+                // Re-render staging list and map if the functions exist
+                if (typeof renderStagedEnemiesList === 'function') {
+                    renderStagedEnemiesList();
+                }
+                if (typeof drawAtlasEncounter === 'function') {
+                    drawAtlasEncounter();
+                }
+
+                // Re-add all placed enemies to combat (DON'T do this - they're already in encounter.combatants)
+                // if (savedEnemies.length > 0 && typeof addPlacedEnemyToCombat === 'function') {
+                //     console.log('[Session] Re-adding placed enemies to combat...');
+                //     savedEnemies.forEach(entry => {
+                //         if (entry.placed) {
+                //             addPlacedEnemyToCombat(entry);
+                //         }
+                //     });
+                // }
             }
 
             updateEncounterDisplay();
             closeEncounterModal();
 
+            // Save to localStorage for auto-load next time
+            if (sessionState.currentSession) {
+                localStorage.setItem('lastEncounterId_' + sessionState.currentSession.id, encounterId);
+            }
+
             console.log('Encounter loaded:', encounter);
-            alert(`Encounter "${encounter.name}" loaded!`);
         } else {
             throw new Error('Failed to load encounter');
         }
@@ -440,7 +514,6 @@ async function deleteEncounter(encounterId) {
             }
 
             renderEncountersList();
-            alert('Encounter deleted successfully.');
         } else {
             throw new Error('Failed to delete encounter');
         }
@@ -474,6 +547,31 @@ async function saveCurrentEncounter() {
         sessionState.currentEncounter.combatants = window.encounterState.combatants;
         sessionState.currentEncounter.roundNumber = window.encounterState.roundNumber;
         sessionState.currentEncounter.currentTurnIndex = window.encounterState.currentTurnIndex;
+    }
+
+    // Sync placed enemies from Atlas state
+    if (window.atlasMapState && window.atlasMapState.encounter) {
+        const placedEnemies = (window.atlasMapState.encounter.pending || []).map(entry => ({
+            id: entry.id,
+            name: entry.name,
+            source: entry.source,
+            payload: entry.payload,
+            placed: entry.placed || false,
+            position: entry.position ? {
+                x: Number(entry.position.x.toFixed(2)),
+                y: Number(entry.position.y.toFixed(2)),
+                mapId: entry.position.mapId
+            } : null,
+            atlasTokenId: entry.id  // Link to the placed token
+        }));
+        sessionState.currentEncounter.placedEnemies = placedEnemies;
+        console.log('[Session] Saving placed enemies to encounter:', placedEnemies);
+    }
+
+    // ALSO: Sync combatants back to placed enemies list
+    // This ensures enemies added in Arena also appear in Atlas
+    if (window.encounterState && window.atlasMapState) {
+        syncCombatantsToAtlas();
     }
 
     try {
@@ -527,3 +625,74 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Sync combatants from Arena to Atlas
+// This ensures that enemies added in the Arena also appear in the Atlas pending list
+function syncCombatantsToAtlas() {
+    console.log('[Session] syncCombatantsToAtlas called');
+
+    if (!window.encounterState) {
+        console.log('[Session] No encounterState, skipping sync');
+        return;
+    }
+
+    if (!window.atlasMapState) {
+        console.log('[Session] No atlasMapState, skipping sync');
+        return;
+    }
+
+    const combatants = window.encounterState.combatants || [];
+    const pending = window.atlasMapState.encounter.pending || [];
+
+    console.log('[Session] Syncing combatants to Atlas:', {
+        combatantsCount: combatants.length,
+        pendingCount: pending.length,
+        combatants: combatants.map(c => ({ name: c.name, type: c.type, id: c.id }))
+    });
+
+    let addedCount = 0;
+
+    // For each combatant that's an enemy and NOT already in pending
+    combatants.forEach(combatant => {
+        const isEnemy = ['enemy', 'monster', 'e'].includes((combatant.type || '').toLowerCase());
+        if (!isEnemy) {
+            console.log('[Session] Skipping non-enemy:', combatant.name, combatant.type);
+            return;
+        }
+
+        // Check if this combatant is already in the pending list
+        const existingEntry = pending.find(entry => entry.atlasTokenId === combatant.id || entry.name === combatant.name);
+        if (existingEntry) {
+            console.log('[Session] Combatant already exists in pending:', combatant.name);
+            return;  // Already exists, skip
+        }
+
+        // Add this combatant to the pending list (without a position yet - not placed on map)
+        const newEntry = {
+            id: combatant.atlasTokenId || `atlas-${combatant.id}`,
+            name: combatant.name,
+            source: combatant.sourceId ? 'library' : 'custom',
+            payload: combatant.sourceId ? { id: combatant.sourceId } : null,
+            placed: false,  // Not placed on map yet
+            position: null,
+            atlasTokenId: combatant.id
+        };
+
+        pending.push(newEntry);
+        addedCount++;
+        console.log('[Session] Added Arena combatant to Atlas pending:', newEntry);
+    });
+
+    console.log('[Session] Sync complete. Added', addedCount, 'new enemies to Atlas');
+
+    // Update the pending array
+    window.atlasMapState.encounter.pending = pending;
+
+    // Re-render the staging list
+    if (typeof renderStagedEnemiesList === 'function') {
+        renderStagedEnemiesList();
+    }
+}
+
+// Make it globally accessible
+window.syncCombatantsToAtlas = syncCombatantsToAtlas;
