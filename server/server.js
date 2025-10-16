@@ -178,7 +178,10 @@ let atlasSettings = readJsonFile(ATLAS_SETTINGS_PATH, {
       offset: { x: 0, y: 0 }
     }
   },
-  active_map_id: null
+  active_map_id: null,
+  encounter: {
+    startingAreas: {}
+  }
 });
 
 function ensureAtlasDefaults() {
@@ -200,9 +203,153 @@ function ensureAtlasDefaults() {
     offset: { x: 0, y: 0 },
     ...(atlasSettings.display.viewport || {})
   };
+  atlasSettings.encounter = atlasSettings.encounter || {};
+  atlasSettings.encounter.startingAreas = atlasSettings.encounter.startingAreas || {};
 }
 
+function clampNumber(value, min, max) {
+  const numberValue = Number(value);
+  if (!Number.isFinite(numberValue)) {
+    return min;
+  }
+  return Math.min(Math.max(numberValue, min), max);
+}
+
+function computeStartAreaRect(map, resolution, startArea) {
+  if (!map || !map.width_px || !map.height_px) {
+    return null;
+  }
+  const mapWidth = Number(map.width_px) || 0;
+  const mapHeight = Number(map.height_px) || 0;
+  const displayWidth = Number(resolution?.w) || 1920;
+  const displayHeight = Number(resolution?.h) || 1080;
+  if (!mapWidth || !mapHeight || !displayWidth || !displayHeight) {
+    return null;
+  }
+  const scaleFactor = Math.min(mapWidth / displayWidth, mapHeight / displayHeight, 1);
+  const baseWidth = displayWidth * scaleFactor;
+  const baseHeight = displayHeight * scaleFactor;
+  const minZoom = 0.25;
+  const maxZoom = 4;
+  const zoom = clampNumber(startArea?.zoom ?? 1, minZoom, maxZoom);
+
+  let rectWidth = baseWidth / zoom;
+  let rectHeight = baseHeight / zoom;
+  const fitScale = Math.min(mapWidth / rectWidth, mapHeight / rectHeight, 1);
+  rectWidth *= fitScale;
+  rectHeight *= fitScale;
+
+  const maxX = Math.max(0, mapWidth - rectWidth);
+  const maxY = Math.max(0, mapHeight - rectHeight);
+  const rawX = Number(startArea?.x ?? 0);
+  const rawY = Number(startArea?.y ?? 0);
+  const x = clampNumber(rawX, 0, maxX);
+  const y = clampNumber(rawY, 0, maxY);
+  return { x, y, width: rectWidth, height: rectHeight, zoom };
+}
+
+function computeViewportFromStartArea(map, resolution, rect, gridZoom = 1) {
+  if (!map || !rect) {
+    return null;
+  }
+  const mapWidth = Number(map.width_px) || 0;
+  const mapHeight = Number(map.height_px) || 0;
+  const displayWidth = Number(resolution?.w) || 1920;
+  const displayHeight = Number(resolution?.h) || 1080;
+  if (!mapWidth || !mapHeight || !displayWidth || !displayHeight) {
+    return null;
+  }
+  const zoomX = displayWidth / rect.width;
+  const zoomY = displayHeight / rect.height;
+  const computedZoom = Math.min(zoomX, zoomY);
+  const zoom = Number((rect.zoom ?? computedZoom).toFixed(4)) || 1;
+  const drawWidth = mapWidth * zoom;
+  const drawHeight = mapHeight * zoom;
+  const offsetX = -((rect.x * zoom) + ((displayWidth - drawWidth) / 2));
+  const offsetY = -((rect.y * zoom) + ((displayHeight - drawHeight) / 2));
+  return {
+    fit: 'pixel',
+    zoom,
+    gridZoom,
+    offset: {
+      x: Number(offsetX.toFixed(2)),
+      y: Number(offsetY.toFixed(2))
+    }
+  };
+}
+
+function resetDisplayViewport() {
+  atlasSettings.display = atlasSettings.display || {};
+  atlasSettings.display.viewport = atlasSettings.display.viewport || {};
+  const viewport = atlasSettings.display.viewport;
+  const gridZoom = Number.isFinite(viewport.gridZoom) ? viewport.gridZoom : 1;
+  const fit = viewport.fit && viewport.fit !== 'pixel' ? viewport.fit : 'fit';
+  atlasSettings.display.viewport = {
+    fit,
+    zoom: 1,
+    gridZoom,
+    offset: { x: 0, y: 0 }
+  };
+}
+
+function applyStartAreaViewport(options = {}) {
+  const { enforce = false } = options;
+  const mapId = atlasSettings.active_map_id;
+  if (!mapId) {
+    if (enforce) {
+      resetDisplayViewport();
+    }
+    return;
+  }
+
+  const map = mapsState.find((entry) => entry.id === mapId);
+  if (!map || !map.width_px || !map.height_px) {
+    if (enforce) {
+      resetDisplayViewport();
+    }
+    return;
+  }
+
+  const startAreas = atlasSettings.encounter?.startingAreas || {};
+  const startArea = startAreas[mapId];
+  const resolution = atlasSettings.display?.resolution || { w: 1920, h: 1080 };
+
+  if (!startArea) {
+    if (enforce) {
+      resetDisplayViewport();
+    }
+    return;
+  }
+
+  const rect = computeStartAreaRect(map, resolution, startArea);
+  if (!rect) {
+    if (enforce) {
+      resetDisplayViewport();
+    }
+    return;
+  }
+
+  atlasSettings.encounter.startingAreas[mapId] = {
+    x: Number(rect.x.toFixed(2)),
+    y: Number(rect.y.toFixed(2)),
+    zoom: Number((rect.zoom ?? 1).toFixed(2))
+  };
+
+  const viewport = computeViewportFromStartArea(map, resolution, rect, atlasSettings.display?.viewport?.gridZoom || 1);
+  if (!viewport) {
+    return;
+  }
+
+  atlasSettings.display.viewport = {
+    ...atlasSettings.display.viewport,
+    ...viewport
+  };
+}
+
+
 ensureAtlasDefaults();
+
+applyStartAreaViewport({ enforce: true });
 
 function computePixelsPerInch(resolution, diagonal) {
   if (!resolution || !resolution.w || !resolution.h || !diagonal) {
@@ -357,6 +504,13 @@ app.patch('/api/maps/:id', (req, res) => {
   }
 
   writeJsonFile(MAPS_DB_PATH, mapsState);
+
+  if (atlasSettings.active_map_id === req.params.id) {
+    applyStartAreaViewport({ enforce: true });
+    writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
+    broadcastDisplayState();
+  }
+
   res.json(target);
 });
 
@@ -380,6 +534,7 @@ app.delete('/api/maps/:id', (req, res) => {
 
   if (atlasSettings.active_map_id === req.params.id) {
     atlasSettings.active_map_id = null;
+    applyStartAreaViewport({ enforce: true });
     writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
     broadcastDisplayState();
   }
@@ -397,6 +552,14 @@ app.patch('/api/atlas/settings', (req, res) => {
     ...atlasSettings,
     ...req.body
   };
+
+  ensureAtlasDefaults();
+
+  if (req.body?.encounter) {
+    applyStartAreaViewport({ enforce: true });
+  } else {
+    applyStartAreaViewport();
+  }
 
   if (!atlasSettings.display?.physical?.ppi_override) {
     const computed = computePixelsPerInch(
@@ -425,6 +588,7 @@ app.post('/api/atlas/active-map', (req, res) => {
   }
 
   atlasSettings.active_map_id = mapId;
+  applyStartAreaViewport({ enforce: true });
   writeJsonFile(ATLAS_SETTINGS_PATH, atlasSettings);
   broadcastDisplayState();
 
@@ -1334,3 +1498,5 @@ controlServer.listen(PORT, () => {
 displayServer.listen(DISPLAY_PORT, () => {
   console.log(`ArcForge display server listening on port ${DISPLAY_PORT}`);
 });
+
+

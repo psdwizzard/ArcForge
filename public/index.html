@@ -621,9 +621,42 @@
                 </section>
 
                 <section id="atlas-encounters-section" class="atlas-section">
-                    <div class="atlas-section-placeholder">Encounter management coming soon.</div>
+                    <div class="atlas-encounter-container">
+                        <header class="atlas-panel-header atlas-encounter-header">
+                            <h3>Encounter Setup</h3>
+                            <div class="atlas-encounter-actions">
+                                <div class="atlas-zoom-controls">
+                                    <span class="zoom-label">Zoom</span>
+                                    <button type="button" id="atlas-encounter-zoom-out" class="btn btn-secondary btn-small">-</button>
+                                    <button type="button" id="atlas-encounter-zoom-in" class="btn btn-secondary btn-small">+</button>
+                                    <button type="button" id="atlas-encounter-zoom-reset" class="btn btn-secondary btn-small">Reset</button>
+                                </div>
+                                <div class="atlas-grid-controls">
+                                    <span class="zoom-label">Grid</span>
+                                    <button type="button" id="atlas-encounter-grid-out" class="btn btn-secondary btn-small">-</button>
+                                    <button type="button" id="atlas-encounter-grid-in" class="btn btn-secondary btn-small">+</button>
+                                    <button type="button" id="atlas-encounter-grid-reset" class="btn btn-secondary btn-small">Reset</button>
+                                </div>
+                                <button type="button" id="atlas-start-area-place" class="btn btn-secondary btn-small">Place Starting Area</button>
+                                <button type="button" id="atlas-start-area-clear" class="btn btn-secondary btn-small">Clear</button>
+                                <button type="button" id="atlas-start-area-save" class="btn btn-primary btn-small">Save</button>
+                            </div>
+                        </header>
+                        <div class="atlas-encounter-stage">
+                            <canvas id="atlas-encounter-canvas"></canvas>
+                            <div id="atlas-encounter-empty" class="atlas-empty-state">Select an active map to configure the encounter.</div>
+                            <div id="atlas-start-area-hint" class="atlas-start-area-hint">Click Place Starting Area or drag the map to choose where the display begins.</div>
+                        </div>
+                        <footer class="atlas-encounter-footer">
+                            <div class="atlas-start-area-metrics">
+                                <span><strong>Display:</strong> <span id="atlas-start-area-resolution">--</span></span>
+                                <span><strong>Top-left:</strong> <span id="atlas-start-area-coords">--</span></span>
+                                <span><strong>Grid:</strong> <span id="atlas-start-area-grid">--</span></span>
+                            </div>
+                            <div id="atlas-start-area-status" class="atlas-start-area-status">Select an active map to begin.</div>
+                        </footer>
+                    </div>
                 </section>
-
                 <section id="atlas-control-section" class="atlas-section">
                     <div class="atlas-section-placeholder">Control center coming soon.</div>
                 </section>

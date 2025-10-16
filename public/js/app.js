@@ -2291,7 +2291,25 @@ const atlasMapState = {
         draggingPoint: null,
         start: { x: 120, y: 120 },
         end: { x: 240, y: 120 }
-    }
+    },
+    encounter: {
+        zoom: 1,
+        minZoom: 0.2,
+        maxZoom: 6,
+        offset: { x: 0, y: 0 },
+        dragging: false,
+        dragMoved: false,
+        dragStart: null,
+        originalOffset: { x: 0, y: 0 },
+        placing: false,
+        startArea: null,
+        areaZoom: 1,
+        minAreaZoom: 0.25,
+        maxAreaZoom: 4,
+        dirty: false,
+        render: null
+    },
+    imageCache: new Map()
 };
 
 function getAtlasElements() {
@@ -2320,7 +2338,24 @@ function getAtlasElements() {
         previewZoomOut: document.getElementById('atlas-preview-zoom-out'),
         previewZoomReset: document.getElementById('atlas-preview-zoom-reset'),
         displayStatus: document.getElementById('atlas-display-status'),
-        atlasSection: document.getElementById('atlas-map-section')
+        atlasSection: document.getElementById('atlas-map-section'),
+        encounterSection: document.getElementById('atlas-encounters-section'),
+        encounterCanvas: document.getElementById('atlas-encounter-canvas'),
+        encounterEmpty: document.getElementById('atlas-encounter-empty'),
+        encounterZoomIn: document.getElementById('atlas-encounter-zoom-in'),
+        encounterZoomOut: document.getElementById('atlas-encounter-zoom-out'),
+        encounterZoomReset: document.getElementById('atlas-encounter-zoom-reset'),
+        encounterGridOut: document.getElementById('atlas-encounter-grid-out'),
+        encounterGridIn: document.getElementById('atlas-encounter-grid-in'),
+        encounterGridReset: document.getElementById('atlas-encounter-grid-reset'),
+        placeStartAreaBtn: document.getElementById('atlas-start-area-place'),
+        clearStartAreaBtn: document.getElementById('atlas-start-area-clear'),
+        saveStartAreaBtn: document.getElementById('atlas-start-area-save'),
+        startAreaHint: document.getElementById('atlas-start-area-hint'),
+        startAreaResolutionLabel: document.getElementById('atlas-start-area-resolution'),
+        startAreaCoordsLabel: document.getElementById('atlas-start-area-coords'),
+        startAreaGridLabel: document.getElementById('atlas-start-area-grid'),
+        startAreaStatus: document.getElementById('atlas-start-area-status')
     };
 }
 
@@ -2332,6 +2367,7 @@ function initAtlasMapModule() {
 
     setupAtlasSockets();
     bindAtlasMapEvents();
+    initAtlasEncounterModule();
     loadAtlasInitialData();
     injectDisplayLaunchButton();
 }
@@ -2367,11 +2403,16 @@ function loadAtlasInitialData() {
         atlasMapState.maps = maps || [];
         atlasMapState.settings = settings || null;
         atlasMapState.activeMapId = settings?.active_map_id || null;
+        syncEncounterStateFromSettings(true);
+        updateEncounterControls();
+        updateEncounterSummary(null);
         renderAtlasMapList();
         populateSettingsForm();
         drawAtlasPreview();
+        drawAtlasEncounter();
     }).catch((error) => {
         console.error('[Atlas] Failed to load initial data:', error);
+        updateEncounterSummary(null);
     });
 }
 
@@ -2451,6 +2492,7 @@ function bindAtlasMapEvents() {
 
 function handleAtlasResize() {
     drawAtlasPreview();
+    drawAtlasEncounter();
 }
 
 function injectDisplayLaunchButton() {
@@ -2628,6 +2670,9 @@ function deleteAtlasMap(mapId) {
             if (atlasMapState.activeMapId === mapId) {
                 atlasMapState.activeMapId = null;
                 drawAtlasPreview();
+                drawAtlasEncounter();
+                updateEncounterSummary(null);
+                updateEncounterControls();
             }
             renderAtlasMapList();
         })
@@ -2650,8 +2695,13 @@ function setAtlasActiveMap(mapId) {
                 throw new Error('Failed to set active map');
             }
             atlasMapState.activeMapId = mapId;
+            resetEncounterView();
+            syncEncounterStateFromSettings(true);
+            updateEncounterControls();
+            updateEncounterSummary(null);
             renderAtlasMapList();
             drawAtlasPreview();
+            drawAtlasEncounter();
         })
         .catch((error) => {
             console.error('[Atlas] Failed to set active map:', error);
@@ -2684,6 +2734,7 @@ function populateSettingsForm() {
     atlasMapState.preview.showGrid = elements.previewGridToggle.checked = settings.display?.grid?.enabled ?? true;
     atlasMapState.preview.fit = settings.display?.viewport?.fit || 'fit';
     atlasMapState.preview.zoom = settings.display?.viewport?.zoom || 1;
+    atlasMapState.preview.gridZoom = settings.display?.viewport?.gridZoom || 1;
     atlasMapState.preview.offset = {
         x: settings.display?.viewport?.offset?.x || 0,
         y: settings.display?.viewport?.offset?.y || 0
@@ -2692,6 +2743,9 @@ function populateSettingsForm() {
     if (fitSelect) {
         fitSelect.value = atlasMapState.preview.fit;
     }
+    updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
+    drawAtlasPreview();
+    drawAtlasEncounter();
 }
 
 function gatherSettingsPayload() {
@@ -2737,6 +2791,7 @@ function handleAtlasSaveSettings() {
         .then((res) => res.json())
         .then((settings) => {
             atlasMapState.settings = settings;
+            syncEncounterStateFromSettings(false);
             populateSettingsForm();
             alert('Display settings saved.');
         })
@@ -2760,6 +2815,8 @@ function handleAtlasPushToDisplay() {
         .then((res) => res.json())
         .then((settings) => {
             atlasMapState.settings = settings;
+            syncEncounterStateFromSettings(false);
+            drawAtlasEncounter();
 
             // Then push the active map to display
             return fetch(`${API_BASE}/atlas/active-map`, {
@@ -2886,6 +2943,788 @@ function applyDisplayGrid(grid) {
     }
 }
 
+function clamp(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function initAtlasEncounterModule() {
+    const elements = getAtlasElements();
+    if (!elements?.encounterCanvas) {
+        return;
+    }
+
+    elements.encounterZoomIn?.addEventListener('click', () => changeEncounterFrameZoom(0.25));
+    elements.encounterZoomOut?.addEventListener('click', () => changeEncounterFrameZoom(-0.25));
+    elements.encounterZoomReset?.addEventListener('click', () => {
+        setEncounterFrameZoom(1);
+    });
+
+    elements.encounterGridIn?.addEventListener('click', () => changeEncounterGridZoom(0.1));
+    elements.encounterGridOut?.addEventListener('click', () => changeEncounterGridZoom(-0.1));
+    elements.encounterGridReset?.addEventListener('click', resetEncounterGridZoom);
+
+    elements.placeStartAreaBtn?.addEventListener('click', () => {
+        if (!atlasMapState.activeMapId) {
+            alert('Select an active map to place a starting area.');
+            return;
+        }
+        atlasMapState.encounter.placing = !atlasMapState.encounter.placing;
+        updateEncounterControls();
+        updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
+        drawAtlasEncounter();
+    });
+
+    elements.clearStartAreaBtn?.addEventListener('click', () => {
+        if (!atlasMapState.activeMapId) {
+            return;
+        }
+        if (atlasMapState.encounter.startArea && !atlasMapState.encounter.dirty) {
+            if (!confirm('Clear the starting area for this map?')) {
+                return;
+            }
+        }
+        clearEncounterStartingArea();
+    });
+
+    elements.saveStartAreaBtn?.addEventListener('click', saveEncounterStartArea);
+
+    const canvas = elements.encounterCanvas;
+    canvas.addEventListener('wheel', handleEncounterWheel, { passive: false });
+    canvas.addEventListener('mousedown', startEncounterDrag);
+    canvas.addEventListener('mousemove', handleEncounterDrag);
+    window.addEventListener('mouseup', endEncounterDrag);
+    canvas.addEventListener('mouseleave', endEncounterDrag);
+    canvas.addEventListener('click', handleEncounterCanvasClick);
+    updateEncounterControls();
+    updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
+}
+
+function syncEncounterStateFromSettings(force) {
+    if (!atlasMapState.settings) {
+        return;
+    }
+    if (!force && atlasMapState.encounter.dirty) {
+        return;
+    }
+    const encounterSettings = atlasMapState.settings.encounter || {};
+    atlasMapState.settings.encounter = encounterSettings;
+    const startAreas = encounterSettings.startingAreas || {};
+    const mapId = atlasMapState.activeMapId;
+    const savedArea = mapId && startAreas[mapId] ? { ...startAreas[mapId] } : null;
+    atlasMapState.encounter.startArea = savedArea;
+    const savedZoom = savedArea?.zoom ?? 1;
+    atlasMapState.encounter.areaZoom = clamp(savedZoom, atlasMapState.encounter.minAreaZoom, atlasMapState.encounter.maxAreaZoom);
+    if (atlasMapState.encounter.startArea) {
+        atlasMapState.encounter.startArea.zoom = atlasMapState.encounter.areaZoom;
+    }
+    atlasMapState.preview.zoom = atlasMapState.settings?.display?.viewport?.zoom || atlasMapState.encounter.areaZoom || 1;
+    atlasMapState.encounter.dirty = false;
+    atlasMapState.encounter.placing = false;
+}
+
+function resetEncounterView() {
+    atlasMapState.encounter.zoom = 1;
+    atlasMapState.encounter.offset = { x: 0, y: 0 };
+    atlasMapState.encounter.dragging = false;
+    atlasMapState.encounter.dragMoved = false;
+    atlasMapState.encounter.dragStart = null;
+    atlasMapState.encounter.originalOffset = { x: 0, y: 0 };
+}
+
+function updateEncounterControls() {
+    const elements = getAtlasElements();
+    const hasMap = Boolean(atlasMapState.activeMapId);
+    const hasArea = Boolean(atlasMapState.encounter.startArea);
+
+    if (elements.placeStartAreaBtn) {
+        elements.placeStartAreaBtn.disabled = !hasMap;
+        elements.placeStartAreaBtn.classList.toggle('btn-toggle-active', atlasMapState.encounter.placing && hasMap);
+    }
+    if (elements.clearStartAreaBtn) {
+        elements.clearStartAreaBtn.disabled = !hasMap || (!hasArea && !atlasMapState.encounter.dirty);
+    }
+    if (elements.saveStartAreaBtn) {
+        elements.saveStartAreaBtn.disabled = !hasMap || !atlasMapState.encounter.dirty;
+    }
+    if (elements.encounterGridIn) {
+        elements.encounterGridIn.disabled = !hasMap;
+    }
+    if (elements.encounterGridOut) {
+        elements.encounterGridOut.disabled = !hasMap;
+    }
+    if (elements.encounterGridReset) {
+        elements.encounterGridReset.disabled = !hasMap;
+    }
+}
+
+function updateEncounterSummary(rect) {
+    const elements = getAtlasElements();
+
+    if (elements.startAreaResolutionLabel) {
+        const resolution = atlasMapState.settings?.display?.resolution;
+        if (resolution?.w && resolution?.h) {
+            elements.startAreaResolutionLabel.textContent = Math.round(resolution.w) + ' x ' + Math.round(resolution.h);
+        } else {
+            elements.startAreaResolutionLabel.textContent = '--';
+        }
+    }
+
+    if (elements.startAreaGridLabel) {
+        if (!atlasMapState.activeMapId) {
+            elements.startAreaGridLabel.textContent = '--';
+        } else {
+            const metrics = getEncounterGridMetrics();
+            const gridEnabled = atlasMapState.settings?.display?.grid?.enabled ?? true;
+            if (!gridEnabled) {
+                elements.startAreaGridLabel.textContent = 'Disabled';
+            } else if (!metrics) {
+                elements.startAreaGridLabel.textContent = '--';
+            } else {
+                const inchesPerCell = Number(atlasMapState.settings?.display?.grid?.inches_per_cell) || 1;
+                const zoomDetails = [];
+                if (Math.abs(metrics.gridZoom - 1) > 0.0001) {
+                    zoomDetails.push('grid ' + metrics.gridZoom.toFixed(2) + 'x');
+                }
+                if (Math.abs(metrics.areaZoom - 1) > 0.0001) {
+                    zoomDetails.push('view ' + metrics.areaZoom.toFixed(2) + 'x');
+                }
+                const zoomSuffix = zoomDetails.length ? ' @ ' + zoomDetails.join(', ') : '';
+                elements.startAreaGridLabel.textContent = Math.round(metrics.zoomed) + ' px (' + inchesPerCell + '" cell' + zoomSuffix + ')';
+            }
+        }
+    }
+
+    if (!elements.startAreaStatus) {
+        return;
+    }
+
+    if (!atlasMapState.activeMapId) {
+        if (elements.startAreaCoordsLabel) {
+            elements.startAreaCoordsLabel.textContent = '--';
+        }
+        elements.startAreaStatus.textContent = 'Select an active map to begin.';
+        return;
+    }
+
+    if (!atlasMapState.encounter.startArea) {
+        if (elements.startAreaCoordsLabel) {
+            elements.startAreaCoordsLabel.textContent = '--';
+        }
+        if (elements.startAreaGridLabel) {
+            elements.startAreaGridLabel.textContent = '--';
+        }
+        if (atlasMapState.encounter.dirty) {
+            elements.startAreaStatus.textContent = 'Starting area will be cleared when you save.';
+        } else if (atlasMapState.encounter.placing) {
+            elements.startAreaStatus.textContent = 'Click on the map to set the starting area.';
+        } else {
+            elements.startAreaStatus.textContent = 'Click Place Starting Area to choose a starting view.';
+        }
+        return;
+    }
+
+    if (!rect) {
+        if (elements.startAreaCoordsLabel) {
+            elements.startAreaCoordsLabel.textContent = '--';
+        }
+        elements.startAreaStatus.textContent = 'Calculating starting area...';
+        return;
+    }
+
+    if (elements.startAreaCoordsLabel) {
+        elements.startAreaCoordsLabel.textContent = Math.round(rect.x) + ', ' + Math.round(rect.y);
+    }
+    const zoom = atlasMapState.encounter.areaZoom || 1;
+    const zoomStatus = Math.abs(zoom - 1) > 0.0001 ? ` (Zoom ${zoom.toFixed(2)}x)` : '';
+    elements.startAreaStatus.textContent = (atlasMapState.encounter.dirty ? 'Unsaved changes' : 'Starting area saved') + zoomStatus;
+}
+
+
+function getActiveEncounterMap() {
+    return atlasMapState.maps.find((entry) => entry.id === atlasMapState.activeMapId) || null;
+}
+
+function getAtlasMapImage(map) {
+    if (!map) {
+        return Promise.reject(new Error('No map selected'));
+    }
+    if (!atlasMapState.imageCache) {
+        atlasMapState.imageCache = new Map();
+    }
+    const cache = atlasMapState.imageCache;
+    const cached = cache.get(map.id);
+    if (cached) {
+        if (cached instanceof HTMLImageElement && cached.complete && cached.naturalWidth > 0) {
+            return Promise.resolve(cached);
+        }
+        if (typeof cached.then === 'function') {
+            return cached;
+        }
+    }
+    const loader = new Promise((resolve, reject) => {
+        const image = new Image();
+        image.crossOrigin = 'anonymous';
+        image.onload = () => {
+            cache.set(map.id, image);
+            resolve(image);
+        };
+        image.onerror = (error) => {
+            cache.delete(map.id);
+            reject(error);
+        };
+        image.src = map.file;
+    });
+    cache.set(map.id, loader);
+    return loader;
+}
+
+function getEncounterGridMetrics() {
+    const settings = atlasMapState.settings;
+    if (!settings?.display) {
+        return null;
+    }
+
+    const resolution = settings.display.resolution || {};
+    const physical = settings.display.physical || {};
+    const grid = settings.display.grid || {};
+    const viewport = settings.display.viewport || {};
+
+    let baseCell = Number(grid.cell_px);
+    let ppi = Number(settings.display.physical?.ppi_override);
+
+    if (!Number.isFinite(ppi)) {
+        const storedPpi = Number(grid.pixels_per_inch);
+        if (Number.isFinite(storedPpi)) {
+            ppi = storedPpi;
+        } else {
+            const width = Number(resolution.w);
+            const height = Number(resolution.h);
+            const diagonal = Number(physical.diagonal_in);
+            if (Number.isFinite(width) && width > 0 && Number.isFinite(height) && height > 0 && Number.isFinite(diagonal) && diagonal > 0) {
+                const pixelDiagonal = Math.sqrt((width ** 2) + (height ** 2));
+                ppi = pixelDiagonal / diagonal;
+            }
+        }
+    }
+
+    if (!Number.isFinite(baseCell)) {
+        const inchesPerCell = Number(grid.inches_per_cell) || 1;
+        const fallbackPpi = Number.isFinite(ppi) ? ppi : 52.45;
+        baseCell = fallbackPpi * inchesPerCell;
+    }
+
+    if (!Number.isFinite(baseCell) || baseCell <= 0) {
+        return null;
+    }
+
+    const viewportGridZoom = Number(viewport.gridZoom) || Number(atlasMapState.preview.gridZoom) || 1;
+    const gridZoom = clamp(viewportGridZoom, 0.05, 5);
+    const configured = baseCell * gridZoom;
+    const areaZoom = clamp(atlasMapState.encounter.areaZoom || Number(viewport.zoom) || 1, atlasMapState.encounter.minAreaZoom || 0.25, atlasMapState.encounter.maxAreaZoom || 4);
+    const effective = configured * areaZoom;
+
+    return {
+        base: baseCell,
+        configured,
+        zoomed: effective,
+        gridZoom: gridZoom,
+        areaZoom
+    };
+}
+
+function computeStartAreaDimensions(mapWidth, mapHeight) {
+    const resolution = atlasMapState.settings?.display?.resolution;
+    let width = Number(resolution?.w) || 1920;
+    let height = Number(resolution?.h) || 1080;
+    if (width <= 0 || height <= 0) {
+        width = 1920;
+        height = 1080;
+    }
+    const scaleFactor = Math.min(mapWidth / width, mapHeight / height, 1);
+    const baseWidth = width * scaleFactor;
+    const baseHeight = height * scaleFactor;
+    const minZoom = atlasMapState.encounter.minAreaZoom || 0.25;
+    const maxZoom = atlasMapState.encounter.maxAreaZoom || 4;
+    const areaZoom = clamp(atlasMapState.encounter.areaZoom || 1, minZoom, maxZoom);
+
+    let adjustedWidth = baseWidth / areaZoom;
+    let adjustedHeight = baseHeight / areaZoom;
+    const fitScale = Math.min(mapWidth / adjustedWidth, mapHeight / adjustedHeight, 1);
+    adjustedWidth *= fitScale;
+    adjustedHeight *= fitScale;
+
+    return {
+        width: adjustedWidth,
+        height: adjustedHeight,
+        zoom: areaZoom
+    };
+}
+
+function computeEncounterStartRect(mapWidth, mapHeight) {
+    if (!atlasMapState.encounter.startArea) {
+        return null;
+    }
+    const dims = computeStartAreaDimensions(mapWidth, mapHeight);
+    if (!dims.width || !dims.height) {
+        return null;
+    }
+    let x = atlasMapState.encounter.startArea.x ?? 0;
+    let y = atlasMapState.encounter.startArea.y ?? 0;
+    x = clamp(x, 0, Math.max(0, mapWidth - dims.width));
+    y = clamp(y, 0, Math.max(0, mapHeight - dims.height));
+    atlasMapState.encounter.areaZoom = dims.zoom;
+    atlasMapState.encounter.startArea.x = x;
+    atlasMapState.encounter.startArea.y = y;
+    atlasMapState.encounter.startArea.zoom = dims.zoom;
+    return { x, y, width: dims.width, height: dims.height };
+}
+
+function positionEncounterStartArea(mapX, mapY) {
+    const render = atlasMapState.encounter.render;
+    if (!render) {
+        return;
+    }
+    const dims = computeStartAreaDimensions(render.mapWidth, render.mapHeight);
+    if (!dims.width || !dims.height) {
+        return;
+    }
+    const halfW = dims.width / 2;
+    const halfH = dims.height / 2;
+    const x = clamp(mapX - halfW, 0, Math.max(0, render.mapWidth - dims.width));
+    const y = clamp(mapY - halfH, 0, Math.max(0, render.mapHeight - dims.height));
+    atlasMapState.encounter.startArea = { x, y, zoom: atlasMapState.encounter.areaZoom || 1 };
+}
+
+function drawStartAreaOverlay(ctx, rect) {
+    const render = atlasMapState.encounter.render;
+    if (!render) {
+        return;
+    }
+    const x = render.offsetX + rect.x * render.scale;
+    const y = render.offsetY + rect.y * render.scale;
+    const w = rect.width * render.scale;
+    const h = rect.height * render.scale;
+
+    ctx.save();
+    ctx.strokeStyle = '#4ade80';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([8, 6]);
+    ctx.strokeRect(x, y, w, h);
+    ctx.fillStyle = 'rgba(74, 222, 128, 0.16)';
+    ctx.fillRect(x, y, w, h);
+    ctx.restore();
+}
+
+function drawAtlasEncounter() {
+    const { encounterCanvas, encounterEmpty, startAreaHint } = getAtlasElements();
+    if (!encounterCanvas) {
+        return;
+    }
+
+    const container = encounterCanvas.parentElement;
+    if (!container) {
+        return;
+    }
+
+    const width = container.clientWidth;
+    const height = container.clientHeight;
+    const dpr = window.devicePixelRatio || 1;
+    const ctx = encounterCanvas.getContext('2d');
+
+    encounterCanvas.width = Math.max(1, Math.floor(width * dpr));
+    encounterCanvas.height = Math.max(1, Math.floor(height * dpr));
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const map = getActiveEncounterMap();
+    if (!map) {
+        if (encounterEmpty) {
+            encounterEmpty.style.display = 'flex';
+        }
+        if (startAreaHint) {
+            startAreaHint.style.display = 'none';
+        }
+        atlasMapState.encounter.render = null;
+        updateEncounterSummary(null);
+        return;
+    }
+
+    if (encounterEmpty) {
+        encounterEmpty.style.display = 'none';
+    }
+
+    getAtlasMapImage(map).then((image) => {
+        if (atlasMapState.activeMapId !== map.id) {
+            return;
+        }
+
+        const baseScale = Math.min(width / image.width, height / image.height) || 1;
+        const zoom = atlasMapState.encounter.zoom;
+        const scale = baseScale * zoom;
+
+        const drawWidth = image.width * scale;
+        const drawHeight = image.height * scale;
+
+        const centerX = (width - drawWidth) / 2;
+        const centerY = (height - drawHeight) / 2;
+
+        const margin = 200;
+        let actualX = centerX + atlasMapState.encounter.offset.x;
+        let actualY = centerY + atlasMapState.encounter.offset.y;
+
+        const minActualX = Math.min(0, width - drawWidth) - margin;
+        const maxActualX = Math.max(0, width - drawWidth) + margin;
+        const minActualY = Math.min(0, height - drawHeight) - margin;
+        const maxActualY = Math.max(0, height - drawHeight) + margin;
+
+        actualX = clamp(actualX, minActualX, maxActualX);
+        actualY = clamp(actualY, minActualY, maxActualY);
+
+        atlasMapState.encounter.offset.x = actualX - centerX;
+        atlasMapState.encounter.offset.y = actualY - centerY;
+
+        ctx.clearRect(0, 0, width, height);
+        ctx.drawImage(image, actualX, actualY, drawWidth, drawHeight);
+
+        const gridEnabled = atlasMapState.settings?.display?.grid?.enabled ?? true;
+        if (atlasMapState.preview.showGrid && gridEnabled) {
+            const metrics = getEncounterGridMetrics();
+            if (metrics) {
+                drawGridOnContext(ctx, {
+                    x: actualX,
+                    y: actualY,
+                    width: drawWidth,
+                    height: drawHeight,
+                    scale
+                });
+            }
+        }
+
+        const rect = computeEncounterStartRect(image.width, image.height);
+        const renderGridMetrics = getEncounterGridMetrics();
+        atlasMapState.encounter.render = {
+            baseScale,
+            scale,
+            offsetX: actualX,
+            offsetY: actualY,
+            canvasWidth: width,
+            canvasHeight: height,
+            mapWidth: image.width,
+            mapHeight: image.height,
+            startRect: rect,
+            gridCellPx: renderGridMetrics ? renderGridMetrics.zoomed : null
+        };
+
+        if (rect) {
+            drawStartAreaOverlay(ctx, rect);
+        }
+
+        if (startAreaHint) {
+            startAreaHint.style.display = 'block';
+            if (atlasMapState.encounter.placing) {
+                startAreaHint.textContent = 'Click on the map to set the starting area.';
+            } else if (rect) {
+                startAreaHint.textContent = 'Drag to pan or place a new starting area when needed.';
+            } else {
+                startAreaHint.textContent = 'Click Place Starting Area to choose where play begins.';
+            }
+        }
+
+        updateEncounterSummary(rect);
+    }).catch((error) => {
+        console.error('[Atlas] Failed to load encounter map:', error);
+        if (encounterEmpty) {
+            encounterEmpty.textContent = 'Failed to load map preview.';
+            encounterEmpty.style.display = 'flex';
+        }
+        if (startAreaHint) {
+            startAreaHint.style.display = 'none';
+        }
+        atlasMapState.encounter.render = null;
+        updateEncounterSummary(null);
+    });
+}
+
+function handleEncounterWheel(event) {
+    if (!atlasMapState.encounter) {
+        return;
+    }
+    event.preventDefault();
+    const delta = event.deltaY < 0 ? 0.1 : -0.1;
+    const pointer = getEncounterPointer(event);
+    changeEncounterZoom(delta, pointer ? { x: pointer.x, y: pointer.y } : null);
+}
+
+function startEncounterDrag(event) {
+    if (event.button !== 0) {
+        return;
+    }
+    if (!atlasMapState.encounter.render) {
+        return;
+    }
+    atlasMapState.encounter.dragging = true;
+    atlasMapState.encounter.dragMoved = false;
+    atlasMapState.encounter.dragStart = { x: event.clientX, y: event.clientY };
+    atlasMapState.encounter.originalOffset = { ...atlasMapState.encounter.offset };
+}
+
+function handleEncounterDrag(event) {
+    if (!atlasMapState.encounter.dragging) {
+        return;
+    }
+    const dx = event.clientX - atlasMapState.encounter.dragStart.x;
+    const dy = event.clientY - atlasMapState.encounter.dragStart.y;
+    if (!atlasMapState.encounter.dragMoved) {
+        if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+            atlasMapState.encounter.dragMoved = true;
+        }
+    }
+    atlasMapState.encounter.offset.x = atlasMapState.encounter.originalOffset.x + dx;
+    atlasMapState.encounter.offset.y = atlasMapState.encounter.originalOffset.y + dy;
+    drawAtlasEncounter();
+}
+
+function endEncounterDrag() {
+    atlasMapState.encounter.dragging = false;
+}
+
+function handleEncounterCanvasClick(event) {
+    if (atlasMapState.encounter.dragMoved) {
+        atlasMapState.encounter.dragMoved = false;
+        return;
+    }
+    if (!atlasMapState.activeMapId) {
+        return;
+    }
+    if (!atlasMapState.encounter.placing && atlasMapState.encounter.startArea) {
+        return;
+    }
+    const pointer = getEncounterPointer(event);
+    if (!pointer) {
+        return;
+    }
+    positionEncounterStartArea(pointer.mapX, pointer.mapY);
+    atlasMapState.encounter.dirty = true;
+    updateEncounterControls();
+    drawAtlasEncounter();
+}
+
+function changeEncounterFrameZoom(delta) {
+    const encounter = atlasMapState.encounter;
+    const min = encounter.minAreaZoom || 0.25;
+    const max = encounter.maxAreaZoom || 4;
+    const current = encounter.areaZoom || 1;
+    const next = clamp(current + delta, min, max);
+    setEncounterFrameZoom(next);
+}
+
+function setEncounterFrameZoom(nextZoom) {
+    const encounter = atlasMapState.encounter;
+    const min = encounter.minAreaZoom || 0.25;
+    const max = encounter.maxAreaZoom || 4;
+    const clamped = clamp(nextZoom, min, max);
+    const previous = encounter.areaZoom || 1;
+    if (Math.abs(clamped - previous) < 0.0001) {
+        return;
+    }
+
+    let center = null;
+    const render = encounter.render;
+    if (render?.startRect && encounter.startArea) {
+        center = {
+            x: encounter.startArea.x + render.startRect.width / 2,
+            y: encounter.startArea.y + render.startRect.height / 2
+        };
+    }
+
+    encounter.areaZoom = clamped;
+    if (encounter.startArea && center) {
+        positionEncounterStartArea(center.x, center.y);
+    }
+
+    if (encounter.startArea) {
+        encounter.dirty = true;
+        encounter.startArea.zoom = clamped;
+    }
+
+    atlasMapState.settings = atlasMapState.settings || {};
+    atlasMapState.settings.display = atlasMapState.settings.display || {};
+    atlasMapState.settings.display.viewport = atlasMapState.settings.display.viewport || {};
+    atlasMapState.settings.display.viewport.zoom = clamped;
+    atlasMapState.settings.display.viewport.fit = 'pixel';
+
+    atlasMapState.preview.zoom = clamped;
+    drawAtlasPreview();
+
+    updateEncounterSummary(null);
+    drawAtlasEncounter();
+}
+
+function changeEncounterGridZoom(delta) {
+    if (!atlasMapState.settings?.display) {
+        return;
+    }
+    atlasMapState.settings = atlasMapState.settings || {};
+    atlasMapState.settings.display = atlasMapState.settings.display || {};
+    const current = Number(atlasMapState.preview.gridZoom) || Number(atlasMapState.settings.display?.viewport?.gridZoom) || 1;
+    const next = clamp(current + delta, 0.1, 4);
+    if (Math.abs(next - current) < 0.0001) {
+        return;
+    }
+
+    const rounded = Number(next.toFixed(2));
+    atlasMapState.preview.gridZoom = rounded;
+    atlasMapState.settings.display = atlasMapState.settings.display || {};
+    atlasMapState.settings.display.viewport = atlasMapState.settings.display.viewport || {};
+    atlasMapState.settings.display.viewport.gridZoom = rounded;
+
+    updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
+    drawAtlasPreview();
+    drawAtlasEncounter();
+}
+
+function resetEncounterGridZoom() {
+    if (!atlasMapState.settings?.display) {
+        return;
+    }
+    atlasMapState.preview.gridZoom = 1;
+    atlasMapState.settings.display = atlasMapState.settings.display || {};
+    atlasMapState.settings.display.viewport = atlasMapState.settings.display.viewport || {};
+    atlasMapState.settings.display.viewport.gridZoom = 1;
+    updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
+    drawAtlasPreview();
+    drawAtlasEncounter();
+}
+
+function changeEncounterZoom(delta, focusPoint) {
+    const encounter = atlasMapState.encounter;
+    const newZoom = (encounter.zoom || 1) + delta;
+    setEncounterZoom(newZoom, focusPoint);
+}
+
+function setEncounterZoom(newZoom, focusPoint) {
+    const encounter = atlasMapState.encounter;
+    const clamped = clamp(newZoom, encounter.minZoom, encounter.maxZoom);
+    const render = encounter.render;
+    const previous = encounter.zoom || 1;
+    encounter.zoom = clamped;
+    if (!render) {
+        drawAtlasEncounter();
+        return;
+    }
+    if (Math.abs(clamped - previous) < 0.0001) {
+        return;
+    }
+
+    const baseScale = render.baseScale;
+    const newScale = baseScale * clamped;
+    const drawWidth = render.mapWidth * newScale;
+    const drawHeight = render.mapHeight * newScale;
+    const centerX = (render.canvasWidth - drawWidth) / 2;
+    const centerY = (render.canvasHeight - drawHeight) / 2;
+
+    const prevScale = render.scale || baseScale;
+    const focus = focusPoint || {
+        x: render.canvasWidth / 2,
+        y: render.canvasHeight / 2
+    };
+    const mapX = (focus.x - render.offsetX) / prevScale;
+    const mapY = (focus.y - render.offsetY) / prevScale;
+
+    const actualX = focus.x - mapX * newScale;
+    const actualY = focus.y - mapY * newScale;
+
+    encounter.offset.x = actualX - centerX;
+    encounter.offset.y = actualY - centerY;
+    drawAtlasEncounter();
+}
+
+function getEncounterPointer(event) {
+    const elements = getAtlasElements();
+    const render = atlasMapState.encounter.render;
+    if (!elements.encounterCanvas || !render) {
+        return null;
+    }
+    const rect = elements.encounterCanvas.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    const mapX = (x - render.offsetX) / render.scale;
+    const mapY = (y - render.offsetY) / render.scale;
+    return { x, y, mapX, mapY };
+}
+
+function saveEncounterStartArea() {
+    const mapId = atlasMapState.activeMapId;
+    const elements = getAtlasElements();
+    if (!mapId) {
+        alert('Select an active map before saving.');
+        return;
+    }
+
+    const encounterSettings = atlasMapState.settings?.encounter || {};
+    const startAreas = { ...(encounterSettings.startingAreas || {}) };
+
+    if (atlasMapState.encounter.startArea) {
+        startAreas[mapId] = {
+            x: Number(atlasMapState.encounter.startArea.x.toFixed(2)),
+            y: Number(atlasMapState.encounter.startArea.y.toFixed(2)),
+            zoom: Number((atlasMapState.encounter.areaZoom || 1).toFixed(2))
+        };
+    } else {
+        delete startAreas[mapId];
+    }
+
+    const payload = {
+        ...encounterSettings,
+        startingAreas: startAreas
+    };
+
+    if (elements.saveStartAreaBtn) {
+        elements.saveStartAreaBtn.disabled = true;
+        elements.saveStartAreaBtn.textContent = 'Saving...';
+    }
+
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ encounter: payload })
+    })
+        .then((res) => res.json())
+        .then((settings) => {
+            atlasMapState.settings = settings;
+            syncEncounterStateFromSettings(true);
+            populateSettingsForm();
+            updateEncounterControls();
+            drawAtlasEncounter();
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to save starting area:', error);
+            alert('Failed to save starting area.');
+        })
+        .finally(() => {
+            if (elements.saveStartAreaBtn) {
+                elements.saveStartAreaBtn.disabled = false;
+                elements.saveStartAreaBtn.textContent = 'Save';
+            }
+        });
+}
+
+function clearEncounterStartingArea() {
+    atlasMapState.encounter.startArea = null;
+    atlasMapState.encounter.areaZoom = 1;
+    if (atlasMapState.settings?.display?.viewport) {
+        atlasMapState.settings.display.viewport.zoom = 1;
+    }
+    atlasMapState.preview.zoom = 1;
+    atlasMapState.encounter.dirty = true;
+    atlasMapState.encounter.placing = false;
+    updateEncounterControls();
+    updateEncounterSummary(null);
+    drawAtlasPreview();
+    drawAtlasEncounter();
+}
 function drawAtlasPreview() {
     const { previewCanvas, previewEmpty } = getAtlasElements();
     if (!previewCanvas) {
