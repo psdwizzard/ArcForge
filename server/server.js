@@ -17,12 +17,14 @@ const DISPLAY_PORT = 3001;
 const ROOT_DIR = path.join(__dirname, '..');
 const DATA_DIR = path.join(ROOT_DIR, 'data');
 const MAPS_DIR = path.join(ROOT_DIR, 'maps');
+const ENCOUNTERS_DIR = path.join(DATA_DIR, 'encounters');
 const DISPLAY_PUBLIC_DIR = path.join(ROOT_DIR, 'public-display');
 const MAPS_DB_PATH = path.join(DATA_DIR, 'maps.json');
 const ATLAS_SETTINGS_PATH = path.join(DATA_DIR, 'atlas_settings.json');
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(MAPS_DIR, { recursive: true });
+fs.mkdirSync(ENCOUNTERS_DIR, { recursive: true });
 fs.mkdirSync(DISPLAY_PUBLIC_DIR, { recursive: true });
 
 displayApp.use(express.static(DISPLAY_PUBLIC_DIR));
@@ -121,7 +123,11 @@ let currentEncounter = {
 // Utility function to save encounter to disk (auto-save)
 function autoSaveEncounter() {
   if (currentEncounter.encounterId) {
-    const encounterPath = path.join(__dirname, '../data/encounters', `${currentEncounter.encounterId}.json`);
+    // Ensure encounters directory exists
+    if (!fs.existsSync(ENCOUNTERS_DIR)) {
+      fs.mkdirSync(ENCOUNTERS_DIR, { recursive: true });
+    }
+    const encounterPath = path.join(ENCOUNTERS_DIR, `${currentEncounter.encounterId}.json`);
     fs.writeFileSync(encounterPath, JSON.stringify(currentEncounter, null, 2));
   }
 }
@@ -1132,11 +1138,173 @@ app.get('/api/load', (req, res) => {
     }
 });
 
+// Session management endpoints
+
+const SESSIONS_DIR = path.join(DATA_DIR, 'sessions');
+fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+
+// Get all sessions
+app.get('/api/sessions', (req, res) => {
+  if (!fs.existsSync(SESSIONS_DIR)) {
+    fs.mkdirSync(SESSIONS_DIR, { recursive: true });
+    return res.json([]);
+  }
+
+  const files = fs.readdirSync(SESSIONS_DIR);
+  const sessions = files
+    .filter(f => f.endsWith('.json'))
+    .map(f => {
+      const data = JSON.parse(fs.readFileSync(path.join(SESSIONS_DIR, f), 'utf8'));
+      return data;
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  res.json(sessions);
+});
+
+// Get single session
+app.get('/api/sessions/:id', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.id}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  res.json(session);
+});
+
+// Create or update session
+app.post('/api/sessions', (req, res) => {
+  const session = req.body;
+
+  if (!session.id) {
+    session.id = `session-${Date.now()}`;
+  }
+
+  if (!session.createdAt) {
+    session.createdAt = new Date().toISOString();
+  }
+
+  if (!session.encounters) {
+    session.encounters = [];
+  }
+
+  const sessionPath = path.join(SESSIONS_DIR, `${session.id}.json`);
+  fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
+
+  res.json(session);
+});
+
+// Delete session
+app.delete('/api/sessions/:id', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.id}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  fs.unlinkSync(sessionPath);
+  res.json({ message: 'Session deleted' });
+});
+
+// Create encounter in session
+app.post('/api/sessions/:sessionId/encounters', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.sessionId}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  const encounter = req.body;
+
+  if (!encounter.id) {
+    encounter.id = `encounter-${Date.now()}`;
+  }
+
+  if (!encounter.createdAt) {
+    encounter.createdAt = new Date().toISOString();
+  }
+
+  if (!session.encounters) {
+    session.encounters = [];
+  }
+
+  session.encounters.push(encounter);
+  fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
+
+  res.json(encounter);
+});
+
+// Get encounter from session
+app.get('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.sessionId}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  const encounter = session.encounters?.find(e => e.id === req.params.encounterId);
+
+  if (!encounter) {
+    return res.status(404).json({ error: 'Encounter not found' });
+  }
+
+  res.json(encounter);
+});
+
+// Update encounter in session
+app.put('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.sessionId}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  const encounterIndex = session.encounters?.findIndex(e => e.id === req.params.encounterId);
+
+  if (encounterIndex === -1 || encounterIndex === undefined) {
+    return res.status(404).json({ error: 'Encounter not found' });
+  }
+
+  session.encounters[encounterIndex] = {
+    ...session.encounters[encounterIndex],
+    ...req.body
+  };
+
+  fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
+  res.json(session.encounters[encounterIndex]);
+});
+
+// Delete encounter from session
+app.delete('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
+  const sessionPath = path.join(SESSIONS_DIR, `${req.params.sessionId}.json`);
+
+  if (!fs.existsSync(sessionPath)) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+
+  const session = JSON.parse(fs.readFileSync(sessionPath, 'utf8'));
+  const encounterIndex = session.encounters?.findIndex(e => e.id === req.params.encounterId);
+
+  if (encounterIndex === -1 || encounterIndex === undefined) {
+    return res.status(404).json({ error: 'Encounter not found' });
+  }
+
+  session.encounters.splice(encounterIndex, 1);
+  fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
+
+  res.json({ message: 'Encounter deleted' });
+});
+
 // Dev restart endpoint
 app.post('/api/dev/restart', (req, res) => {
   console.log('[DEV] Restart requested');
   res.json({ message: 'Server restarting...' });
-  
+
   setTimeout(() => {
     console.log('[DEV] Shutting down...');
     process.exit(0);

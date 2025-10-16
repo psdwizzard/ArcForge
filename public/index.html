@@ -9,18 +9,31 @@
 <body>
     <div class="app-container">
         <header>
-            <div class="header-logo">
-                <img src="images/Arc_Logo-48px.png" alt="ArcForge logo" class="logo-image">
-                <button id="dev-restart-btn" class="btn btn-dev" title="Restart Server & Reload">🔄</button>
+            <div class="header-left">
+                <div class="header-logo">
+                    <img src="images/Arc_Logo-48px.png" alt="ArcForge logo" class="logo-image">
+                    <button id="dev-restart-btn" class="btn btn-dev" title="Restart Server & Reload">🔄</button>
+                </div>
+                <nav class="header-nav">
+                    <button id="nav-arena-btn" class="nav-btn active">Arena</button>
+                    <button id="nav-crucible-btn" class="nav-btn">Crucible</button>
+                    <button id="nav-atlas-btn" class="nav-btn">Atlas</button>
+                    <button id="nav-codex-btn" class="nav-btn">Codex</button>
+                </nav>
             </div>
-            <nav class="header-nav">
-                <button id="nav-arena-btn" class="nav-btn active">Arena</button>
-                <button id="nav-crucible-btn" class="nav-btn">Crucible</button>
-                <button id="nav-atlas-btn" class="nav-btn">Atlas</button>
-                <button id="nav-codex-btn" class="nav-btn">Codex</button>
-            </nav>
             <div class="header-actions">
-                <button id="new-encounter-btn" class="btn btn-secondary">New Encounter</button>
+                <div class="session-encounter-controls">
+                    <button id="new-session-btn" class="btn btn-primary">New Session</button>
+                    <button id="load-session-btn" class="btn btn-secondary">Load Session</button>
+                    <div class="session-info">
+                        <span id="current-session-name" class="session-name">No Session</span>
+                    </div>
+                    <button id="new-encounter-btn" class="btn btn-success">New Encounter</button>
+                    <button id="load-encounter-btn" class="btn btn-secondary">Load Encounter</button>
+                    <div class="encounter-info">
+                        <span id="current-encounter-name" class="encounter-name">No Encounter</span>
+                    </div>
+                </div>
                 <div class="round-display">
                     Round: <span id="round-number">1</span>
                 </div>
@@ -858,6 +871,87 @@
         </div>
     </div>
 
+    <!-- Session Management Modal -->
+    <div id="session-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="session-modal-title">Session Management</h2>
+                <button class="modal-close" onclick="closeSessionModal()">&times;</button>
+            </div>
+            <div id="session-modal-body" class="modal-body">
+                <div class="session-modal-layout">
+                    <div class="session-form-section">
+                        <h3>Create New Session</h3>
+                        <form id="session-form">
+                            <div class="form-group">
+                                <label for="session-name-input">Session Name *</label>
+                                <input type="text" id="session-name-input" required placeholder="e.g., The Lost Mines - Session 4">
+                            </div>
+                            <div class="form-group">
+                                <label for="session-description-input">Description</label>
+                                <textarea id="session-description-input" rows="3" placeholder="Campaign notes, goals for today..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Create Session</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeSessionModal()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="session-list-section">
+                        <h3>Saved Sessions</h3>
+                        <div id="sessions-list" class="sessions-list">
+                            <div class="empty-state">No sessions saved yet</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Encounter Management Modal -->
+    <div id="encounter-modal" class="modal" style="display: none;">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2 id="encounter-modal-title">Encounter Management</h2>
+                <button class="modal-close" onclick="closeEncounterModal()">&times;</button>
+            </div>
+            <div id="encounter-modal-body" class="modal-body">
+                <div class="encounter-modal-layout">
+                    <div class="encounter-form-section">
+                        <h3>Create New Encounter</h3>
+                        <form id="encounter-form">
+                            <div class="form-group">
+                                <label for="encounter-name-input">Encounter Name *</label>
+                                <input type="text" id="encounter-name-input" required placeholder="e.g., Goblin Ambush">
+                            </div>
+                            <div class="form-group">
+                                <label for="encounter-map-select">Associated Map</label>
+                                <select id="encounter-map-select">
+                                    <option value="">No Map</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="encounter-description-input">Description</label>
+                                <textarea id="encounter-description-input" rows="3" placeholder="Notes about this encounter..."></textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-success">Create Encounter</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeEncounterModal()">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="encounter-list-section">
+                        <h3>Encounters in Current Session</h3>
+                        <div id="encounters-list" class="encounters-list">
+                            <div class="empty-state">No encounters in this session</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/session-manager.js?v=1"></script>
     <script src="js/app.js?v=13"></script>
     <script src="js/character-builder.js?v=3"></script>
     <script src="js/effects-builder.js?v=2"></script>
