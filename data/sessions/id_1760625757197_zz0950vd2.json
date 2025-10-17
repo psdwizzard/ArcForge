@@ -110,16 +110,139 @@
       "createdAt": "2025-10-16T23:26:08.990Z",
       "combatants": [
         {
-          "id": "combatant-1760657176990-0dy4o722m",
+          "id": "combatant-1760714384349-0dvamu21y",
           "name": "Pig - 01",
           "type": "enemy",
           "initiative": 13,
-          "dexModifier": 0,
+          "dexModifier": 4,
           "imagePath": null,
           "sourceId": null,
-          "atlasTokenId": "enc-enemy-1760657173505-m94275",
+          "atlasTokenId": "enc-enemy-1760714368798-qx7c9w",
+          "hp": {
+            "current": 43,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760714382014-nhedrudwg",
+          "name": "Ancient Bronze Dragon - 01",
+          "type": "enemy",
+          "initiative": 13,
+          "dexModifier": 0,
+          "imagePath": "/data/creatures/library/tokens/dragon/YoungBronzeDragon.webp",
+          "sourceId": "35Y64PEFFdvQS0ra",
+          "atlasTokenId": "enc-enemy-1760714375060-61bfhe",
+          "hp": {
+            "current": 444,
+            "max": 444,
+            "temp": 0
+          },
+          "ac": 22,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [
+            {
+              "name": "Bite",
+              "attackBonus": 16,
+              "damageRoll": "2d10+9",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+16 to hit,</strong>, <strong>15 ft.,</strong> one target. Hit: <strong>20 (2d10 + 9) <em>piercing damage</em></strong>.</p>"
+            },
+            {
+              "name": "Claw",
+              "attackBonus": 16,
+              "damageRoll": "2d6+9",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+16 to hit,</strong>, <strong>10 ft.,</strong> one target. Hit: <strong>16 (2d6 + 9) <em>slashing damage</em></strong>.</p>"
+            },
+            {
+              "name": "Tail",
+              "attackBonus": 16,
+              "damageRoll": "2d8+9",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+16 to hit,</strong>, <strong>20 ft.,</strong> one target. Hit: <strong>18 (2d8 + 9) <em>bludgeoning damage</em></strong>.</p>"
+            }
+          ],
+          "specialAbilities": [
+            {
+              "name": "Multiattack",
+              "description": "<p>The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.</p>"
+            },
+            {
+              "name": "Frightful Presence",
+              "description": "<p>Each creature of the dragon's choice that is <strong>within 120 feet</strong> of the dragon and aware of it must succeed on a <strong>DC 20 Wisdom saving throw</strong> or become frightened for <strong>1 minute</strong>. </p><p>A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours.</p>"
+            },
+            {
+              "name": "Breath Weapons",
+              "description": "<p>The dragon uses one of the following breath weapons.</p><p>**Lightning Breath.** The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a  <strong>DC 23 Dexterity</strong> saving throw, taking <strong>88 (16d10) <em>lightning damage</em></strong> on a failed save, or half as much damage on a successful one.</p><p>**Repulsion Breath.** The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a  <strong>DC 23 Strength</strong> saving throw. On a failed save, the creature is pushed 60 feet away from the dragon.</p>"
+            },
+            {
+              "name": "Lightning Breath",
+              "description": "<p>**Lightning Breath.** The dragon exhales lightning in a 120-foot line that is 10 feet wide. Each creature in that line must make a  <strong>DC 23 Dexterity</strong> saving throw, taking <strong>88 (16d10) <em>lightning damage</em></strong> on a failed save, or half as much damage on a successful one.</p>"
+            },
+            {
+              "name": "Repulsion Breath",
+              "description": "<p>**Repulsion Breath.** The dragon exhales repulsion energy in a 30-foot cone. Each creature in that area must succeed on a  <strong>DC 23 Strength</strong> saving throw. On a failed save, the creature is pushed 60 feet away from the dragon.</p>"
+            },
+            {
+              "name": "Change Shape",
+              "description": "<p>The dragon magically <strong>polymorphs</strong> into a <strong>humanoid</strong> or <strong>beast</strong> that has a challenge rating no higher than its own, or back into its true form. It reverts to its true form if it dies. Any equipment it is wearing or carrying is absorbed or borne by the new form (the dragon's choice).</p>\n<p>In a new form, the dragon <strong>retains its alignment, hit points, Hit Dice, ability to speak, proficiencies, Legendary Resistance, lair actions, and Intelligence, Wisdom, and Charisma scores, as well as this action. </strong>Its statistics and capabilities are otherwise replaced by those of the new form, <strong>except any class features or legendary actions of that form.</strong></p>"
+            }
+          ]
+        },
+        {
+          "id": "combatant-1760714390310-qke64fvqf",
+          "name": "Awakened Shrub - 01",
+          "type": "enemy",
+          "initiative": 13,
+          "dexModifier": -1,
+          "imagePath": "/data/creatures/library/tokens/plant/AwakenedShrub.webp",
+          "sourceId": "gaSTr7DFZJLmgI2J",
+          "atlasTokenId": "enc-enemy-1760714379444-ju6n5v",
           "hp": {
             "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 9,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [
+            {
+              "name": "Rake",
+              "attackBonus": 0,
+              "damageRoll": "1d4+-1",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+1 to hit,</strong>, <strong>5 ft.,</strong> one target. Hit: 1 (1d4 - 1) <em>slashing damage</em>.</p>"
+            }
+          ],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760714401933-4u2phmrex",
+          "name": "klous",
+          "type": "p",
+          "initiative": 11,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1760356767243-215162926.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 0,
             "max": 10,
             "temp": 0
           },
@@ -134,17 +257,17 @@
           "specialAbilities": []
         },
         {
-          "id": "combatant-1760657186220-xmbnj7yji",
-          "name": "Acolyte - 01",
+          "id": "combatant-1760714386565-qov4fgf3q",
+          "name": "Pig - 02",
           "type": "enemy",
-          "initiative": 5,
-          "dexModifier": 0,
-          "imagePath": "/data/creatures/library/tokens/humanoid/Acolyte.webp",
-          "sourceId": "CHEUjiYrVM9X0vIT",
-          "atlasTokenId": "enc-enemy-1760657181614-4eb6dx",
+          "initiative": 9,
+          "dexModifier": 4,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760714367558-jj5gzj",
           "hp": {
-            "current": 9,
-            "max": 9,
+            "current": 43,
+            "max": 43,
             "temp": 0
           },
           "ac": 10,
@@ -154,74 +277,132 @@
             "failures": 0
           },
           "loot": [],
-          "attacks": [
-            {
-              "name": "Club",
-              "attackBonus": 1,
-              "damageRoll": "1d4+0",
-              "description": "<p><em>Melee Weapon Attack:</em><strong>+2 to hit,</strong>, <strong>5 ft.,</strong> one target. Hit: <strong>2 (1d4) <em>bludgeoning damage</em></strong>.</p>"
-            }
-          ],
-          "specialAbilities": [
-            {
-              "name": "Light",
-              "description": "<p>You touch one object that is no larger than 10 feet in any dimension. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet. The light can be colored as you like. Completely covering the object with something opaque blocks the light. The spell ends if you cast it again or dismiss it as an action.</p><p>If you target an object held or worn by a hostile creature, that creature must succeed on a Dexterity saving throw to avoid the spell.</p>"
-            },
-            {
-              "name": "Sacred Flame",
-              "description": "<p>Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw.</p><p>The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8).</p>"
-            },
-            {
-              "name": "Thaumaturgy",
-              "description": "<p>You create one of the following magical effects within range:</p>\n<ul>\n<li>Your voice booms up to three times as loud as normal for 1 minute.</li>\n<li>You cause flames to flicker, brighten, dim, or change color for 1 minute.</li>\n<li>You cause harmless tremors in the ground for 1 minute.</li>\n<li>You create a sound that originates from a point of your choice within range.</li>\n<li>You cause an unlocked door or window to fly open or slam shut.</li>\n<li>You alter the appearance of your eyes for 1 minute.</li>\n</ul>\n<p>If you cast this spell multiple times, you can have up to three of its 1-minute effects active at a time, and you can dismiss such an effect as an action.</p>"
-            },
-            {
-              "name": "Bless",
-              "description": "<p>You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll 1d4 and add the number rolled to the attack roll or saving throw.</p>\n<p><strong>Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.</p>"
-            },
-            {
-              "name": "Sanctuary",
-              "description": "<p>You ward a creature within range against attack. Until the spell ends, any creature who targets the warded creature with an attack or a harmful spell must first make a Wisdom saving throw. On a failed save, the creature must choose a new target or lose the attack or spell. This spell doesn't protect the warded creature from area effects, such as the explosion of a Fireball.</p><p>If the warded creature makes an attack or casts a spell that affects an enemy creature, this spell ends.</p>"
-            },
-            {
-              "name": "Cure Wounds",
-              "description": "<p>A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.</p><p><strong>Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.</p>"
-            }
-          ]
+          "attacks": [],
+          "specialAbilities": []
         }
       ],
       "roundNumber": 1,
-      "currentTurnIndex": 0,
+      "currentTurnIndex": 1,
       "placedEnemies": [
         {
-          "id": "enc-enemy-1760657173505-m94275",
-          "name": "Pig - 01",
+          "id": "enc-enemy-1760714367558-jj5gzj",
+          "name": "Pig - 02",
           "source": "custom",
-          "payload": null,
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760462067060",
+                "name": "puckYou",
+                "attackBonus": 50,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
           "placed": true,
           "visible": true,
           "position": {
-            "x": 100.97,
+            "x": 1330.96,
+            "y": 1092.3,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760714367558-jj5gzj"
+        },
+        {
+          "id": "enc-enemy-1760714368798-qx7c9w",
+          "name": "Pig - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760462067060",
+                "name": "puckYou",
+                "attackBonus": 50,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 376.34,
+            "y": 1257.52,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760714368798-qx7c9w"
+        },
+        {
+          "id": "enc-enemy-1760714375060-61bfhe",
+          "name": "Ancient Bronze Dragon - 01",
+          "source": "library",
+          "payload": {
+            "id": "35Y64PEFFdvQS0ra"
+          },
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 1165.73,
+            "y": 1789.91,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760714375060-61bfhe"
+        },
+        {
+          "id": "enc-enemy-1760714379444-ju6n5v",
+          "name": "Awakened Shrub - 01",
+          "source": "library",
+          "payload": {
+            "id": "gaSTr7DFZJLmgI2J"
+          },
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 266.19,
             "y": 1826.62,
             "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
           },
-          "atlasTokenId": "enc-enemy-1760657173505-m94275"
-        },
-        {
-          "id": "enc-enemy-1760657181614-4eb6dx",
-          "name": "Acolyte - 01",
-          "source": "library",
-          "payload": {
-            "id": "CHEUjiYrVM9X0vIT"
-          },
-          "placed": true,
-          "visible": true,
-          "position": {
-            "x": 321.26,
-            "y": 1863.34,
-            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
-          },
-          "atlasTokenId": "enc-enemy-1760657181614-4eb6dx"
+          "atlasTokenId": "enc-enemy-1760714379444-ju6n5v"
         }
       ]
     }

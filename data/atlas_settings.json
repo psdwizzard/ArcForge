@@ -1,8 +1,8 @@
 {
   "display": {
     "resolution": {
-      "w": 720,
-      "h": 1280
+      "w": 1080,
+      "h": 1920
     },
     "physical": {
       "diagonal_in": 8,
@@ -21,8 +21,8 @@
       "zoom": 1.5,
       "gridZoom": 0.1,
       "offset": {
-        "x": 1104,
-        "y": -767.99
+        "x": 924,
+        "y": -576
       }
     }
   },
@@ -31,7 +31,7 @@
     "startingAreas": {
       "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc": {
         "x": 48,
-        "y": 1109.33,
+        "y": 768,
         "zoom": 1.5
       }
     }

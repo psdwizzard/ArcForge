@@ -1,0 +1,16 @@
+/* Atlas layout overrides to ensure encounter map maintains minimum width */
+#atlas-encounters-section .atlas-encounter-stage {
+    flex: 1 1 550px;
+    min-width: min(550px, 100%);
+}
+
+#atlas-encounters-section .atlas-agent-panel {
+    flex: 0 1 480px;
+    min-width: 320px;
+}
+
+#atlas-encounters-section .atlas-enemy-panel {
+    flex: 0 1 400px;
+    min-width: 400px;
+    width: min(100%, 440px);
+}

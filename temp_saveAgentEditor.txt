@@ -1,0 +1,73 @@
+async function saveAgentEditor() {
+    const editCtx = atlasMapState.encounter.editing;
+    if (!editCtx) return;
+    const pending = atlasMapState.encounter.pending || [];
+    const entry = pending.find(e => e.id === editCtx.entryId);
+    if (!entry) return;
+
+    const byId = (id) => document.getElementById(id);
+    const name = byId('ae-name').value.trim();
+    const ac = Number(byId('ae-ac').value || 0);
+    const hp = Number(byId('ae-hp').value || 0);
+    const abilities = {
+        str: Number(byId('ae-str').value || 10),
+        dex: Number(byId('ae-dex').value || 10),
+        con: Number(byId('ae-con').value || 10),
+        int: Number(byId('ae-int').value || 10),
+        wis: Number(byId('ae-wis').value || 10),
+        cha: Number(byId('ae-cha').value || 10)
+    };
+    // Prefer structured items; fall back to comma list
+    let inventory = (atlasMapState.encounter.editingInventory || []);
+    if (!inventory.length) {
+        const inventoryText = byId('ae-inventory').value || '';
+        inventory = inventoryText
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(name => ({ id: name, name }));
+    }
+    const gold = Number(byId('ae-gold').value || 0);
+    const visible = !!byId('ae-visible').checked;
+
+    // Always update the staged entry
+    entry.name = name || entry.name;
+    entry.visible = visible;
+    entry.inventory = inventory;
+    atlasMapState.encounter.dirty = true;
+
+    // If linked combatant exists, persist to Arena
+    if (editCtx.combatantId) {
+        try {
+            const payload = {
+                name,
+                ac,
+                hp: { current: hp, max: Math.max(hp, 1), temp: (window.encounterState?.combatants?.find(c => c.id === editCtx.combatantId)?.hp?.temp) || 0 },
+                abilities,
+                inventory,
+                gold
+            };
+            const res = await fetch(`${API_BASE}/combatants/${editCtx.combatantId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                // Update local state
+                const c = (window.encounterState?.combatants || []).find(c => c.id === editCtx.combatantId);
+                if (c) {
+                    c.name = payload.name;
+                    c.ac = payload.ac;
+                    c.hp = payload.hp;
+                    c.abilities = payload.abilities;
+                    c.inventory = payload.inventory;
+                    c.gold = payload.gold;
+                }
+                if (typeof renderCombatantsList === 'function') {
+                    renderCombatantsList();
+                }
+            }
+        } catch (e) {
+            console.error('[Atlas] Failed to update combatant:', e);
+        }
+    }

@@ -1,4 +1,4 @@
-function toggleAgentDetails(agentId) {
+﻿function toggleAgentDetails(agentId) {
     const card = document.querySelector(`.agent-card[data-agent-id="${agentId}"]`);
     if (!card) {
         return;
@@ -3620,18 +3620,177 @@ function selectEncounterEnemy(enemy) {
     renderEncounterEnemyDetail(enemy);
 }
 
+function coerceNumber(value) {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+}
+
+function extractPayloadAbilityScores(payload) {
+    if (!payload) {
+        return null;
+    }
+    const abilityKeys = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
+    const scores = {};
+    abilityKeys.forEach((key) => {
+        const direct = coerceNumber(payload[key]);
+        const nested = coerceNumber(payload.abilities?.[key]);
+        const value = direct ?? nested;
+        if (value !== null && value !== undefined) {
+            scores[key] = value;
+        }
+    });
+    return Object.keys(scores).length ? scores : null;
+}
+
+function extractPayloadInventory(payload) {
+    if (!payload) {
+        return [];
+    }
+    const normalizeItem = (item) => ({
+        id: item?.id || item?._id || item?.uuid || item?.name,
+        name: item?.name || '',
+        type: item?.type || item?.system?.type || null,
+        price: item?.price ?? item?.system?.price ?? null,
+        weight: item?.weight ?? item?.system?.weight ?? null
+    });
+    if (Array.isArray(payload.inventory) && payload.inventory.length) {
+        return payload.inventory.map(normalizeItem);
+    }
+    if (Array.isArray(payload.items) && payload.items.length) {
+        return payload.items.map(normalizeItem);
+    }
+    if (Array.isArray(payload.gear) && payload.gear.length) {
+        return payload.gear.map(normalizeItem);
+    }
+    return [];
+}
+
+function extractPayloadGold(payload) {
+    if (!payload) {
+        return null;
+    }
+    const sources = [
+        payload.gold,
+        payload.currency?.gp,
+        payload.coins?.gp,
+        payload.treasure?.gold
+    ];
+    for (const value of sources) {
+        const num = coerceNumber(value);
+        if (num !== null && num !== undefined) {
+            return num;
+        }
+    }
+    return null;
+}
+
+function extractPayloadDexModifier(payload, abilityScores) {
+    if (abilityScores?.dex !== undefined) {
+        return modifierFromScore(abilityScores.dex);
+    }
+    const candidates = [
+        payload?.dex_mod,
+        payload?.dexModifier,
+        payload?.abilities?.dex_mod,
+        payload?.abilities?.dexModifier,
+        payload?.dex
+    ];
+    for (const value of candidates) {
+        const num = coerceNumber(value);
+        if (num !== null && num !== undefined) {
+            if (value === payload?.dex) {
+                return modifierFromScore(num);
+            }
+            return num;
+        }
+    }
+    return null;
+}
+
 function handleEncounterEnemyAdd(enemy) {
     if (!enemy) {
         return;
     }
     atlasMapState.encounter.pending = atlasMapState.encounter.pending || [];
+    const payload = enemy.raw || enemy;
+    const abilityScores = extractPayloadAbilityScores(payload);
+    const inventory = extractPayloadInventory(payload);
+    const gold = extractPayloadGold(payload);
+
+    const stats = {};
+    const hpCandidates = [
+        enemy?.hp,
+        payload?.hp,
+        payload?.hit_points,
+        payload?.attributes?.hp?.value,
+        payload?.hp?.value,
+        payload?.hp?.average
+    ];
+    for (const candidate of hpCandidates) {
+        if (candidate === undefined || candidate === null) {
+            continue;
+        }
+        if (typeof candidate === 'object') {
+            const num = coerceNumber(candidate.current ?? candidate.max);
+            if (num !== null && num !== undefined) {
+                stats.hp = { current: num, max: num, temp: 0 };
+                break;
+            }
+        } else {
+            const num = coerceNumber(candidate);
+            if (num !== null && num !== undefined) {
+                stats.hp = { current: num, max: num, temp: 0 };
+                break;
+            }
+        }
+    }
+
+    const acCandidates = [
+        enemy?.ac,
+        payload?.ac,
+        payload?.armor_class,
+        payload?.attributes?.ac,
+        payload?.ac?.value
+    ];
+    for (const candidate of acCandidates) {
+        const num = coerceNumber(candidate);
+        if (num !== null && num !== undefined) {
+            stats.ac = num;
+            break;
+        }
+    }
+
+    const dexModifier = extractPayloadDexModifier(payload, abilityScores);
+    if (dexModifier !== null && dexModifier !== undefined) {
+        stats.dexModifier = dexModifier;
+    }
+
     const entry = {
         id: `enc-enemy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         name: enemy.name,
         source: enemy.source,
-        payload: enemy.raw || enemy,
-        placed: false
+        payload,
+        placed: false,
+        visible: enemy.visible !== false,
+        inventory: inventory.map((item) => ({ ...item })),
+        originCombatantId: null
     };
+
+    if (Object.keys(stats).length) {
+        entry.stats = stats;
+        if (typeof stats.hp === 'object' && stats.hp !== null && typeof stats.hp.current === 'number') {
+            entry.hp = stats.hp.current;
+        } else if (typeof stats.hp === 'number') {
+            entry.hp = stats.hp;
+        }
+    }
+    if (abilityScores) {
+        entry.abilities = abilityScores;
+    }
+    if (gold !== null && gold !== undefined) {
+        entry.gold = gold;
+    }
+
     atlasMapState.encounter.pending.push(entry);
     atlasMapState.encounter.dirty = true;
     updateEncounterEnemyStagingCount('Added to encounter queue');
@@ -3850,16 +4009,54 @@ async function addPlacedEnemyToCombat(entry) {
     }
 
     try {
+        const entryStats = entry.stats || {};
+        const entryAbilities = entry.abilities || null;
+        const baseAbilities = entryAbilities || (monster?.abilities ? { ...monster.abilities } : null);
+        const hpSource = entryStats.hp;
+        let hpValue = null;
+        if (typeof hpSource === 'object' && hpSource !== null) {
+            hpValue = coerceNumber(hpSource.current ?? hpSource.max);
+        } else if (hpSource !== undefined) {
+            hpValue = coerceNumber(hpSource);
+        }
+        if (hpValue === null || hpValue === undefined) {
+            hpValue = coerceNumber(entry.hp);
+        }
+        if (hpValue === null || hpValue === undefined) {
+            hpValue = monster ? coerceNumber(monster.hp) : null;
+        }
+        if (hpValue === null || hpValue === undefined) {
+            hpValue = 0;
+        }
+
+        const acValue = coerceNumber(entryStats.ac) ?? coerceNumber(entry.ac) ?? (monster ? coerceNumber(monster.ac) : null) ?? 10;
+        let dexModifier = coerceNumber(entryStats.dexModifier);
+        if (dexModifier === null || dexModifier === undefined) {
+            const dexScore = baseAbilities?.dex ?? monster?.abilities?.dex ?? null;
+            dexModifier = dexScore !== null && dexScore !== undefined ? modifierFromScore(dexScore) : 0;
+        }
+
+        const inventory = Array.isArray(entry.inventory) ? entry.inventory.map(item => ({ ...item })) : [];
+
         const combatantData = {
             name: entry.name,
             type: 'enemy',
             atlasTokenId: entry.id, // Link back to the placed token
-            hp: monster ? (monster.hp ?? 0) : 0,
-            ac: monster ? (monster.ac ?? 10) : 10,
-            dexModifier: monster ? modifierFromScore(monster.abilities?.dex ?? 10) : 0,
+            hp: hpValue,
+            ac: acValue,
+            dexModifier,
             imagePath: monster ? resolveMonsterImage(monster.tokenImage) : null,
             sourceId: monster ? monster.id : null
         };
+        if (baseAbilities) {
+            combatantData.abilities = { ...baseAbilities };
+        }
+        if (inventory.length) {
+            combatantData.inventory = inventory;
+        }
+        if (typeof entry.gold === 'number') {
+            combatantData.gold = entry.gold;
+        }
 
         // Extract attacks if we have monster data
         if (monster && monster.actions) {
@@ -3985,13 +4182,41 @@ function handleStagedEnemyClone(entryId) {
         return;
     }
 
+    const clonedStats = original.stats ? JSON.parse(JSON.stringify(original.stats)) : null;
+    const clonedAbilities = original.abilities ? { ...original.abilities } : null;
+    const clonedInventory = Array.isArray(original.inventory) ? original.inventory.map(item => ({ ...item })) : [];
     const clone = {
         id: `enc-enemy-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         name: original.name,
         source: original.source,
-        payload: { ...original.payload },
-        placed: false
+        payload: original.payload ? { ...original.payload } : null,
+        placed: false,
+        visible: original.visible !== false,
+        inventory: clonedInventory,
+        abilities: clonedAbilities || undefined,
+        stats: clonedStats || undefined,
+        gold: typeof original.gold === 'number' ? original.gold : undefined,
+        hp: typeof original.hp === 'number' ? original.hp : undefined,
+        originCombatantId: null
     };
+    if (!clone.inventory.length) {
+        delete clone.inventory;
+    }
+    if (!clone.abilities) {
+        delete clone.abilities;
+    }
+    if (!clone.stats) {
+        delete clone.stats;
+    }
+    if (clone.gold === undefined) {
+        delete clone.gold;
+    }
+    if (clone.hp === undefined) {
+        delete clone.hp;
+    }
+    if (!clone.payload) {
+        delete clone.payload;
+    }
 
     atlasMapState.encounter.pending.push(clone);
     atlasMapState.encounter.dirty = true;
@@ -4041,28 +4266,112 @@ function handleStagedEnemyEdit(entryId) {
 
     // Populate form fields
     const byId = (id) => document.getElementById(id);
+    const payload = entry.payload || {};
+    const stats = entry.stats || {};
+    const fallbackAbilities = entry.abilities || extractPayloadAbilityScores(payload) || {};
+    const resolveAbilityScore = (key) => {
+        const linkedValue = coerceNumber(linked?.abilities?.[key]);
+        if (linkedValue !== null && linkedValue !== undefined) {
+            return linkedValue;
+        }
+        const entryValue = coerceNumber(fallbackAbilities[key]);
+        if (entryValue !== null && entryValue !== undefined) {
+            return entryValue;
+        }
+        const payloadValue = coerceNumber(payload[key]) ?? coerceNumber(payload.abilities?.[key]);
+        if (payloadValue !== null && payloadValue !== undefined) {
+            return payloadValue;
+        }
+        return 10;
+    };
     byId('ae-name').value = linked?.name || entry.name || '';
-    byId('ae-ac').value = Number(linked?.ac ?? 10);
-    const hpVal = typeof linked?.hp === 'object' ? Number(linked.hp.current ?? linked.hp ?? 0) : Number(linked?.hp ?? 0);
-    byId('ae-hp').value = Number.isFinite(hpVal) ? hpVal : 0;
-    const abilities = linked?.abilities || {};
-    byId('ae-str').value = Number(abilities.str ?? 10);
-    byId('ae-dex').value = Number(abilities.dex ?? 10);
-    byId('ae-con').value = Number(abilities.con ?? 10);
-    byId('ae-int').value = Number(abilities.int ?? 10);
-    byId('ae-wis').value = Number(abilities.wis ?? 10);
-    byId('ae-cha').value = Number(abilities.cha ?? 10);
-    // Prepare inventory working list
-    const invItems = Array.isArray(linked?.inventory) ? linked.inventory : (Array.isArray(entry.inventory) ? entry.inventory : []);
-    atlasMapState.encounter.editingInventory = invItems.map(it => ({
-        id: it.id || it.name,
-        name: it.name || String(it),
-        type: it.type || null,
-        price: it.price ?? null,
-        weight: it.weight ?? null
-    }));
-    byId('ae-inventory').value = atlasMapState.encounter.editingInventory.length ? atlasMapState.encounter.editingInventory.map(i => i.name).join(', ') : (linked?.inventoryNotes || '');
-    byId('ae-gold').value = Number(linked?.gold ?? 0);
+    let acNumber = coerceNumber(linked?.ac);
+    if (acNumber === null || acNumber === undefined) {
+        acNumber = coerceNumber(stats.ac);
+    }
+    if (acNumber === null || acNumber === undefined) {
+        const acCandidates = [
+            payload.ac,
+            payload.armor_class,
+            payload.attributes?.ac,
+            payload.ac?.value
+        ];
+        for (const candidate of acCandidates) {
+            acNumber = coerceNumber(candidate);
+            if (acNumber !== null && acNumber !== undefined) {
+                break;
+            }
+        }
+    }
+    byId('ae-ac').value = Number.isFinite(acNumber) ? acNumber : 10;
+
+    const extractHpNumber = (value) => {
+        if (value === undefined || value === null) {
+            return null;
+        }
+        if (typeof value === 'object') {
+            return coerceNumber(value.current ?? value.max ?? value.value);
+        }
+        return coerceNumber(value);
+    };
+    let hpNumber = extractHpNumber(linked?.hp);
+    if (hpNumber === null || hpNumber === undefined) {
+        hpNumber = extractHpNumber(stats.hp);
+    }
+    if (hpNumber === null || hpNumber === undefined) {
+        const hpCandidates = [
+            payload.hp,
+            payload.hit_points,
+            payload.attributes?.hp?.value,
+            payload.hp?.value,
+            payload.hp?.average
+        ];
+        for (const candidate of hpCandidates) {
+            hpNumber = extractHpNumber(candidate);
+            if (hpNumber !== null && hpNumber !== undefined) {
+                break;
+            }
+        }
+    }
+    byId('ae-hp').value = Number.isFinite(hpNumber) ? hpNumber : 0;
+
+    byId('ae-str').value = resolveAbilityScore('str');
+    byId('ae-dex').value = resolveAbilityScore('dex');
+    byId('ae-con').value = resolveAbilityScore('con');
+    byId('ae-int').value = resolveAbilityScore('int');
+    byId('ae-wis').value = resolveAbilityScore('wis');
+    byId('ae-cha').value = resolveAbilityScore('cha');
+
+    const baseInventory = (() => {
+        if (Array.isArray(linked?.inventory) && linked.inventory.length) {
+            return linked.inventory;
+        }
+        if (Array.isArray(entry.inventory) && entry.inventory.length) {
+            return entry.inventory;
+        }
+        return extractPayloadInventory(payload);
+    })();
+    atlasMapState.encounter.editingInventory = baseInventory.map(it => {
+        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
+        return {
+            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
+            name: resolvedName,
+            type: it?.type || it?.system?.type || null,
+            price: it?.price ?? it?.system?.price ?? null,
+            weight: it?.weight ?? it?.system?.weight ?? null
+        };
+    });
+    byId('ae-inventory').value = atlasMapState.encounter.editingInventory.length
+        ? atlasMapState.encounter.editingInventory.map(i => i.name).join(', ')
+        : (linked?.inventoryNotes || entry.inventoryNotes || '');
+    let goldValue = coerceNumber(linked?.gold);
+    if (goldValue === null || goldValue === undefined) {
+        goldValue = coerceNumber(entry.gold);
+    }
+    if (goldValue === null || goldValue === undefined) {
+        goldValue = extractPayloadGold(payload);
+    }
+    byId('ae-gold').value = Number.isFinite(goldValue) ? goldValue : 0;
     byId('ae-visible').checked = entry.visible !== false;
 
     // Wire buttons
@@ -4122,9 +4431,12 @@ async function saveAgentEditor() {
     if (!entry) return;
 
     const byId = (id) => document.getElementById(id);
+    const linkedCombatant = editCtx.combatantId
+        ? (window.encounterState?.combatants || []).find(c => c.id === editCtx.combatantId)
+        : null;
     const name = byId('ae-name').value.trim();
-    const ac = Number(byId('ae-ac').value || 0);
-    const hp = Number(byId('ae-hp').value || 0);
+    const acInput = coerceNumber(byId('ae-ac').value);
+    const hpInput = coerceNumber(byId('ae-hp').value);
     const abilities = {
         str: Number(byId('ae-str').value || 10),
         dex: Number(byId('ae-dex').value || 10),
@@ -4133,7 +4445,6 @@ async function saveAgentEditor() {
         wis: Number(byId('ae-wis').value || 10),
         cha: Number(byId('ae-cha').value || 10)
     };
-    // Prefer structured items; fall back to comma list
     let inventory = (atlasMapState.encounter.editingInventory || []);
     if (!inventory.length) {
         const inventoryText = byId('ae-inventory').value || '';
@@ -4141,15 +4452,44 @@ async function saveAgentEditor() {
             .split(',')
             .map(s => s.trim())
             .filter(Boolean)
-            .map(name => ({ id: name, name }));
+            .map(label => ({ id: label, name: label }));
     }
+    const normalizedInventory = inventory.map(it => {
+        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
+        return {
+            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
+            name: resolvedName,
+            type: it?.type || it?.system?.type || null,
+            price: it?.price ?? it?.system?.price ?? null,
+            weight: it?.weight ?? it?.system?.weight ?? null
+        };
+    });
     const gold = Number(byId('ae-gold').value || 0);
     const visible = !!byId('ae-visible').checked;
+
+    const safeHpCurrent = Number.isFinite(hpInput) ? Math.max(hpInput, 0) : (coerceNumber(entry.stats?.hp?.current) ?? coerceNumber(linkedCombatant?.hp?.current) ?? 0);
+    const safeHpMax = Math.max(safeHpCurrent, coerceNumber(entry.stats?.hp?.max) ?? coerceNumber(linkedCombatant?.hp?.max) ?? safeHpCurrent);
+    const safeHpTemp = coerceNumber(linkedCombatant?.hp?.temp) ?? coerceNumber(entry.stats?.hp?.temp) ?? 0;
+    const safeAc = Number.isFinite(acInput) ? acInput : (coerceNumber(entry.stats?.ac) ?? coerceNumber(linkedCombatant?.ac) ?? 10);
+    const dexModifier = modifierFromScore(abilities.dex || 10);
+
+    atlasMapState.encounter.editingInventory = normalizedInventory.map(item => ({ ...item }));
 
     // Always update the staged entry
     entry.name = name || entry.name;
     entry.visible = visible;
-    entry.inventory = inventory;
+    entry.inventory = normalizedInventory.map(item => ({ ...item }));
+    entry.abilities = { ...abilities };
+    entry.gold = gold;
+    entry.stats = entry.stats || {};
+    entry.stats.ac = safeAc;
+    entry.stats.hp = {
+        current: safeHpCurrent,
+        max: safeHpMax,
+        temp: safeHpTemp
+    };
+    entry.hp = safeHpCurrent;
+    entry.stats.dexModifier = dexModifier;
     atlasMapState.encounter.dirty = true;
 
     // If linked combatant exists, persist to Arena
@@ -4157,10 +4497,11 @@ async function saveAgentEditor() {
         try {
             const payload = {
                 name,
-                ac,
-                hp: { current: hp, max: Math.max(hp, 1), temp: (window.encounterState?.combatants?.find(c => c.id === editCtx.combatantId)?.hp?.temp) || 0 },
+                ac: safeAc,
+                dexModifier,
+                hp: { current: safeHpCurrent, max: safeHpMax, temp: safeHpTemp },
                 abilities,
-                inventory,
+                inventory: entry.inventory.map(item => ({ ...item })),
                 gold
             };
             const res = await fetch(`${API_BASE}/combatants/${editCtx.combatantId}`, {
@@ -4174,6 +4515,7 @@ async function saveAgentEditor() {
                 if (c) {
                     c.name = payload.name;
                     c.ac = payload.ac;
+                    c.dexModifier = payload.dexModifier;
                     c.hp = payload.hp;
                     c.abilities = payload.abilities;
                     c.inventory = payload.inventory;
