@@ -557,6 +557,7 @@ async function saveCurrentEncounter() {
             source: entry.source,
             payload: entry.payload,
             placed: entry.placed || false,
+            visible: entry.visible !== false,
             position: entry.position ? {
                 x: Number(entry.position.x.toFixed(2)),
                 y: Number(entry.position.y.toFixed(2)),
@@ -585,6 +586,10 @@ async function saveCurrentEncounter() {
         });
 
         if (response.ok) {
+            window.__lastEncounterSaveAt = Date.now();
+            if (typeof updateSyncDebugHUD === 'function') {
+                updateSyncDebugHUD('autosave');
+            }
             console.log('Encounter auto-saved');
             return true;
         } else {
@@ -652,9 +657,16 @@ function syncCombatantsToAtlas() {
 
     let addedCount = 0;
 
-    // For each combatant that's an enemy and NOT already in pending
+    // For each combatant that's an enemy/NPC (not PCs) and NOT already in pending
     combatants.forEach(combatant => {
-        const isEnemy = ['enemy', 'monster', 'e'].includes((combatant.type || '').toLowerCase());
+        const t = (combatant.type || '').toLowerCase();
+        // Treat enemies/monsters and NPCs as placeable on Atlas; exclude players/PCs
+        const isEnemy = ['enemy', 'monster', 'e', 'npc', 'n'].includes(t);
+        const isPlayer = ['player', 'pc', 'p'].includes(t);
+        if (isPlayer) {
+            console.log('[Session] Skipping player/PC:', combatant.name, combatant.type);
+            return;
+        }
         if (!isEnemy) {
             console.log('[Session] Skipping non-enemy:', combatant.name, combatant.type);
             return;

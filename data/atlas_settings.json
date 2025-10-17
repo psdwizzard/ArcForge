@@ -10,20 +10,30 @@
     },
     "grid": {
       "inches_per_cell": 1,
-      "line_px": 2,
-      "opacity": 0.25,
+      "pixels_per_inch": 52.45,
       "color": "#3aaaff",
+      "opacity": 0.25,
+      "line_px": 2,
       "enabled": true
     },
     "viewport": {
-      "fit": "fit",
-      "zoom": 2.5000000000000013,
+      "fit": "pixel",
+      "zoom": 1.5,
       "gridZoom": 0.1,
       "offset": {
-        "x": 0,
-        "y": 0
+        "x": 1104,
+        "y": -767.99
       }
     }
   },
-  "active_map_id": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+  "active_map_id": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc",
+  "encounter": {
+    "startingAreas": {
+      "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc": {
+        "x": 48,
+        "y": 1109.33,
+        "zoom": 1.5
+      }
+    }
+  }
 }

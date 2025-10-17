@@ -643,6 +643,7 @@ app.post('/api/combatants', (req, res) => {
     dexModifier,
     imagePath: req.body.imagePath || null,
     sourceId,
+    atlasTokenId: req.body.atlasTokenId || null,
     hp: {
       current: req.body.hp || 10,
       max: req.body.hp || 10,

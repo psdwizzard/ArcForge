@@ -37,6 +37,9 @@
                 <div class="round-display">
                     Round: <span id="round-number">1</span>
                 </div>
+                <div id="sync-debug" style="font-size: 12px; color: #6b7280; margin-left: 12px; white-space: nowrap;" title="Arena ↔ Atlas sync status">
+                    Sync • Arena: 0 • Atlas (pending/placed): 0/0 • Saved: —
+                </div>
             </div>
         </header>
 
@@ -668,6 +671,65 @@
                                     <div id="atlas-enemy-list" class="atlas-enemy-list"></div>
                                 </div>
                                 <div id="atlas-enemy-detail" class="atlas-enemy-detail">Select an enemy to view details.</div>
+                                <div class="atlas-enemy-staging">
+                                    <header class="atlas-enemy-staging-header">
+                                        <h5>Staged Enemies</h5>
+                                        <button type="button" id="atlas-staging-clear-all" class="btn btn-secondary btn-small">Clear All</button>
+                                    </header>
+                                    <div id="atlas-enemy-staging-list" class="atlas-enemy-staging-list">
+                                        <div class="atlas-empty-state">No enemies staged yet</div>
+                                    </div>
+                                </div>
+                        </section>
+                        <section id="atlas-agent-panel" class="atlas-agent-panel">
+                            <div id="atlas-agent-editor" class="atlas-agent-editor" style="display:none;">
+                                <div class="atlas-agent-editor-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                    <strong>Agent Editor</strong>
+                                    <button type="button" id="ae-cancel" class="btn btn-secondary btn-small">Close</button>
+                                </div>
+                                <div class="form-row" style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center;">
+                                    <label>Name</label>
+                                    <input type="text" id="ae-name" />
+                                </div>
+                                <div class="form-row" style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">
+                                    <div>
+                                        <label>HP</label>
+                                        <input type="number" id="ae-hp" min="0" />
+                                    </div>
+                                    <div>
+                                        <label>AC</label>
+                                        <input type="number" id="ae-ac" min="0" />
+                                    </div>
+                                </div>
+                                <div class="form-row" style="display:grid; grid-template-columns:repeat(6, 1fr); gap:6px;">
+                                    <div><label>STR</label><input type="number" id="ae-str" min="1" max="30" /></div>
+                                    <div><label>DEX</label><input type="number" id="ae-dex" min="1" max="30" /></div>
+                                    <div><label>CON</label><input type="number" id="ae-con" min="1" max="30" /></div>
+                                    <div><label>INT</label><input type="number" id="ae-int" min="1" max="30" /></div>
+                                    <div><label>WIS</label><input type="number" id="ae-wis" min="1" max="30" /></div>
+                                    <div><label>CHA</label><input type="number" id="ae-cha" min="1" max="30" /></div>
+                                </div>
+                                <div class="form-row" style="display:grid; grid-template-columns:1fr auto; gap:8px; align-items:start;">
+                                    <div>
+                                        <label>Inventory</label>
+                                        <textarea id="ae-inventory" rows="2" placeholder="Comma-separated items (or use the item picker)"></textarea>
+                                        <div class="atlas-item-picker">
+                                            <input type="text" id="ae-item-search" placeholder="Search items..." />
+                                            <button type="button" id="ae-item-add" class="btn btn-secondary btn-small">Add Item</button>
+                                        </div>
+                                        <div id="ae-inv-list" class="atlas-inventory-list"></div>
+                                    </div>
+                                    <div>
+                                        <label>Gold</label>
+                                        <input type="number" id="ae-gold" min="0" />
+                                    </div>
+                                </div>
+                                <div class="form-row" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <label class="atlas-checkbox"><input type="checkbox" id="ae-visible" checked /><span>Visible on Map</span></label>
+                                    <button type="button" id="ae-save" class="btn btn-primary btn-small">Save</button>
+                                </div>
+                                <div id="ae-status" class="atlas-agent-editor-status"> </div>
+                            </div>
                         </section>
                         </div>
                         <footer class="atlas-encounter-footer">

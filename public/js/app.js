@@ -2352,6 +2352,32 @@ const atlasMapState = {
     imageCache: new Map()
 };
 
+// Expose to other modules (e.g., session-manager) for cross-view sync
+// This resolves race conditions where session-manager expects window.atlasMapState
+// and ensures bidirectional sync can run reliably.
+window.atlasMapState = atlasMapState;
+
+// Lightweight sync debug HUD
+function updateSyncDebugHUD(extra) {
+    try {
+        const el = document.getElementById('sync-debug');
+        if (!el) return;
+
+        const arenaCount = (window.encounterState?.combatants?.length) || 0;
+        const pending = (window.atlasMapState?.encounter?.pending) || [];
+        const pendingCount = pending.length;
+        const placedCount = pending.filter(e => e.placed && e.position).length;
+        const lastSaved = window.__lastEncounterSaveAt ? new Date(window.__lastEncounterSaveAt).toLocaleTimeString() : '—';
+
+        el.textContent = `Sync • Arena: ${arenaCount} • Atlas (pending/placed): ${pendingCount}/${placedCount} • Saved: ${lastSaved}${extra ? ' • ' + extra : ''}`;
+    } catch (e) {
+        // no-op
+    }
+}
+
+// Periodically refresh the HUD
+setInterval(() => updateSyncDebugHUD(), 1000);
+
 function getAtlasElements() {
     return {
         uploadInput: document.getElementById('atlas-map-upload-input'),
@@ -3690,8 +3716,8 @@ function renderStagedEnemiesList() {
         editBtn.type = 'button';
         editBtn.className = 'btn btn-secondary btn-small';
         editBtn.textContent = 'Edit';
-        editBtn.title = 'Edit this enemy (coming soon)';
-        editBtn.disabled = true;
+        editBtn.title = 'Edit this enemy';
+        editBtn.addEventListener('click', () => handleStagedEnemyEdit(entry.id));
 
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
@@ -3794,6 +3820,9 @@ function placeEnemyToken(rawMapX, rawMapY) {
     updateEncounterSummary(null, entry.name + ' placed at (' + Math.round(snapped.x) + ', ' + Math.round(snapped.y) + ')');
     renderStagedEnemiesList();
     drawAtlasEncounter();
+    if (typeof updateSyncDebugHUD === 'function') {
+        updateSyncDebugHUD('placed');
+    }
 
     // Add to Arena combat tracker
     addPlacedEnemyToCombat(entry);
@@ -3919,6 +3948,9 @@ async function addPlacedEnemyToCombat(entry) {
             if (typeof window.loadCombatants === 'function') {
                 await window.loadCombatants();
             }
+            if (typeof updateSyncDebugHUD === 'function') {
+                updateSyncDebugHUD('added');
+            }
             console.log('[Atlas] Successfully added to combat:', entry.name);
         } else {
             console.error('[Atlas] Failed to add to combat');
@@ -3984,6 +4016,241 @@ function handleStagedEnemyDelete(entryId) {
     if (typeof saveCurrentEncounter === 'function') {
         saveCurrentEncounter();
     }
+    if (typeof updateSyncDebugHUD === 'function') {
+        updateSyncDebugHUD('removed');
+    }
+}
+
+function handleStagedEnemyEdit(entryId) {
+    const elements = getAtlasElements();
+    const editor = document.getElementById('atlas-agent-editor');
+    if (!editor) return;
+
+    const pending = atlasMapState.encounter.pending || [];
+    const entry = pending.find(e => e.id === entryId);
+    if (!entry) return;
+
+    atlasMapState.encounter.editing = { entryId, combatantId: null };
+
+    // Try to find corresponding combatant in Arena
+    const combatants = (window.encounterState?.combatants) || [];
+    const linked = combatants.find(c => c.atlasTokenId === entry.id) || combatants.find(c => c.name === entry.name);
+    if (linked) {
+        atlasMapState.encounter.editing.combatantId = linked.id;
+    }
+
+    // Populate form fields
+    const byId = (id) => document.getElementById(id);
+    byId('ae-name').value = linked?.name || entry.name || '';
+    byId('ae-ac').value = Number(linked?.ac ?? 10);
+    const hpVal = typeof linked?.hp === 'object' ? Number(linked.hp.current ?? linked.hp ?? 0) : Number(linked?.hp ?? 0);
+    byId('ae-hp').value = Number.isFinite(hpVal) ? hpVal : 0;
+    const abilities = linked?.abilities || {};
+    byId('ae-str').value = Number(abilities.str ?? 10);
+    byId('ae-dex').value = Number(abilities.dex ?? 10);
+    byId('ae-con').value = Number(abilities.con ?? 10);
+    byId('ae-int').value = Number(abilities.int ?? 10);
+    byId('ae-wis').value = Number(abilities.wis ?? 10);
+    byId('ae-cha').value = Number(abilities.cha ?? 10);
+    // Prepare inventory working list
+    const invItems = Array.isArray(linked?.inventory) ? linked.inventory : (Array.isArray(entry.inventory) ? entry.inventory : []);
+    atlasMapState.encounter.editingInventory = invItems.map(it => ({
+        id: it.id || it.name,
+        name: it.name || String(it),
+        type: it.type || null,
+        price: it.price ?? null,
+        weight: it.weight ?? null
+    }));
+    byId('ae-inventory').value = atlasMapState.encounter.editingInventory.length ? atlasMapState.encounter.editingInventory.map(i => i.name).join(', ') : (linked?.inventoryNotes || '');
+    byId('ae-gold').value = Number(linked?.gold ?? 0);
+    byId('ae-visible').checked = entry.visible !== false;
+
+    // Wire buttons
+    const status = byId('ae-status');
+    status.textContent = linked ? `Editing Arena agent (${linked.name})` : 'Editing staged entry (not yet in Arena)';
+    const saveBtn = byId('ae-save');
+    const cancelBtn = byId('ae-cancel');
+    const addBtn = byId('ae-item-add');
+    const searchInput = byId('ae-item-search');
+
+    // Render initial inventory list
+    renderAgentEditorInventoryList();
+
+    if (addBtn) {
+        addBtn.onclick = async () => {
+            const term = (searchInput?.value || '').trim().toLowerCase();
+            if (!term) return;
+            const catalog = await getItemsCatalog();
+            const match = catalog.find(it => it.name.toLowerCase().includes(term));
+            if (match) {
+                atlasMapState.encounter.editingInventory.push({
+                    id: getItemIdSafe(match),
+                    name: match.name,
+                    type: match.type,
+                    price: match.system?.price ?? null,
+                    weight: match.system?.weight ?? null
+                });
+                renderAgentEditorInventoryList();
+                searchInput.value = '';
+            } else {
+                alert('No item found for that search.');
+            }
+        };
+    }
+
+    saveBtn.onclick = async () => {
+        await saveAgentEditor();
+    };
+    cancelBtn.onclick = () => {
+        hideAgentEditor();
+    };
+
+    editor.style.display = 'block';
+}
+
+function hideAgentEditor() {
+    const editor = document.getElementById('atlas-agent-editor');
+    if (editor) editor.style.display = 'none';
+    atlasMapState.encounter.editing = null;
+}
+
+async function saveAgentEditor() {
+    const editCtx = atlasMapState.encounter.editing;
+    if (!editCtx) return;
+    const pending = atlasMapState.encounter.pending || [];
+    const entry = pending.find(e => e.id === editCtx.entryId);
+    if (!entry) return;
+
+    const byId = (id) => document.getElementById(id);
+    const name = byId('ae-name').value.trim();
+    const ac = Number(byId('ae-ac').value || 0);
+    const hp = Number(byId('ae-hp').value || 0);
+    const abilities = {
+        str: Number(byId('ae-str').value || 10),
+        dex: Number(byId('ae-dex').value || 10),
+        con: Number(byId('ae-con').value || 10),
+        int: Number(byId('ae-int').value || 10),
+        wis: Number(byId('ae-wis').value || 10),
+        cha: Number(byId('ae-cha').value || 10)
+    };
+    // Prefer structured items; fall back to comma list
+    let inventory = (atlasMapState.encounter.editingInventory || []);
+    if (!inventory.length) {
+        const inventoryText = byId('ae-inventory').value || '';
+        inventory = inventoryText
+            .split(',')
+            .map(s => s.trim())
+            .filter(Boolean)
+            .map(name => ({ id: name, name }));
+    }
+    const gold = Number(byId('ae-gold').value || 0);
+    const visible = !!byId('ae-visible').checked;
+
+    // Always update the staged entry
+    entry.name = name || entry.name;
+    entry.visible = visible;
+    entry.inventory = inventory;
+    atlasMapState.encounter.dirty = true;
+
+    // If linked combatant exists, persist to Arena
+    if (editCtx.combatantId) {
+        try {
+            const payload = {
+                name,
+                ac,
+                hp: { current: hp, max: Math.max(hp, 1), temp: (window.encounterState?.combatants?.find(c => c.id === editCtx.combatantId)?.hp?.temp) || 0 },
+                abilities,
+                inventory,
+                gold
+            };
+            const res = await fetch(`${API_BASE}/combatants/${editCtx.combatantId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                // Update local state
+                const c = (window.encounterState?.combatants || []).find(c => c.id === editCtx.combatantId);
+                if (c) {
+                    c.name = payload.name;
+                    c.ac = payload.ac;
+                    c.hp = payload.hp;
+                    c.abilities = payload.abilities;
+                    c.inventory = payload.inventory;
+                    c.gold = payload.gold;
+                }
+                if (typeof renderCombatantsList === 'function') {
+                    renderCombatantsList();
+                }
+            }
+        } catch (e) {
+            console.error('[Atlas] Failed to update combatant:', e);
+        }
+    }
+
+    // Re-render panels and map
+    renderStagedEnemiesList();
+    drawAtlasEncounter();
+    if (typeof updateSyncDebugHUD === 'function') {
+        updateSyncDebugHUD('edited');
+    }
+
+    // Save encounter to session
+    if (typeof saveCurrentEncounter === 'function') {
+        await saveCurrentEncounter();
+    }
+}
+
+function renderAgentEditorInventoryList() {
+    const list = document.getElementById('ae-inv-list');
+    if (!list) return;
+    const items = atlasMapState.encounter.editingInventory || [];
+    if (!items.length) {
+        list.innerHTML = '<div class="atlas-empty-state" style="padding: 0.25rem 0;">No items</div>';
+        return;
+    }
+    list.innerHTML = '';
+    items.forEach((it, idx) => {
+        const row = document.createElement('div');
+        row.className = 'atlas-inventory-row';
+        row.style.display = 'grid';
+        row.style.gridTemplateColumns = '1fr auto';
+        row.style.gap = '6px';
+        row.style.alignItems = 'center';
+        const name = document.createElement('span');
+        name.textContent = it.name;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'btn btn-danger btn-small';
+        remove.textContent = 'Remove';
+        remove.onclick = () => {
+            items.splice(idx, 1);
+            renderAgentEditorInventoryList();
+        };
+        row.appendChild(name);
+        row.appendChild(remove);
+        list.appendChild(row);
+    });
+}
+
+async function getItemsCatalog() {
+    // Try to reuse cache if already loaded by loot-manager
+    if (window.cachedItemData && Array.isArray(window.cachedItemData) && window.cachedItemData.length) {
+        return window.cachedItemData;
+    }
+    try {
+        const res = await fetch('/data/DBs/items.json');
+        const data = await res.json();
+        window.cachedItemData = data;
+        return data;
+    } catch (e) {
+        console.error('[Atlas] Failed to load items catalog:', e);
+        return [];
+    }
+}
+
+function getItemIdSafe(item) {
+    return item._id || item.system?.identifier || item.name;
 }
 
 function handleClearAllStagedEnemies() {
@@ -3997,6 +4264,9 @@ function handleClearAllStagedEnemies() {
     atlasMapState.encounter.dirty = true;
     updateEncounterEnemyStagingCount();
     renderStagedEnemiesList();
+    if (typeof updateSyncDebugHUD === 'function') {
+        updateSyncDebugHUD('cleared');
+    }
 }
 function getEncounterEnemySourceLabel(source) {
     if (source === 'library') {
@@ -4270,6 +4540,10 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
 
         // Only draw tokens on the current map
         if (entry.position.mapId !== activeMapId) {
+            return;
+        }
+        // Respect visibility toggle (default visible if not set)
+        if (entry.visible === false) {
             return;
         }
 
@@ -4801,6 +5075,7 @@ function saveEncounterStartArea() {
         source: entry.source,
         payload: entry.payload,
         placed: entry.placed || false,
+        visible: entry.visible !== false,
         position: entry.position ? {
             x: Number(entry.position.x.toFixed(2)),
             y: Number(entry.position.y.toFixed(2)),

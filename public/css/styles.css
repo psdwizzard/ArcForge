@@ -2889,8 +2889,19 @@ h2 {
     align-items: stretch;
 }
 
+/* New right-side panel for Agent Editor */
+.atlas-agent-panel {
+    flex: 0 0 480px;
+    max-width: 520px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
 .atlas-encounter-stage {
-    flex: 2 1 0;
+    flex: 1 1 auto;
+    min-width: 0;
     position: relative;
     min-height: 60vh;
     border-radius: 10px;
@@ -2956,10 +2967,9 @@ h2 {
 }
 
 .atlas-enemy-panel {
-
-    flex: 1 1 0;
+    flex: 0 0 360px;
     max-width: 360px;
-    width: 100%;
+    width: 360px;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -3188,6 +3198,70 @@ h2 {
     overflow-y: auto;
 }
 
+/* Agent Editor (Atlas side panel) */
+.atlas-agent-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.atlas-agent-editor .atlas-item-picker {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.atlas-agent-editor .atlas-item-picker input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    border-radius: 6px;
+    background: rgba(2, 6, 23, 0.6);
+    color: #e2e8f0;
+}
+
+.atlas-inventory-list {
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.atlas-agent-editor .form-row label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+}
+
+.atlas-agent-editor input[type="text"],
+.atlas-agent-editor input[type="number"],
+.atlas-agent-editor textarea {
+    width: 100%;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid rgba(100, 116, 139, 0.5);
+    border-radius: 6px;
+    background: rgba(2, 6, 23, 0.6);
+    color: #e2e8f0;
+}
+
+.atlas-agent-editor textarea {
+    resize: vertical;
+}
+
+.atlas-agent-editor .atlas-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
 .atlas-staged-enemy-item {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -3203,11 +3277,13 @@ h2 {
     font-size: 0.85rem;
     font-weight: 500;
     grid-column: 1;
+    grid-row: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     padding-top: 0.25rem;
+    align-self: center;
 }
 
 .atlas-staged-enemy-actions {

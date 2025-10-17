@@ -115,6 +115,34 @@ The app has TWO separate encounter persistence systems that need to work togethe
 - Plan incremental introduction of testing (Jest/Vitest) covering initiative, attack flows, catalog loaders, map broadcasting, and Arena↔Atlas sync
 - Document architectural decisions (catalog normalization, `sourceId` usage, display socket contract, dual encounter system sync) and future enhancements here to keep team alignment.
 
+## Encounter UI TODOs (Atlas) — In Progress
+
+Context: Agent Editor added; items picker wired to DB; Arena↔Atlas sync stabilized. Layout and persistence need refinement. Stats currently do not reliably save from the editor.
+
+- Layout
+  - Keep map large; use three columns: Enemy Library (≈360px), Map (flex), Agent Editor (≈480px)
+  - Agent Editor in a separate right-side panel (not stacked under Library)
+  - Consider resizable columns and sticky control bars
+
+- Agent Editor
+  - Dark theme parity across inputs and lists
+  - Full-width item search; inventory list with remove actions
+  - Optional: quantity, weight totals, drag-reorder
+
+- Persistence (known issue: stats don’t save)
+  - Persist staged overrides (hp, ac, abilities, inventory, gold, visible) on staged entries
+  - Apply overrides when creating Arena combatants from placed tokens
+  - When editing an existing Arena combatant, PUT updates should mirror in UI immediately
+  - Verify session save/restore includes placedEnemies with visible + overrides
+
+- Control Center integration
+  - Visibility bulk toggles (show/hide all), layer groups, and a manual “Sync Now” button
+
+- QA/Testing
+  - Add smoke tests for editor save, staged→Arena application, session load/restore, and visibility rendering
+
+Note (tomorrow AM): focus on fixing editor stats persistence and finalizing the three-column layout widths/resizing.
+
 ## Open Questions
 - What UX do we want for large monster libraries in Arena (search, favorites, encounter presets)?
 - How should multiple display profiles be represented in the UI and persisted? (Per-device naming/lookups?)
