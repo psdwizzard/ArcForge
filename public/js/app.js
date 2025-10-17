@@ -4385,22 +4385,173 @@ function handleStagedEnemyEdit(entryId) {
     // Render initial inventory list
     renderAgentEditorInventoryList();
 
+    // Setup autocomplete
+    let autocompleteContainer = null;
+    let itemsCatalog = null;
+    let selectedItemIndex = -1;
+
+    async function showItemAutocomplete(term) {
+        if (!itemsCatalog) {
+            itemsCatalog = await getItemsCatalog();
+        }
+
+        // Filter items
+        const searchTerm = term.trim().toLowerCase();
+        if (!searchTerm) {
+            hideItemAutocomplete();
+            return;
+        }
+
+        const matches = itemsCatalog
+            .filter(item => item.name.toLowerCase().includes(searchTerm))
+            .slice(0, 20); // Limit to 20 results
+
+        // Create autocomplete container if it doesn't exist
+        if (!autocompleteContainer) {
+            autocompleteContainer = document.createElement('div');
+            autocompleteContainer.className = 'atlas-item-autocomplete';
+            searchInput.parentElement.appendChild(autocompleteContainer);
+        }
+
+        // Clear previous results
+        autocompleteContainer.innerHTML = '';
+
+        if (matches.length === 0) {
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'atlas-item-autocomplete-empty';
+            emptyDiv.textContent = 'No items found';
+            autocompleteContainer.appendChild(emptyDiv);
+        } else {
+            matches.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'atlas-item-autocomplete-item';
+                itemDiv.dataset.index = index;
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'atlas-item-autocomplete-item-name';
+                nameSpan.textContent = item.name;
+
+                const typeSpan = document.createElement('span');
+                typeSpan.className = 'atlas-item-autocomplete-item-type';
+                typeSpan.textContent = item.type || 'Item';
+
+                itemDiv.appendChild(nameSpan);
+                itemDiv.appendChild(typeSpan);
+
+                itemDiv.onclick = () => {
+                    addItemToInventory(item);
+                    hideItemAutocomplete();
+                    searchInput.value = '';
+                };
+
+                autocompleteContainer.appendChild(itemDiv);
+            });
+        }
+
+        autocompleteContainer.style.display = 'block';
+        selectedItemIndex = -1;
+    }
+
+    function hideItemAutocomplete() {
+        if (autocompleteContainer) {
+            autocompleteContainer.style.display = 'none';
+            autocompleteContainer.innerHTML = '';
+        }
+        selectedItemIndex = -1;
+    }
+
+    function addItemToInventory(item) {
+        atlasMapState.encounter.editingInventory.push({
+            id: getItemIdSafe(item),
+            name: item.name,
+            type: item.type,
+            price: item.system?.price ?? null,
+            weight: item.system?.weight ?? null
+        });
+        renderAgentEditorInventoryList();
+    }
+
+    function navigateAutocomplete(direction) {
+        if (!autocompleteContainer || autocompleteContainer.style.display === 'none') return;
+
+        const items = autocompleteContainer.querySelectorAll('.atlas-item-autocomplete-item');
+        if (items.length === 0) return;
+
+        // Remove previous active state
+        if (selectedItemIndex >= 0 && selectedItemIndex < items.length) {
+            items[selectedItemIndex].classList.remove('active');
+        }
+
+        // Update index
+        if (direction === 'down') {
+            selectedItemIndex = (selectedItemIndex + 1) % items.length;
+        } else if (direction === 'up') {
+            selectedItemIndex = selectedItemIndex <= 0 ? items.length - 1 : selectedItemIndex - 1;
+        }
+
+        // Add active state
+        items[selectedItemIndex].classList.add('active');
+        items[selectedItemIndex].scrollIntoView({ block: 'nearest' });
+    }
+
+    function selectActiveItem() {
+        if (selectedItemIndex >= 0 && autocompleteContainer) {
+            const items = autocompleteContainer.querySelectorAll('.atlas-item-autocomplete-item');
+            if (items[selectedItemIndex]) {
+                items[selectedItemIndex].click();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    if (searchInput) {
+        // Show autocomplete as user types
+        searchInput.addEventListener('input', (e) => {
+            showItemAutocomplete(e.target.value);
+        });
+
+        // Handle keyboard navigation
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                navigateAutocomplete('down');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                navigateAutocomplete('up');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (!selectActiveItem()) {
+                    // If no item selected from dropdown, use old behavior
+                    addBtn.click();
+                }
+            } else if (e.key === 'Escape') {
+                hideItemAutocomplete();
+            }
+        });
+
+        // Hide autocomplete when clicking outside
+        document.addEventListener('click', (e) => {
+            if (searchInput && !searchInput.contains(e.target) && autocompleteContainer && !autocompleteContainer.contains(e.target)) {
+                hideItemAutocomplete();
+            }
+        });
+    }
+
     if (addBtn) {
         addBtn.onclick = async () => {
             const term = (searchInput?.value || '').trim().toLowerCase();
             if (!term) return;
-            const catalog = await getItemsCatalog();
-            const match = catalog.find(it => it.name.toLowerCase().includes(term));
+
+            if (!itemsCatalog) {
+                itemsCatalog = await getItemsCatalog();
+            }
+
+            const match = itemsCatalog.find(it => it.name.toLowerCase().includes(term));
             if (match) {
-                atlasMapState.encounter.editingInventory.push({
-                    id: getItemIdSafe(match),
-                    name: match.name,
-                    type: match.type,
-                    price: match.system?.price ?? null,
-                    weight: match.system?.weight ?? null
-                });
-                renderAgentEditorInventoryList();
+                addItemToInventory(match);
                 searchInput.value = '';
+                hideItemAutocomplete();
             } else {
                 alert('No item found for that search.');
             }
@@ -4520,6 +4671,8 @@ async function saveAgentEditor() {
                     c.abilities = payload.abilities;
                     c.inventory = payload.inventory;
                     c.gold = payload.gold;
+                    c.flavorImages = payload.flavorImages;
+                    c.flavorSounds = payload.flavorSounds;
                 }
                 if (typeof renderCombatantsList === 'function') {
                     renderCombatantsList();
@@ -4574,6 +4727,8 @@ function renderAgentEditorInventoryList() {
         list.appendChild(row);
     });
 }
+
+// Removed renderAgentEditorMediaLists() - flavor media is now separate from agent editor
 
 async function getItemsCatalog() {
     // Try to reuse cache if already loaded by loot-manager
@@ -5781,4 +5936,269 @@ function endPreviewDrag() {
     if (atlasMapState.preview) {
         atlasMapState.preview.dragging = false;
     }
+}
+
+// ==========================================
+// Flavor Media Upload Functionality
+// ==========================================
+
+// Initialize flavor media arrays in atlasMapState
+if (!atlasMapState.encounter.flavorImages) {
+    atlasMapState.encounter.flavorImages = [];
+}
+if (!atlasMapState.encounter.flavorSounds) {
+    atlasMapState.encounter.flavorSounds = [];
+}
+
+function bindFlavorMediaEvents() {
+    const imageUpload = document.getElementById('flavor-image-upload');
+    const soundUpload = document.getElementById('flavor-sound-upload');
+
+    if (imageUpload) {
+        imageUpload.addEventListener('change', handleFlavorImageUpload);
+    }
+
+    if (soundUpload) {
+        soundUpload.addEventListener('change', handleFlavorSoundUpload);
+    }
+}
+
+function handleFlavorImageUpload(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) {
+        return;
+    }
+
+    files.forEach((file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        uploadFlavorMedia(formData, 'image');
+    });
+
+    event.target.value = '';
+}
+
+function handleFlavorSoundUpload(event) {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) {
+        return;
+    }
+
+    files.forEach((file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        uploadFlavorMedia(formData, 'sound');
+    });
+
+    event.target.value = '';
+}
+
+function uploadFlavorMedia(formData, type) {
+    const endpoint = '/flavor-media';
+
+    fetch(API_BASE + endpoint, {
+        method: 'POST',
+        body: formData
+    })
+        .then((res) => {
+            if (!res.ok) {
+                return res.json()
+                    .then((data) => {
+                        const message = data && data.error ? data.error : 'Upload failed: ' + res.status;
+                        throw new Error(message);
+                    })
+                    .catch(() => {
+                        throw new Error('Upload failed: ' + res.status);
+                    });
+            }
+            return res.json();
+        })
+        .then((record) => {
+            console.log('[FlavorMedia] Upload response:', record);
+            // Extract filename from file path (e.g., "/maps/abc123.png" -> "abc123.png")
+            const filename = record.file ? record.file.split('/').pop() : record.name;
+            const mediaItem = {
+                id: record.id || Date.now().toString(),
+                path: record.file,
+                filename: filename,
+                type: type
+            };
+            console.log('[FlavorMedia] Created mediaItem:', mediaItem);
+
+            if (type === 'image') {
+                atlasMapState.encounter.flavorImages.push(mediaItem);
+            } else {
+                atlasMapState.encounter.flavorSounds.push(mediaItem);
+            }
+
+            renderFlavorMediaLists();
+            saveFlavorMediaToEncounter();
+        })
+        .catch((error) => {
+            console.error('[Atlas] Failed to upload ' + type + ':', error);
+            alert(error.message || 'Failed to upload ' + type + '. Please try again.');
+        });
+}
+
+function renderFlavorMediaLists() {
+    renderFlavorImagesList();
+    renderFlavorSoundsList();
+}
+
+function renderFlavorImagesList() {
+    const container = document.getElementById('flavor-images-list');
+    if (!container) {
+        return;
+    }
+
+    const images = atlasMapState.encounter.flavorImages || [];
+
+    if (images.length === 0) {
+        container.innerHTML = '<div class="atlas-empty-state">No images uploaded yet</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    images.forEach((item, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'atlas-flavor-media-item';
+
+        const img = document.createElement('img');
+        img.className = 'atlas-flavor-media-item-preview';
+        const imgPath = item.path || item.filename;
+        img.src = imgPath.startsWith('/') ? imgPath : '/maps/' + imgPath;
+        img.alt = item.filename;
+        img.title = item.filename + ' (click to view full size)';
+        img.onclick = () => window.open(img.src, '_blank');
+        img.onerror = () => {
+            console.warn('[FlavorMedia] Failed to load image:', img.src);
+            img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="80"%3E%3Crect fill="%23374151" width="100" height="80"/%3E%3Ctext x="50" y="40" text-anchor="middle" fill="%239ca3af" font-size="12"%3E✗ Error%3C/text%3E%3C/svg%3E';
+        };
+        console.log('[FlavorMedia] Image src:', img.src);
+
+        const name = document.createElement('div');
+        name.className = 'atlas-flavor-media-item-name';
+        name.textContent = item.filename;
+        name.title = item.filename;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'atlas-flavor-media-item-remove';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = () => removeFlavorMedia('image', index);
+
+        itemEl.appendChild(img);
+        itemEl.appendChild(name);
+        itemEl.appendChild(removeBtn);
+        container.appendChild(itemEl);
+    });
+}
+
+function renderFlavorSoundsList() {
+    const container = document.getElementById('flavor-sounds-list');
+    if (!container) {
+        return;
+    }
+
+    const sounds = atlasMapState.encounter.flavorSounds || [];
+
+    if (sounds.length === 0) {
+        container.innerHTML = '<div class="atlas-empty-state">No sounds uploaded yet</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    sounds.forEach((item, index) => {
+        const itemEl = document.createElement('div');
+        itemEl.className = 'atlas-flavor-media-item';
+        itemEl.style.flexDirection = 'column';
+        itemEl.style.padding = '10px';
+
+        const audioPath = item.path || item.filename;
+        const audioSrc = audioPath.startsWith('/') ? audioPath : '/maps/' + audioPath;
+        console.log('[FlavorMedia] Sound src:', audioSrc);
+
+        const audioWrapper = document.createElement('div');
+        audioWrapper.className = 'atlas-flavor-media-item-preview';
+        audioWrapper.style.width = '100%';
+        audioWrapper.style.height = 'auto';
+        audioWrapper.style.display = 'flex';
+        audioWrapper.style.flexDirection = 'column';
+        audioWrapper.style.gap = '6px';
+        audioWrapper.style.background = '#1f2937';
+        audioWrapper.style.padding = '8px';
+        audioWrapper.style.borderRadius = '3px';
+
+        const icon = document.createElement('div');
+        icon.style.fontSize = '1.5em';
+        icon.style.textAlign = 'center';
+        icon.textContent = '🔊';
+
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.style.width = '100%';
+        audio.style.height = 'auto';
+        audio.style.minHeight = '40px';
+        audio.src = audioSrc;
+        audio.onerror = () => {
+            console.warn('[FlavorMedia] Failed to load audio:', audioSrc);
+            icon.textContent = '✗';
+            icon.style.color = '#ef4444';
+        };
+
+        audioWrapper.appendChild(icon);
+        audioWrapper.appendChild(audio);
+
+        const name = document.createElement('div');
+        name.className = 'atlas-flavor-media-item-name';
+        name.textContent = item.filename;
+        name.title = item.filename;
+
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'atlas-flavor-media-item-remove';
+        removeBtn.textContent = '×';
+        removeBtn.onclick = () => removeFlavorMedia('sound', index);
+
+        itemEl.appendChild(audioWrapper);
+        itemEl.appendChild(name);
+        itemEl.appendChild(removeBtn);
+        container.appendChild(itemEl);
+    });
+}
+
+function removeFlavorMedia(type, index) {
+    if (type === 'image') {
+        atlasMapState.encounter.flavorImages.splice(index, 1);
+    } else {
+        atlasMapState.encounter.flavorSounds.splice(index, 1);
+    }
+
+    renderFlavorMediaLists();
+    saveFlavorMediaToEncounter();
+}
+
+function saveFlavorMediaToEncounter() {
+    if (typeof saveCurrentEncounter === 'function') {
+        const currentEncounter = window.sessionState && window.sessionState.currentEncounter;
+        if (currentEncounter) {
+            currentEncounter.flavorImages = atlasMapState.encounter.flavorImages;
+            currentEncounter.flavorSounds = atlasMapState.encounter.flavorSounds;
+            saveCurrentEncounter();
+        }
+    }
+}
+
+function loadFlavorMediaFromEncounter() {
+    const currentEncounter = window.sessionState && window.sessionState.currentEncounter;
+    if (currentEncounter) {
+        atlasMapState.encounter.flavorImages = currentEncounter.flavorImages || [];
+        atlasMapState.encounter.flavorSounds = currentEncounter.flavorSounds || [];
+        renderFlavorMediaLists();
+    }
+}
+
+if (document.getElementById('flavor-image-upload')) {
+    bindFlavorMediaEvents();
+    loadFlavorMediaFromEncounter();
 }

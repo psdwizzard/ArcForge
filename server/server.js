@@ -160,6 +160,7 @@ function applyEffects(combatant, timing) {
 
 // Atlas map state
 let mapsState = readJsonFile(MAPS_DB_PATH, []);
+let currentSessionEncounter = null; // Track current encounter for display
 let atlasSettings = readJsonFile(ATLAS_SETTINGS_PATH, {
   display: {
     resolution: { w: 1920, h: 1080 },
@@ -369,6 +370,23 @@ function buildDisplayState() {
   const gridZoom = atlasSettings.display?.viewport?.gridZoom || 1;
   const cellPx = ppi * inchesPerCell * gridZoom;
 
+  // Get visible enemy tokens from current encounter
+  const tokens = [];
+  if (currentSessionEncounter && currentSessionEncounter.placedEnemies) {
+    currentSessionEncounter.placedEnemies.forEach(enemy => {
+      // Only include placed and visible enemies
+      if (enemy.placed && enemy.visible !== false && enemy.position) {
+        tokens.push({
+          id: enemy.id,
+          name: enemy.name,
+          x: enemy.position.x,
+          y: enemy.position.y,
+          mapId: enemy.position.mapId
+        });
+      }
+    });
+  }
+
   return {
     type: 'DISPLAY_STATE',
     connected: displayConnectionCount > 0,
@@ -388,7 +406,8 @@ function buildDisplayState() {
       line_px: atlasSettings.display?.grid?.line_px ?? 2,
       color: atlasSettings.display?.grid?.color ?? '#3aaaff',
       opacity: atlasSettings.display?.grid?.opacity ?? 0.25
-    }
+    },
+    tokens: tokens
   };
 }
 
@@ -441,6 +460,27 @@ displayIo.on('connection', (socket) => {
     displayConnectionCount = Math.max(0, displayConnectionCount - 1);
     broadcastDisplayState();
   });
+});
+
+// Flavor media upload endpoint (separate from maps)
+app.post('/api/flavor-media', mapUpload.single('file'), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file provided' });
+  }
+
+  try {
+    const record = {
+      id: generateId('flavor'),
+      name: req.body?.name || path.parse(req.file.originalname).name,
+      file: `/maps/${req.file.filename}`,
+      created_at: new Date().toISOString()
+    };
+
+    res.json(record);
+  } catch (error) {
+    console.error('[FlavorMedia] Failed to process uploaded file:', error);
+    res.status(500).json({ error: 'Failed to process file' });
+  }
 });
 
 // Map management endpoints
@@ -1420,6 +1460,10 @@ app.get('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
     return res.status(404).json({ error: 'Encounter not found' });
   }
 
+  // Update the current session encounter for display
+  currentSessionEncounter = encounter;
+  broadcastDisplayState();
+
   res.json(encounter);
 });
 
@@ -1443,7 +1487,14 @@ app.put('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
     ...req.body
   };
 
+  // Update the current session encounter for display
+  currentSessionEncounter = session.encounters[encounterIndex];
+
   fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
+
+  // Broadcast updated display state with new enemy positions
+  broadcastDisplayState();
+
   res.json(session.encounters[encounterIndex]);
 });
 

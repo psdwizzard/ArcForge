@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ArcForge - Initiative Tracker</title>
     <link rel="stylesheet" href="css/styles.css?v=4">
-    <link rel="stylesheet" href="css/atlas-overrides.css?v=1">
+    <link rel="stylesheet" href="css/atlas-overrides.css?v=6">
 </head>
 <body>
     <div class="app-container">
@@ -733,6 +733,36 @@
                             </div>
                         </section>
                         </div>
+                        <section class="atlas-flavor-media-section">
+                            <header class="atlas-flavor-media-header">
+                                <h4>Encounter Flavor Media</h4>
+                                <span class="atlas-flavor-media-hint">Upload images and sounds for player display</span>
+                                <div class="atlas-flavor-media-upload-btns">
+                                    <label class="btn btn-secondary btn-small">
+                                        <input type="file" id="flavor-image-upload" accept="image/*" multiple style="display: none;">
+                                        Upload Images
+                                    </label>
+                                    <label class="btn btn-secondary btn-small">
+                                        <input type="file" id="flavor-sound-upload" accept="audio/*" multiple style="display: none;">
+                                        Upload Sounds
+                                    </label>
+                                </div>
+                            </header>
+                            <div class="atlas-flavor-media-content">
+                                <div class="atlas-flavor-media-panel">
+                                    <h5>Images</h5>
+                                    <div id="flavor-images-list" class="atlas-flavor-media-list">
+                                        <div class="atlas-empty-state">No images uploaded yet</div>
+                                    </div>
+                                </div>
+                                <div class="atlas-flavor-media-panel">
+                                    <h5>Sounds</h5>
+                                    <div id="flavor-sounds-list" class="atlas-flavor-media-list">
+                                        <div class="atlas-empty-state">No sounds uploaded yet</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
                         <footer class="atlas-encounter-footer">
                             <div class="atlas-start-area-metrics">
                                 <span><strong>Display:</strong> <span id="atlas-start-area-resolution">--</span></span>
@@ -1078,8 +1108,8 @@
         </div>
     </div>
 
-    <script src="js/session-manager.js?v=1"></script>
-    <script src="js/app.js?v=16"></script>
+    <script src="js/session-manager.js?v=2"></script>
+    <script src="js/app.js?v=26"></script>
     <script src="js/character-builder.js?v=3"></script>
     <script src="js/effects-builder.js?v=2"></script>
     <script src="js/loot-manager.js?v=2"></script>

@@ -53,9 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let drawHeight = mapHeight;
     let offsetX = 0;
     let offsetY = 0;
+    let scale = 1;
 
     if (fitMode === 'fill') {
-      const scale = Math.max(width / mapWidth, height / mapHeight) * zoom;
+      scale = Math.max(width / mapWidth, height / mapHeight) * zoom;
       drawWidth = mapWidth * scale;
       drawHeight = mapHeight * scale;
       offsetX = (width - drawWidth) / 2 + offset.x;
@@ -64,19 +65,21 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (fitMode === 'stretch') {
       const scaleX = (width / mapWidth) * zoom;
       const scaleY = (height / mapHeight) * zoom;
+      scale = scaleX; // Use scaleX for tokens
       drawWidth = mapWidth * scaleX;
       drawHeight = mapHeight * scaleY;
       offsetX = (width - drawWidth) / 2 + offset.x;
       offsetY = (height - drawHeight) / 2 + offset.y;
       ctx.drawImage(state.image, offsetX, offsetY, drawWidth, drawHeight);
     } else if (fitMode === 'pixel') {
+      scale = zoom;
       drawWidth = mapWidth * zoom;
       drawHeight = mapHeight * zoom;
       offsetX = (width - drawWidth) / 2 + offset.x;
       offsetY = (height - drawHeight) / 2 + offset.y;
       ctx.drawImage(state.image, offsetX, offsetY, drawWidth, drawHeight);
     } else {
-      const scale = Math.min(width / mapWidth, height / mapHeight) * zoom;
+      scale = Math.min(width / mapWidth, height / mapHeight) * zoom;
       drawWidth = mapWidth * scale;
       drawHeight = mapHeight * scale;
       offsetX = (width - drawWidth) / 2 + offset.x;
@@ -93,6 +96,14 @@ document.addEventListener('DOMContentLoaded', () => {
         scale: drawWidth / state.image.width
       });
     }
+
+    // Draw enemy tokens
+    drawTokens({
+      offsetX,
+      offsetY,
+      scale,
+      mapId: state.payload.map?.url
+    });
   }
 
   function drawGrid(area) {
@@ -121,6 +132,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     ctx.stroke();
     ctx.restore();
+  }
+
+  function drawTokens(mapTransform) {
+    if (!state.payload || !state.payload.tokens) {
+      return;
+    }
+
+    const tokens = state.payload.tokens;
+    const grid = state.payload.grid;
+    const cellSize = grid?.cell_px || 50;
+
+    tokens.forEach(token => {
+      // Convert token map coordinates to screen coordinates
+      const screenX = mapTransform.offsetX + (token.x * mapTransform.scale);
+      const screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
+      const tokenRadius = (cellSize * mapTransform.scale) / 2;
+
+      // Draw token circle
+      ctx.save();
+      ctx.fillStyle = 'rgba(220, 38, 38, 0.7)'; // Red color for enemies
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.lineWidth = 3;
+
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Draw token name
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `${Math.max(12, tokenRadius / 2)}px Roboto, Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(token.name, screenX, screenY);
+
+      ctx.restore();
+    });
   }
 
   function handleDisplayState(payload) {

@@ -1,8 +1,8 @@
 {
   "display": {
     "resolution": {
-      "w": 1080,
-      "h": 1920
+      "w": 720,
+      "h": 1280
     },
     "physical": {
       "diagonal_in": 8,
@@ -21,8 +21,8 @@
       "zoom": 1.5,
       "gridZoom": 0.1,
       "offset": {
-        "x": 924,
-        "y": -576
+        "x": 1176,
+        "y": -896
       }
     }
   },
@@ -30,10 +30,111 @@
   "encounter": {
     "startingAreas": {
       "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc": {
-        "x": 48,
-        "y": 768,
+        "x": 0,
+        "y": 1194.67,
         "zoom": 1.5
       }
-    }
+    },
+    "placedEnemies": [
+      {
+        "id": "enc-enemy-1760720299847-67o6kf",
+        "name": "Pig - 01",
+        "source": "custom",
+        "payload": {
+          "id": "char-1760356699440",
+          "agentType": "e",
+          "name": "Pig",
+          "race": "human",
+          "class": "rogue",
+          "level": 8,
+          "abilities": {
+            "str": 17,
+            "dex": 18,
+            "con": 17,
+            "int": 15,
+            "wis": 12,
+            "cha": 19
+          },
+          "hp": 43,
+          "ac": 10,
+          "speed": 30,
+          "skills": [],
+          "attacks": [
+            {
+              "id": "attack-1760462067060",
+              "name": "puckYou",
+              "attackBonus": 50,
+              "damageDice": "1d6",
+              "damageType": "slashing"
+            }
+          ],
+          "notes": "",
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+        },
+        "placed": true,
+        "visible": true,
+        "position": {
+          "x": 137.69,
+          "y": 1808.26,
+          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+        }
+      },
+      {
+        "id": "enc-enemy-1760720356801-zsbtso",
+        "name": "Pig - 02",
+        "source": "custom",
+        "payload": {
+          "id": "char-1760356699440",
+          "agentType": "e",
+          "name": "Pig",
+          "race": "human",
+          "class": "rogue",
+          "level": 8,
+          "abilities": {
+            "str": 17,
+            "dex": 18,
+            "con": 17,
+            "int": 15,
+            "wis": 12,
+            "cha": 19
+          },
+          "hp": 43,
+          "ac": 10,
+          "speed": 30,
+          "skills": [],
+          "attacks": [
+            {
+              "id": "attack-1760462067060",
+              "name": "puckYou",
+              "attackBonus": 50,
+              "damageDice": "1d6",
+              "damageType": "slashing"
+            }
+          ],
+          "notes": "",
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+        },
+        "placed": true,
+        "visible": true,
+        "position": {
+          "x": 211.12,
+          "y": 1826.62,
+          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+        }
+      },
+      {
+        "id": "enc-enemy-1760719969415-c4yyq3",
+        "name": "Pig - 01",
+        "source": "custom",
+        "payload": null,
+        "placed": true,
+        "visible": true,
+        "position": {
+          "x": 229.47,
+          "y": 1716.47,
+          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+        }
+      }
+    ]
   }
 }

@@ -460,6 +460,11 @@ async function loadEncounter(encounterId) {
                 localStorage.setItem('lastEncounterId_' + sessionState.currentSession.id, encounterId);
             }
 
+            // Load flavor media from encounter
+            if (typeof loadFlavorMediaFromEncounter === 'function') {
+                loadFlavorMediaFromEncounter();
+            }
+
             console.log('Encounter loaded:', encounter);
         } else {
             throw new Error('Failed to load encounter');
