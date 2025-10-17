@@ -66,3 +66,51 @@ canvas {
 canvas:hover {
   box-shadow: 0 24px 120px rgba(94, 234, 212, 0.25);
 }
+
+.map-name-header {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  backdrop-filter: blur(8px);
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+.current-turn-footer {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 1rem 2.5rem;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 2px solid rgba(99, 102, 241, 0.5);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+}
+
+.turn-label {
+  font-size: 1rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.turn-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
+}

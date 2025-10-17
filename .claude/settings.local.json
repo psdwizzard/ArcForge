@@ -13,7 +13,9 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push)",
-      "Read(//h/**)"
+      "Read(//h/**)",
+      "Bash(cd:*)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

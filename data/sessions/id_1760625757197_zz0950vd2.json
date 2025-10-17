@@ -501,6 +501,30 @@
       "createdAt": "2025-10-17T18:32:43.941Z",
       "combatants": [
         {
+          "id": "combatant-1760727549946-m0izibbms",
+          "name": "Todd",
+          "type": "p",
+          "initiative": 14,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356841744-226858974.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 52,
+            "max": 52,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
           "id": "combatant-1760727573415-dxbk22xrg",
           "name": "Acolyte - 01",
           "type": "enemy",
@@ -510,7 +534,7 @@
           "sourceId": "CHEUjiYrVM9X0vIT",
           "atlasTokenId": "enc-enemy-1760725993971-54ofw8",
           "hp": {
-            "current": 9,
+            "current": 0,
             "max": 9,
             "temp": 0
           },
@@ -581,6 +605,30 @@
           "specialAbilities": []
         },
         {
+          "id": "combatant-1760727549131-z52qjbo2h",
+          "name": "MeanGrean",
+          "type": "p",
+          "initiative": 8,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356807448-51809731.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 28,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
           "id": "combatant-1760727579109-bzs61i5d8",
           "name": "Orc - 01",
           "type": "enemy",
@@ -590,7 +638,7 @@
           "sourceId": "HB49mCOVBXwWeKWQ",
           "atlasTokenId": "enc-enemy-1760726005715-hpogbo",
           "hp": {
-            "current": 15,
+            "current": 5,
             "max": 15,
             "temp": 0
           },
@@ -618,58 +666,10 @@
           "specialAbilities": []
         },
         {
-          "id": "combatant-1760727549131-z52qjbo2h",
-          "name": "MeanGrean",
-          "type": "p",
-          "initiative": 0,
-          "dexModifier": 2,
-          "imagePath": "/uploads/characterImage/characterImage-1760356807448-51809731.png",
-          "sourceId": null,
-          "atlasTokenId": null,
-          "hp": {
-            "current": 43,
-            "max": 43,
-            "temp": 0
-          },
-          "ac": 10,
-          "statusEffects": [],
-          "deathSaves": {
-            "successes": 0,
-            "failures": 0
-          },
-          "loot": [],
-          "attacks": [],
-          "specialAbilities": []
-        },
-        {
-          "id": "combatant-1760727549946-m0izibbms",
-          "name": "Todd",
-          "type": "p",
-          "initiative": 0,
-          "dexModifier": 2,
-          "imagePath": "/uploads/characterImage/characterImage-1760356841744-226858974.png",
-          "sourceId": null,
-          "atlasTokenId": null,
-          "hp": {
-            "current": 52,
-            "max": 52,
-            "temp": 0
-          },
-          "ac": 10,
-          "statusEffects": [],
-          "deathSaves": {
-            "successes": 0,
-            "failures": 0
-          },
-          "loot": [],
-          "attacks": [],
-          "specialAbilities": []
-        },
-        {
           "id": "combatant-1760727548539-cwp4b6u09",
           "name": "klous",
           "type": "p",
-          "initiative": 0,
+          "initiative": 6,
           "dexModifier": 1,
           "imagePath": "/uploads/characterImage/characterImage-1760356767243-215162926.png",
           "sourceId": null,
@@ -691,7 +691,7 @@
         }
       ],
       "roundNumber": 1,
-      "currentTurnIndex": 0,
+      "currentTurnIndex": 4,
       "placedEnemies": [
         {
           "id": "enc-enemy-1760725990027-bvj9hx",
@@ -783,6 +783,247 @@
           "id": "flavor-b8436a71-df56-4c1e-a113-c9d76f3a654b",
           "path": "/maps/c787e572-31bb-4683-857e-4ddce2a2251e.mp3",
           "filename": "c787e572-31bb-4683-857e-4ddce2a2251e.mp3",
+          "type": "sound"
+        }
+      ]
+    },
+    {
+      "id": "id_1760729163356_zxllwkwux",
+      "name": "e7",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-17T19:26:03.356Z",
+      "combatants": [
+        {
+          "id": "combatant-1760729183581-vgbtbm57y",
+          "name": "Pig - 01",
+          "type": "enemy",
+          "initiative": 7,
+          "dexModifier": 4,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760729177637-bqdr1k",
+          "hp": {
+            "current": 43,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760729170363-t66szr1hm",
+          "name": "Todd",
+          "type": "p",
+          "initiative": 4,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356841744-226858974.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 52,
+            "max": 52,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760729186452-a4hfdbw8l",
+          "name": "Adult Black Dragon - 01",
+          "type": "enemy",
+          "initiative": 3,
+          "dexModifier": 2,
+          "imagePath": "/data/creatures/library/tokens/dragon/BlackDragonAdult.webp",
+          "sourceId": "M4eX4Mu5IHCr3TMf",
+          "atlasTokenId": "enc-enemy-1760729179882-ysss4g",
+          "hp": {
+            "current": 195,
+            "max": 195,
+            "temp": 0
+          },
+          "ac": 19,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [
+            {
+              "name": "Bite",
+              "attackBonus": 11,
+              "damageRoll": "2d10+6 + 1d8",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+11 to hit,</strong>, <strong>10 ft.,</strong> one target. Hit: <strong>17 (2d10 + 6) <em>piercing damage</em></strong> plus <strong>4 (1d8) <em>acid damage</em></strong>.</p>"
+            },
+            {
+              "name": "Claw",
+              "attackBonus": 11,
+              "damageRoll": "2d6+6",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+11 to hit,</strong>, <strong>5 ft.,</strong> one target. Hit: <strong>13 (2d6 + 6) <em>slashing damage</em></strong>.</p>"
+            },
+            {
+              "name": "Tail",
+              "attackBonus": 11,
+              "damageRoll": "2d8+6",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+11 to hit,</strong>, <strong>15 ft.,</strong> one target. Hit: <strong>15 (2d8 + 6) <em>bludgeoning damage</em></strong>.</p>"
+            }
+          ],
+          "specialAbilities": [
+            {
+              "name": "Multiattack",
+              "description": "<p>The dragon can use its Frightful Presence. It then makes three attacks: one with its bite and two with its claws.</p>"
+            },
+            {
+              "name": "Frightful Presence",
+              "description": "<p>Each creature of the dragon's choice that is <strong>within 120 feet</strong> of the dragon and aware of it must succeed on a <strong>DC 16 Wisdom saving throw</strong> or become frightened for <strong>1 minute</strong>. </p><p>A creature can repeat the saving throw at the end of each of its turns, ending the effect on itself on a success. If a creature's saving throw is successful or the effect ends for it, the creature is immune to the dragon's Frightful Presence for the next 24 hours.</p>"
+            },
+            {
+              "name": "Acid Breath",
+              "description": "<p>The dragon exhales acid in a 60-foot line that is 5 feet wide. </p><p>Each creature in that line must make a  <strong>DC 18 Dexterity</strong> saving throw, taking <strong>54 (12d8) <em>acid damage</em></strong> on a failed save, or half as much damage on a successful one.</p>"
+            }
+          ]
+        },
+        {
+          "id": "combatant-1760729169699-slvgjbc04",
+          "name": "MeanGrean",
+          "type": "p",
+          "initiative": 3,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356807448-51809731.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 43,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760729169139-iwa3oozed",
+          "name": "klous",
+          "type": "p",
+          "initiative": 3,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1760356767243-215162926.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 2,
+      "currentTurnIndex": 2,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1760729177637-bqdr1k",
+          "name": "Pig - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760462067060",
+                "name": "puckYou",
+                "attackBonus": 50,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 165.22,
+            "y": 1817.44,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760729177637-bqdr1k"
+        },
+        {
+          "id": "enc-enemy-1760729179882-ysss4g",
+          "name": "Adult Black Dragon - 01",
+          "source": "library",
+          "payload": {
+            "id": "M4eX4Mu5IHCr3TMf"
+          },
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 64.25,
+            "y": 1863.33,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760729179882-ysss4g"
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-f048fc12-8b02-45d4-bb70-5accaa1c41df",
+          "path": "/maps/ff1f8cb8-d457-4364-a2e2-d934f09566f6.png",
+          "filename": "ff1f8cb8-d457-4364-a2e2-d934f09566f6.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": [
+        {
+          "id": "flavor-11e2f6e3-fa56-4dc7-9639-2a86fcde503b",
+          "path": "/maps/48065fe1-0977-4592-b6ea-ffbc6e0f1348.mp3",
+          "filename": "48065fe1-0977-4592-b6ea-ffbc6e0f1348.mp3",
           "type": "sound"
         }
       ]

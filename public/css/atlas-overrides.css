@@ -1,3 +1,30 @@
+/* Map Library Upload Controls */
+.atlas-upload-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.atlas-map-name-input {
+    width: 140px;
+    padding: 6px 10px;
+    background: #1f2937;
+    border: 1px solid #374151;
+    border-radius: 4px;
+    color: #f9fafb;
+    font-size: 0.85em;
+    transition: border-color 0.2s;
+}
+
+.atlas-map-name-input:focus {
+    outline: none;
+    border-color: #60a5fa;
+}
+
+.atlas-map-name-input::placeholder {
+    color: #6b7280;
+}
+
 /* Atlas layout overrides to ensure encounter map maintains minimum width */
 #atlas-encounters-section .atlas-encounter-stage {
     flex: 1 1 550px;

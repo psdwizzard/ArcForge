@@ -3321,18 +3321,8 @@ function buildEncounterEnemySearchKey(...parts) {
 }
 
 function resolveEncounterMonsterImage(monster) {
-    const candidate = monster?.tokenImage || monster?.image || monster?.img;
-    if (!candidate) {
-        return null;
-    }
-    if (candidate.startsWith('http://') || candidate.startsWith('https://')) {
-        return candidate;
-    }
-    if (candidate.startsWith('/')) {
-        return candidate;
-    }
-    const normalized = candidate.replace(/^\+/g, '').replace(/^\/+/, '');
-    return `/data/creatures/library/${encodeURI(normalized)}`;
+    const candidate = monster?.tokenImage || monster?.token_image || monster?.image || monster?.portrait_image || monster?.img;
+    return resolveMonsterImage(candidate);
 }
 
 function normalizeEncounterMonster(monster) {
@@ -3580,7 +3570,21 @@ function renderEncounterEnemyDetail(enemy) {
         defenses.push(`HP ${enemy.hp}`);
     }
 
-    const imageSrc = enemy.image ? sanitizeEncounterText(enemy.image) : null;
+    const imageCandidates = [
+        enemy.image,
+        enemy.imagePath,
+        enemy.tokenImage,
+        enemy.token_image,
+        enemy.portrait_image,
+        enemy.img,
+        enemy.raw?.tokenImage,
+        enemy.raw?.token_image,
+        enemy.raw?.image,
+        enemy.raw?.portrait_image,
+        enemy.raw?.img
+    ];
+    const resolvedImage = resolveEnemyImagePath(imageCandidates, { preferLibrary: enemy.source === 'library' });
+    const imageSrc = resolvedImage ? sanitizeEncounterText(resolvedImage) : null;
     const imageMarkup = imageSrc
         ? `<img src="${imageSrc}" alt="${sanitizeEncounterText(enemy.name)}">`
         : '<div class="atlas-enemy-detail-avatar">?</div>';
@@ -3775,6 +3779,25 @@ function handleEncounterEnemyAdd(enemy) {
         inventory: inventory.map((item) => ({ ...item })),
         originCombatantId: null
     };
+
+    const imageCandidates = [
+        enemy.image,
+        enemy.imagePath,
+        enemy.tokenImage,
+        enemy.token_image,
+        enemy.portrait_image,
+        enemy.img,
+        payload?.imagePath,
+        payload?.tokenImage,
+        payload?.token_image,
+        payload?.image,
+        payload?.portrait_image,
+        payload?.img
+    ];
+    const resolvedImagePath = resolveEnemyImagePath(imageCandidates, { preferLibrary: enemy.source === 'library' });
+    if (resolvedImagePath) {
+        entry.imagePath = resolvedImagePath;
+    }
 
     if (Object.keys(stats).length) {
         entry.stats = stats;
@@ -4038,6 +4061,22 @@ async function addPlacedEnemyToCombat(entry) {
 
         const inventory = Array.isArray(entry.inventory) ? entry.inventory.map(item => ({ ...item })) : [];
 
+        const imageCandidates = [
+            entry.imagePath,
+            entry.payload?.imagePath,
+            entry.payload?.tokenImage,
+            entry.payload?.token_image,
+            entry.payload?.image,
+            entry.payload?.portrait_image,
+            entry.payload?.img,
+            monster?.tokenImage,
+            monster?.token_image,
+            monster?.image,
+            monster?.portrait_image,
+            monster?.img
+        ];
+        const imagePath = resolveEnemyImagePath(imageCandidates, { preferLibrary: entry.source === 'library' });
+
         const combatantData = {
             name: entry.name,
             type: 'enemy',
@@ -4045,7 +4084,7 @@ async function addPlacedEnemyToCombat(entry) {
             hp: hpValue,
             ac: acValue,
             dexModifier,
-            imagePath: monster ? resolveMonsterImage(monster.tokenImage) : null,
+            imagePath,
             sourceId: monster ? monster.id : null
         };
         if (baseAbilities) {
@@ -4167,12 +4206,69 @@ function resolveMonsterImage(path) {
     if (!path) {
         return null;
     }
-    if (path.startsWith('http://') || path.startsWith('https://')) {
-        return path;
+    const raw = String(path).trim();
+    if (!raw) {
+        return null;
+    }
+    if (raw.startsWith('http://') || raw.startsWith('https://')) {
+        return raw;
+    }
+    if (raw.startsWith('/')) {
+        return raw;
     }
     const MONSTER_IMAGE_ROOT = '/data/creatures/library/';
-    const normalized = path.startsWith('/') ? path.slice(1) : path;
-    return `${MONSTER_IMAGE_ROOT}${encodeURI(normalized)}`;
+    let normalized = raw.split('\\').join('/');
+    while (normalized.startsWith('./')) {
+        normalized = normalized.slice(2);
+    }
+    while (normalized.startsWith('../')) {
+        normalized = normalized.slice(3);
+    }
+    while (normalized.startsWith('/')) {
+        normalized = normalized.slice(1);
+    }
+    if (!normalized) {
+        return null;
+    }
+    const libraryBaseRegex = /^data\/creatures\/library\/?/i;
+    const relative = libraryBaseRegex.test(normalized) ? normalized.replace(libraryBaseRegex, '') : normalized;
+    return `${MONSTER_IMAGE_ROOT}${encodeURI(relative)}`;
+}
+
+function resolveEnemyImagePath(candidates, options = {}) {
+    if (!Array.isArray(candidates)) {
+        return null;
+    }
+    const preferLibrary = options.preferLibrary === true;
+    for (const candidate of candidates) {
+        if (!candidate) {
+            continue;
+        }
+        const value = String(candidate).trim();
+        if (!value || value === '[object Object]') {
+            continue;
+        }
+        if (value.startsWith('http://') || value.startsWith('https://')) {
+            return value;
+        }
+        if (value.startsWith('/')) {
+            return value;
+        }
+        const normalized = value.split('\\').join('/');
+        if (normalized.startsWith('data:')) {
+            return normalized;
+        }
+        if (normalized.startsWith('/')) {
+            return normalized;
+        }
+        if (preferLibrary || normalized.toLowerCase().startsWith('data/creatures/library')) {
+            return resolveMonsterImage(normalized);
+        }
+        if (normalized) {
+            return normalized;
+        }
+    }
+    return null;
 }
 
 function handleStagedEnemyClone(entryId) {
@@ -4351,15 +4447,24 @@ function handleStagedEnemyEdit(entryId) {
         }
         return extractPayloadInventory(payload);
     })();
-    atlasMapState.encounter.editingInventory = baseInventory.map(it => {
-        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
-        return {
-            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
-            name: resolvedName,
-            type: it?.type || it?.system?.type || null,
-            price: it?.price ?? it?.system?.price ?? null,
-            weight: it?.weight ?? it?.system?.weight ?? null
-        };
+    atlasMapState.encounter.editingInventory = baseInventory.map(it => {
+
+        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
+
+        return {
+
+            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
+
+            name: resolvedName,
+
+            type: it?.type || it?.system?.type || null,
+
+            price: it?.price ?? it?.system?.price ?? null,
+
+            weight: it?.weight ?? it?.system?.weight ?? null
+
+        };
+
     });
     byId('ae-inventory').value = atlasMapState.encounter.editingInventory.length
         ? atlasMapState.encounter.editingInventory.map(i => i.name).join(', ')
@@ -4605,15 +4710,24 @@ async function saveAgentEditor() {
             .filter(Boolean)
             .map(label => ({ id: label, name: label }));
     }
-    const normalizedInventory = inventory.map(it => {
-        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
-        return {
-            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
-            name: resolvedName,
-            type: it?.type || it?.system?.type || null,
-            price: it?.price ?? it?.system?.price ?? null,
-            weight: it?.weight ?? it?.system?.weight ?? null
-        };
+    const normalizedInventory = inventory.map(it => {
+
+        const resolvedName = typeof it === 'object' ? (it?.name ?? '') : String(it ?? '');
+
+        return {
+
+            id: it?.id || it?._id || it?.uuid || it?.name || resolvedName,
+
+            name: resolvedName,
+
+            type: it?.type || it?.system?.type || null,
+
+            price: it?.price ?? it?.system?.price ?? null,
+
+            weight: it?.weight ?? it?.system?.weight ?? null
+
+        };
+
     });
     const gold = Number(byId('ae-gold').value || 0);
     const visible = !!byId('ae-visible').checked;

@@ -9,8 +9,13 @@
 </head>
 <body>
   <div id="display-status" class="status disconnected">Connecting...</div>
+  <div id="map-name-header" class="map-name-header">No Map Loaded</div>
   <div id="root">
     <canvas id="display-canvas" width="1920" height="1080">Your browser does not support the canvas element.</canvas>
+  </div>
+  <div id="current-turn-footer" class="current-turn-footer" style="display: none;">
+    <span class="turn-label">Current Turn:</span>
+    <span id="current-turn-name" class="turn-name">—</span>
   </div>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./js/display.js"></script>

@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const state = {
     payload: null,
     image: null,
-    connected: false
+    connected: false,
+    tokenImages: {}
   };
 
   function setStatus(text, isConnected) {
@@ -134,6 +135,22 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
+  function preloadTokenImage(imagePath) {
+    if (!imagePath || state.tokenImages[imagePath]) {
+      return;
+    }
+
+    const img = new Image();
+    img.onload = () => {
+      draw(); // Redraw when image loads
+    };
+    img.onerror = () => {
+      console.warn('[Display] Failed to load token image:', imagePath);
+    };
+    img.src = imagePath;
+    state.tokenImages[imagePath] = img;
+  }
+
   function drawTokens(mapTransform) {
     if (!state.payload || !state.payload.tokens) {
       return;
@@ -149,30 +166,92 @@ document.addEventListener('DOMContentLoaded', () => {
       const screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
       const tokenRadius = (cellSize * mapTransform.scale) / 2;
 
-      // Draw token circle
+      // Preload image if available
+      const imagePath = token.imagePath;
+      if (imagePath) {
+        preloadTokenImage(imagePath);
+      }
+
+      const tokenImage = imagePath ? state.tokenImages[imagePath] : null;
+
       ctx.save();
-      ctx.fillStyle = 'rgba(220, 38, 38, 0.7)'; // Red color for enemies
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-      ctx.lineWidth = 3;
 
-      ctx.beginPath();
-      ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
+      if (tokenImage && tokenImage.complete && tokenImage.naturalWidth > 0) {
+        // Draw circular clipped image
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
+        ctx.clip();
 
-      // Draw token name
-      ctx.fillStyle = '#ffffff';
-      ctx.font = `${Math.max(12, tokenRadius / 2)}px Roboto, Arial, sans-serif`;
+        // Draw image to fill the circle
+        const imgSize = tokenRadius * 2;
+        ctx.drawImage(tokenImage, screenX - tokenRadius, screenY - tokenRadius, imgSize, imgSize);
+        ctx.restore();
+
+        // Draw border around the image
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(220, 38, 38, 0.9)';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        // Draw default red circle if no image
+        ctx.fillStyle = 'rgba(220, 38, 38, 0.7)'; // Red color for enemies
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw name label below the token
+      ctx.save();
+      const fontSize = Math.max(14, tokenRadius / 1.5);
+      ctx.font = `bold ${fontSize}px Roboto, Arial, sans-serif`;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(token.name, screenX, screenY);
+      ctx.textBaseline = 'top';
 
+      // Draw text with background for better visibility
+      const textY = screenY + tokenRadius + 6;
+      const textMetrics = ctx.measureText(token.name);
+      const textWidth = textMetrics.width;
+      const textHeight = fontSize + 6;
+
+      // Draw semi-transparent background
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.fillRect(screenX - textWidth / 2 - 6, textY - 3, textWidth + 12, textHeight);
+
+      // Draw text
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(token.name, screenX, textY);
       ctx.restore();
     });
   }
 
   function handleDisplayState(payload) {
     state.payload = payload;
+
+    // Update map name header
+    const mapNameHeader = document.getElementById('map-name-header');
+    if (mapNameHeader) {
+      mapNameHeader.textContent = payload?.map?.name || 'No Map Loaded';
+    }
+
+    // Update current turn footer
+    const currentTurnFooter = document.getElementById('current-turn-footer');
+    const currentTurnName = document.getElementById('current-turn-name');
+
+    if (payload?.currentTurn && payload.currentTurn.visible !== false) {
+      if (currentTurnFooter) currentTurnFooter.style.display = 'flex';
+      if (currentTurnName) currentTurnName.textContent = payload.currentTurn.name || '—';
+    } else {
+      if (currentTurnFooter) currentTurnFooter.style.display = 'none';
+    }
+
     if (!payload?.map?.url) {
       state.image = null;
       draw();

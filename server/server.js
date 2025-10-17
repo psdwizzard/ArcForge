@@ -29,6 +29,8 @@ fs.mkdirSync(DISPLAY_PUBLIC_DIR, { recursive: true });
 
 displayApp.use(express.static(DISPLAY_PUBLIC_DIR));
 displayApp.use('/maps', express.static(MAPS_DIR));
+displayApp.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+displayApp.use('/data/creatures/library', express.static(path.join(__dirname, '../data/creatures/library')));
 displayApp.get('*', (req, res) => {
   res.sendFile(path.join(DISPLAY_PUBLIC_DIR, 'index.html'));
 });
@@ -48,7 +50,7 @@ app.use((req, res, next) => {
 app.use(express.static(path.join(__dirname, '../public')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/db-assets', express.static(path.join(__dirname, '../data/DBs')));
-app.use('/data/creatures/library', express.static(path.join(__dirname, '../data/DBs')));
+app.use('/data/creatures/library', express.static(path.join(__dirname, '../data/creatures/library')));
 app.use('/data', express.static(path.join(__dirname, '../data')));
 app.use('/maps', express.static(MAPS_DIR));
 
@@ -381,17 +383,38 @@ function buildDisplayState() {
           name: enemy.name,
           x: enemy.position.x,
           y: enemy.position.y,
-          mapId: enemy.position.mapId
+          mapId: enemy.position.mapId,
+          imagePath: enemy.payload?.imagePath || null
         });
       }
     });
+  }
+
+  // Get current turn information from combat tracker
+  let currentTurn = null;
+  if (currentEncounter && currentEncounter.combatActive && currentEncounter.combatants && currentEncounter.combatants.length > 0) {
+    const currentCombatant = currentEncounter.combatants[currentEncounter.currentTurnIndex];
+    if (currentCombatant) {
+      // Check if this combatant has a corresponding placed enemy in the encounter
+      const placedEnemy = currentSessionEncounter?.placedEnemies?.find(e =>
+        e.name === currentCombatant.name || e.id === currentCombatant.atlasTokenId
+      );
+
+      // Only show if the combatant is visible (for enemies on the map, check their visibility)
+      const isVisible = placedEnemy ? (placedEnemy.visible !== false) : true;
+
+      currentTurn = {
+        name: currentCombatant.name,
+        visible: isVisible
+      };
+    }
   }
 
   return {
     type: 'DISPLAY_STATE',
     connected: displayConnectionCount > 0,
     map: activeMap
-      ? { url: activeMap.file, w: activeMap.width_px, h: activeMap.height_px }
+      ? { url: activeMap.file, name: activeMap.name, w: activeMap.width_px, h: activeMap.height_px }
       : null,
     viewport: {
       w: resolution.w,
@@ -407,7 +430,8 @@ function buildDisplayState() {
       color: atlasSettings.display?.grid?.color ?? '#3aaaff',
       opacity: atlasSettings.display?.grid?.opacity ?? 0.25
     },
-    tokens: tokens
+    tokens: tokens,
+    currentTurn: currentTurn
   };
 }
 
@@ -1007,7 +1031,9 @@ app.post('/api/combatants/:id/initiative', (req, res) => {
 
 // Start combat - roll initiative for all and begin
 app.post('/api/combat/start', (req, res) => {
+  console.log('[start-combat] Endpoint called, current combatants:', currentEncounter.combatants.length);
   if (currentEncounter.combatants.length === 0) {
+    console.log('[start-combat] ERROR: No combatants');
     return res.status(400).json({ error: 'No agents to start combat with' });
   }
 
@@ -1036,6 +1062,7 @@ app.post('/api/combat/start', (req, res) => {
   }
 
   autoSaveEncounter();
+  broadcastDisplayState();
   res.json(currentEncounter);
 });
 
@@ -1043,6 +1070,7 @@ app.post('/api/combat/start', (req, res) => {
 app.post('/api/combat/end', (req, res) => {
   currentEncounter.combatActive = false;
   autoSaveEncounter();
+  broadcastDisplayState();
   res.json(currentEncounter);
 });
 
@@ -1096,6 +1124,7 @@ app.post('/api/combat/next-turn', (req, res) => {
 
   console.log('[next-turn] Returning state with', currentEncounter.combatants.length, 'combatants');
   autoSaveEncounter();
+  broadcastDisplayState();
   res.json(currentEncounter);
 });
 
