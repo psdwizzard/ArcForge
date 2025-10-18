@@ -696,6 +696,11 @@ async function loadSavedAgents() {
         console.log('[loadSavedAgents] Response status:', response.status, response.statusText);
         savedAgents = await response.json();
         console.log('[loadSavedAgents] Loaded agents:', savedAgents.length, savedAgents);
+        
+        // Expose to window for other modules
+        window.charactersData = savedAgents;
+        console.log('[loadSavedAgents] Exposed charactersData to window with', savedAgents.length, 'characters');
+        
         refreshEncounterEnemyAgents();
     } catch (error) {
         console.error('[loadSavedAgents] Error loading saved agents:', error);
@@ -3715,6 +3720,10 @@ function handleEncounterEnemyAdd(enemy) {
     if (!enemy) {
         return;
     }
+    console.log(`[handleEncounterEnemyAdd] Adding enemy:`, enemy);
+    console.log(`[handleEncounterEnemyAdd] enemy.image:`, enemy.image);
+    console.log(`[handleEncounterEnemyAdd] enemy.raw:`, enemy.raw);
+    
     atlasMapState.encounter.pending = atlasMapState.encounter.pending || [];
     const payload = enemy.raw || enemy;
     const abilityScores = extractPayloadAbilityScores(payload);
@@ -3786,15 +3795,24 @@ function handleEncounterEnemyAdd(enemy) {
         enemy.tokenImage,
         enemy.token_image,
         enemy.portrait_image,
+        enemy.portraitImage,  // camelCase
         enemy.img,
         payload?.imagePath,
-        payload?.tokenImage,
+        payload?.tokenImage,  // camelCase
         payload?.token_image,
         payload?.image,
         payload?.portrait_image,
+        payload?.portraitImage,  // camelCase
         payload?.img
     ];
+    
+    console.log(`[handleEncounterEnemyAdd] ${enemy.name} source:`, enemy.source);
+    console.log(`[handleEncounterEnemyAdd] ${enemy.name} payload.tokenImage:`, payload?.tokenImage);
+    console.log(`[handleEncounterEnemyAdd] ${enemy.name} payload.portraitImage:`, payload?.portraitImage);
+    
     const resolvedImagePath = resolveEnemyImagePath(imageCandidates, { preferLibrary: enemy.source === 'library' });
+    console.log(`[handleEncounterEnemyAdd] ${enemy.name} resolvedImagePath:`, resolvedImagePath);
+    
     if (resolvedImagePath) {
         entry.imagePath = resolvedImagePath;
     }
@@ -5121,13 +5139,26 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
     const activeMapId = atlasMapState.activeMapId;
     const selectedToken = atlasMapState.encounter.selectedToken;
 
+    console.log('[drawEnemyTokens] Called with pending count:', pending.length, 'activeMapId:', activeMapId);
+
     if (!activeMapId) {
+        console.log('[drawEnemyTokens] No active map ID, returning');
         return;
     }
 
     // Calculate cell size the same way the grid does
     const settings = atlasMapState.settings;
     if (!settings?.display?.grid) {
+        console.warn('[drawEnemyTokens] No grid settings available, using defaults');
+        // Use default values instead of returning
+        const defaultCellPx = 50;
+        const defaultGridZoom = atlasMapState.preview?.gridZoom || 1;
+        const scaledCellPx = defaultCellPx * scale * defaultGridZoom;
+        const tokenRadius = scaledCellPx * 0.4;
+        
+        ctx.save();
+        drawTokensWithRadius(ctx, pending, activeMapId, selectedToken, offsetX, offsetY, scale, tokenRadius);
+        ctx.restore();
         return;
     }
 
@@ -5140,21 +5171,46 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
     const scaledCellPx = cellPx * scale * gridZoom;
 
     // Token should be 80% of cell diameter (40% radius)
-    const tokenRadius = scaledCellPx * 0.4;
+    let tokenRadius = scaledCellPx * 0.4;
+    
+    // TEMP FIX: Ensure minimum visible size (increased to 20px for better visibility)
+    tokenRadius = Math.max(tokenRadius, 20);
+    
+    console.log('[drawEnemyTokens] Token size calculation:', {
+        cellPx: cellPx,
+        scale: scale,
+        gridZoom: gridZoom,
+        scaledCellPx: scaledCellPx,
+        tokenRadius: tokenRadius
+    });
 
     ctx.save();
+    drawTokensWithRadius(ctx, pending, activeMapId, selectedToken, offsetX, offsetY, scale, tokenRadius);
+    ctx.restore();
+}
 
+function drawTokensWithRadius(ctx, pending, activeMapId, selectedToken, offsetX, offsetY, scale, tokenRadius) {
+    let drawnCount = 0;
+    let skippedCount = 0;
+    const skippedReasons = [];
+    
     pending.forEach(entry => {
         if (!entry.placed || !entry.position) {
+            skippedCount++;
+            skippedReasons.push(`${entry.name}: not placed or no position`);
             return;
         }
 
         // Only draw tokens on the current map
         if (entry.position.mapId !== activeMapId) {
+            skippedCount++;
+            skippedReasons.push(`${entry.name}: map ID mismatch (token: ${entry.position.mapId}, active: ${activeMapId})`);
             return;
         }
         // Respect visibility toggle (default visible if not set)
         if (entry.visible === false) {
+            skippedCount++;
+            skippedReasons.push(`${entry.name}: not visible`);
             return;
         }
 
@@ -5163,6 +5219,21 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
         // Convert map coordinates to canvas coordinates
         const canvasX = offsetX + (entry.position.x * scale);
         const canvasY = offsetY + (entry.position.y * scale);
+
+        if (drawnCount === 0) {
+            // Log first token's coordinates for debugging
+            console.log('[drawTokensWithRadius] First token coordinates:', {
+                name: entry.name,
+                mapPos: { x: entry.position.x, y: entry.position.y },
+                canvasPos: { x: canvasX, y: canvasY },
+                scale: scale,
+                offsetX: offsetX,
+                offsetY: offsetY,
+                tokenRadius: tokenRadius
+            });
+        }
+
+        drawnCount++;
 
         // Draw selection highlight if selected
         if (isSelected) {
@@ -5173,19 +5244,22 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
             ctx.stroke();
         }
 
-        // Draw token circle
+        // Draw token circle with VERY visible colors
         ctx.beginPath();
         ctx.arc(canvasX, canvasY, tokenRadius, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(239, 68, 68, 0.7)'; // Red with transparency
+        
+        // Bright solid red fill (no transparency to ensure visibility)
+        ctx.fillStyle = '#ef4444'; // Bright red
         ctx.fill();
-        ctx.strokeStyle = isSelected ? '#fbbf24' : '#dc2626'; // Yellow border if selected
-        ctx.lineWidth = 2;
+        
+        // Thick white border for contrast
+        ctx.strokeStyle = isSelected ? '#fbbf24' : '#ffffff'; // Yellow if selected, white otherwise
+        ctx.lineWidth = 4;
         ctx.stroke();
 
-        // Draw name label - scale font based on token size
-        const fontSize = Math.max(8, Math.min(14, tokenRadius * 0.35));
-        ctx.font = `${fontSize}px sans-serif`;
-        ctx.fillStyle = '#ffffff';
+        // Draw name label with background for better visibility
+        const fontSize = Math.max(10, Math.min(16, tokenRadius * 0.6));
+        ctx.font = `bold ${fontSize}px sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -5195,11 +5269,52 @@ function drawEnemyTokens(ctx, scale, offsetX, offsetY) {
             displayName = displayName.substring(0, 10) + '...';
         }
 
+        // Draw dark background behind text
+        const textMetrics = ctx.measureText(displayName);
+        const textWidth = textMetrics.width;
+        const padding = 4;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        ctx.fillRect(
+            canvasX - textWidth / 2 - padding,
+            canvasY - fontSize / 2 - padding,
+            textWidth + padding * 2,
+            fontSize + padding * 2
+        );
+
+        // Draw white text on top
+        ctx.fillStyle = '#ffffff';
         ctx.fillText(displayName, canvasX, canvasY);
     });
 
-    ctx.restore();
+    console.log('[drawTokensWithRadius] Drew', drawnCount, 'tokens, skipped', skippedCount);
+    if (skippedCount > 0) {
+        console.log('[drawTokensWithRadius] Skipped reasons:', skippedReasons);
+    }
 }
+
+// Debug helper - call from console: debugAtlasTokens()
+window.debugAtlasTokens = function() {
+    console.log('=== ATLAS TOKEN DEBUG ===');
+    console.log('atlasMapState.activeMapId:', atlasMapState?.activeMapId);
+    console.log('atlasMapState.encounter.pending:', atlasMapState?.encounter?.pending);
+    console.log('Pending tokens:', atlasMapState?.encounter?.pending?.length || 0);
+    
+    if (atlasMapState?.encounter?.pending) {
+        atlasMapState.encounter.pending.forEach((entry, idx) => {
+            console.log(`Token ${idx}:`, {
+                name: entry.name,
+                placed: entry.placed,
+                visible: entry.visible,
+                position: entry.position,
+                positionMapId: entry.position?.mapId,
+                matches: entry.position?.mapId === atlasMapState.activeMapId
+            });
+        });
+    }
+    
+    console.log('atlasMapState.settings?.display?.grid:', atlasMapState?.settings?.display?.grid);
+    console.log('=== END DEBUG ===');
+};
 
 function drawAtlasEncounter() {
     const { encounterCanvas, encounterEmpty, startAreaHint } = getAtlasElements();
@@ -5307,6 +5422,45 @@ function drawAtlasEncounter() {
 
         // Draw placed enemy tokens
         drawEnemyTokens(ctx, scale, actualX, actualY);
+
+        // DEBUG: Draw test markers
+        if (atlasMapState.encounter.pending && atlasMapState.encounter.pending.length > 0) {
+            ctx.save();
+            // Green marker at canvas center
+            ctx.fillStyle = 'lime';
+            ctx.beginPath();
+            ctx.arc(width / 2, height / 2, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Draw large crosshairs at token positions to show where they actually are
+            atlasMapState.encounter.pending.forEach((entry, idx) => {
+                if (!entry.placed || !entry.position || entry.position.mapId !== atlasMapState.activeMapId) {
+                    return;
+                }
+                
+                const tokenX = actualX + (entry.position.x * scale);
+                const tokenY = actualY + (entry.position.y * scale);
+                
+                // Draw a bright yellow crosshair
+                ctx.strokeStyle = idx === 0 ? 'yellow' : 'cyan';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(tokenX - 50, tokenY);
+                ctx.lineTo(tokenX + 50, tokenY);
+                ctx.moveTo(tokenX, tokenY - 50);
+                ctx.lineTo(tokenX, tokenY + 50);
+                ctx.stroke();
+                
+                // Draw a circle around it
+                ctx.beginPath();
+                ctx.arc(tokenX, tokenY, 30, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+            ctx.restore();
+        }
 
         // Update cursor based on mode
         if (atlasMapState.encounter.placementMode) {

@@ -109,9 +109,52 @@ The app has TWO separate encounter persistence systems that need to work togethe
 - Selection highlight: Yellow border when token selected
 - Keyboard movement: Arrow keys move exactly one grid cell, Escape to deselect
 
-## Recent Session Accomplishments (2025-01-17)
+## Recent Session Accomplishments
 
-### Encounter Flavor Media System
+### Token Display & Image Rendering Fixes (2025-10-18)
+
+**Issue:** Enemy tokens were invisible in Atlas Encounters view and showing as red circles (no images) on player display (port 3001).
+
+**Root Causes Identified:**
+1. **Tiny Token Size:** Token radius calculation using `cellPx * scale * gridZoom * 0.4` resulted in ~4px tokens when `gridZoom=0.2`, making them essentially invisible
+2. **Missing Image Paths:** Library monster image paths not preserved through save/load cycle due to:
+   - Field name mismatch: `normalizeMonsterData()` converts `token_image` → `tokenImage` (camelCase), but sync code looked for snake_case
+   - Payload stripping: `syncCombatantsToAtlas()` reduced monster payload to just `{ id: "..." }`, losing all image data
+   - Missing window exposure: `monstersById` and `charactersData` not exposed globally for cross-module access
+
+**Solutions Implemented:**
+
+*Token Visibility (app.js, display.js):*
+- Added minimum token radius: 20px for Atlas Encounters, 25px for player display
+- Improved token styling: Solid colors, thicker borders (4-5px white), larger fonts
+- Added visual debugging: Crosshair markers and test circles to verify rendering
+- Enhanced name labels: Dark backgrounds, better padding, bold text
+
+*Image Path Resolution (session-manager.js, server/server.js):*
+- Fixed field name references: Changed all `token_image`/`portrait_image` lookups to use camelCase (`tokenImage`/`portraitImage`)
+- Exposed data globally: `window.monstersById` (loot-manager.js) and `window.charactersData` (app.js)
+- Enhanced `loadEncounter()`: Retry mechanism waits for libraries to load, then resolves missing image paths
+- Enhanced `syncCombatantsToAtlas()`: Preserves full monster payload and resolves images from library
+- Enhanced `saveCurrentEncounter()`: Checks multiple image path sources (entry, payload camelCase/snake_case)
+- Updated server `buildDisplayState()`: Checks `payload.tokenImage`/`portraitImage` (camelCase) and handles relative paths
+- Custom enemy support: Looks up character data by name (strips auto-number suffix) to get image paths
+
+*Data Flow for Images:*
+1. Library monster added → `handleEncounterEnemyAdd()` resolves `payload.tokenImage` via `resolveEnemyImagePath()`
+2. On save → `saveCurrentEncounter()` extracts image from `entry.imagePath` or `payload.tokenImage`/`portraitImage`
+3. On load → `loadEncounter()` restores images, waits for libraries, then fills in missing paths
+4. On sync → `syncCombatantsToAtlas()` fetches full monster data from `window.monstersById` including images
+5. Server broadcast → `buildDisplayState()` checks multiple image sources and sends to display
+6. Display renders → Shows monster portrait if available, otherwise solid red circle with white border
+
+**Current Status:**
+- ✅ Tokens visible in Atlas Encounters view (bright red with white borders, minimum 20px radius)
+- ✅ Library monster images display on player view (port 3001)
+- ✅ Custom enemy images display on player view
+- ✅ Debug helpers available: `debugAtlasTokens()` in browser console
+- ⚠️ Need to verify newly-added library monsters get images (testing required)
+
+### Encounter Flavor Media System (2025-01-17)
 - Created dedicated flavor media upload section separate from agent editor
 - File upload buttons for images and audio with visual preview grids
 - Image previews with click-to-view full size functionality

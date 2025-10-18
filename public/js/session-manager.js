@@ -427,11 +427,107 @@ async function loadEncounter(encounterId) {
             console.log('[Session] Loading placed enemies from encounter:', savedEnemies);
 
             if (window.atlasMapState && window.atlasMapState.encounter) {
-                window.atlasMapState.encounter.pending = savedEnemies.map(entry => ({
-                    ...entry,
-                    position: entry.position ? { ...entry.position } : null
-                }));
+                window.atlasMapState.encounter.pending = savedEnemies.map(entry => {
+                    // Try to resolve image path if missing
+                    let imagePath = entry.imagePath || entry.payload?.imagePath || entry.payload?.token_image || entry.payload?.portrait_image || null;
+                    
+                    // For library monsters, resolve relative paths
+                    if (entry.source === 'library' && imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+                        imagePath = `/data/creatures/library/${imagePath}`;
+                    }
+                    
+                    // If still no image path and it's a library monster with payload.id, try to get it from monster library
+                    if (!imagePath && entry.source === 'library' && entry.payload?.id) {
+                        if (typeof window.monstersById !== 'undefined' && window.monstersById) {
+                            const monsterData = window.monstersById.get(entry.payload.id);
+                            if (monsterData) {
+                                console.log(`[Session] Resolved image for ${entry.name} from monster library:`, monsterData.tokenImage || monsterData.portraitImage);
+                                if (monsterData.tokenImage) {
+                                    imagePath = `/data/creatures/library/${monsterData.tokenImage}`;
+                                } else if (monsterData.portraitImage) {
+                                    imagePath = `/data/creatures/library/${monsterData.portraitImage}`;
+                                }
+                            }
+                        } else {
+                            console.warn(`[Session] monstersById not available yet for ${entry.name}, image path will be resolved later`);
+                        }
+                    }
+                    
+                    // If still no image path and it's a custom enemy, try to get it from characters data
+                    if (!imagePath && entry.source === 'custom' && window.charactersData) {
+                        const baseName = entry.name.split(' - ')[0]; // Remove auto-number suffix (e.g., "Pig - 01" -> "Pig")
+                        const charData = window.charactersData.find(c => c.name === baseName || c.name === entry.name);
+                        if (charData && charData.imagePath) {
+                            imagePath = charData.imagePath;
+                            console.log(`[Session] Resolved custom enemy image for ${entry.name} from character data:`, imagePath);
+                        }
+                    }
+                    
+                    return {
+                        ...entry,
+                        imagePath: imagePath,
+                        position: entry.position ? { ...entry.position } : null
+                    };
+                });
                 console.log('[Session] Restored to Atlas pending array:', window.atlasMapState.encounter.pending);
+                
+                // If monstersById or charactersData wasn't available, retry after they load
+                const needsMonsterLibrary = savedEnemies.some(e => e.source === 'library' && !e.imagePath);
+                const needsCharacterData = savedEnemies.some(e => e.source === 'custom' && !e.imagePath);
+                
+                if ((needsMonsterLibrary && !window.monstersById) || (needsCharacterData && !window.charactersData)) {
+                    console.log('[Session] Waiting for libraries to load... (monsters:', needsMonsterLibrary, 'characters:', needsCharacterData, ')');
+                    let retries = 0;
+                    const retryInterval = setInterval(() => {
+                        retries++;
+                        const monstersReady = !needsMonsterLibrary || window.monstersById;
+                        const charactersReady = !needsCharacterData || window.charactersData;
+                        
+                        if (monstersReady && charactersReady) {
+                            console.log('[Session] Libraries loaded, resolving missing image paths...');
+                            clearInterval(retryInterval);
+                            
+                            // Re-process entries to get image paths
+                            window.atlasMapState.encounter.pending.forEach(entry => {
+                                // Check if imagePath is missing or null
+                                const needsImage = !entry.imagePath || entry.imagePath === null || entry.imagePath === 'null';
+                                
+                                console.log(`[Session] Checking ${entry.name}: needsImage=${needsImage}, source=${entry.source}, hasPayloadId=${!!entry.payload?.id}`);
+                                
+                                if (needsImage && entry.source === 'library' && entry.payload?.id) {
+                                    // Library monster
+                                    const monsterData = window.monstersById.get(entry.payload.id);
+                                    console.log(`[Session] Monster data for ${entry.name}:`, monsterData ? 'found' : 'not found');
+                                    if (monsterData) {
+                                        console.log(`[Session] Monster has tokenImage:`, monsterData.tokenImage, 'portraitImage:', monsterData.portraitImage);
+                                        if (monsterData.tokenImage) {
+                                            entry.imagePath = `/data/creatures/library/${monsterData.tokenImage}`;
+                                        } else if (monsterData.portraitImage) {
+                                            entry.imagePath = `/data/creatures/library/${monsterData.portraitImage}`;
+                                        }
+                                        console.log(`[Session] Resolved image for ${entry.name}: ${entry.imagePath}`);
+                                    }
+                                } else if (needsImage && entry.source === 'custom' && window.charactersData) {
+                                    // Custom character/enemy - look up from characters
+                                    const baseName = entry.name.split(' - ')[0]; // Remove auto-number suffix
+                                    const charData = window.charactersData.find(c => c.name === baseName || c.name === entry.name);
+                                    if (charData && charData.imagePath) {
+                                        entry.imagePath = charData.imagePath;
+                                        console.log(`[Session] Resolved custom enemy image for ${entry.name}: ${entry.imagePath}`);
+                                    }
+                                }
+                            });
+                            
+                            // Trigger save to persist the resolved paths
+                            if (typeof saveCurrentEncounter === 'function') {
+                                saveCurrentEncounter();
+                            }
+                        } else if (retries >= 50) {
+                            console.warn('[Session] Libraries failed to load after 5 seconds (monsters:', window.monstersById ? 'ready' : 'missing', 'characters:', window.charactersData ? 'ready' : 'missing', ')');
+                            clearInterval(retryInterval);
+                        }
+                    }, 100);
+                }
 
                 // Re-render staging list and map if the functions exist
                 if (typeof renderStagedEnemiesList === 'function') {
@@ -556,22 +652,42 @@ async function saveCurrentEncounter() {
 
     // Sync placed enemies from Atlas state
     if (window.atlasMapState && window.atlasMapState.encounter) {
-        const placedEnemies = (window.atlasMapState.encounter.pending || []).map(entry => ({
-            id: entry.id,
-            name: entry.name,
-            source: entry.source,
-            payload: entry.payload,
-            placed: entry.placed || false,
-            visible: entry.visible !== false,
-            position: entry.position ? {
-                x: Number(entry.position.x.toFixed(2)),
-                y: Number(entry.position.y.toFixed(2)),
-                mapId: entry.position.mapId
-            } : null,
-            atlasTokenId: entry.id  // Link to the placed token
-        }));
+        const placedEnemies = (window.atlasMapState.encounter.pending || []).map(entry => {
+            // Get image path from multiple possible sources
+            let imagePath = entry.imagePath 
+                || entry.payload?.imagePath 
+                || entry.payload?.tokenImage 
+                || entry.payload?.portraitImage 
+                || null;
+            
+            // Prepend library path if it's a relative path
+            if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+                imagePath = `/data/creatures/library/${imagePath}`;
+            }
+            
+            return {
+                id: entry.id,
+                name: entry.name,
+                source: entry.source,
+                payload: entry.payload,
+                imagePath: imagePath,
+                placed: entry.placed || false,
+                visible: entry.visible !== false,
+                position: entry.position ? {
+                    x: Number(entry.position.x.toFixed(2)),
+                    y: Number(entry.position.y.toFixed(2)),
+                    mapId: entry.position.mapId
+                } : null,
+                atlasTokenId: entry.id  // Link to the placed token
+            };
+        });
         sessionState.currentEncounter.placedEnemies = placedEnemies;
         console.log('[Session] Saving placed enemies to encounter:', placedEnemies);
+        
+        // Debug: Log image paths for each enemy
+        placedEnemies.forEach(e => {
+            console.log(`[Session] ${e.name}: imagePath=${e.imagePath}, source=${e.source}`);
+        });
     }
 
     // ALSO: Sync combatants back to placed enemies list
@@ -685,11 +801,41 @@ function syncCombatantsToAtlas() {
         }
 
         // Add this combatant to the pending list (without a position yet - not placed on map)
+        // Get full monster/character data
+        let fullPayload = null;
+        let imagePath = combatant.imagePath || null;
+        
+        if (combatant.sourceId && typeof window.monstersById !== 'undefined') {
+            // Library monster - get from monster library
+            const monsterData = window.monstersById.get(combatant.sourceId);
+            if (monsterData) {
+                fullPayload = { ...monsterData };
+                // Resolve image path if not already set (use camelCase field names)
+                if (!imagePath && monsterData.tokenImage) {
+                    imagePath = `/data/creatures/library/${monsterData.tokenImage}`;
+                } else if (!imagePath && monsterData.portraitImage) {
+                    imagePath = `/data/creatures/library/${monsterData.portraitImage}`;
+                }
+            } else {
+                // Fallback if monster not found
+                fullPayload = { id: combatant.sourceId };
+            }
+        } else if (!combatant.sourceId && typeof window.charactersData !== 'undefined') {
+            // Custom character/enemy - look up from characters data
+            const charData = window.charactersData.find(c => c.id === combatant.characterId || c.name === combatant.name);
+            if (charData) {
+                fullPayload = { ...charData };
+                imagePath = charData.imagePath || imagePath;
+                console.log(`[Session] Found character data for ${combatant.name}, imagePath:`, imagePath);
+            }
+        }
+        
         const newEntry = {
             id: combatant.atlasTokenId || `atlas-${combatant.id}`,
             name: combatant.name,
             source: combatant.sourceId ? 'library' : 'custom',
-            payload: combatant.sourceId ? { id: combatant.sourceId } : null,
+            payload: fullPayload,
+            imagePath: imagePath,
             placed: false,  // Not placed on map yet
             position: null,
             atlasTokenId: combatant.id
@@ -697,7 +843,7 @@ function syncCombatantsToAtlas() {
 
         pending.push(newEntry);
         addedCount++;
-        console.log('[Session] Added Arena combatant to Atlas pending:', newEntry);
+        console.log('[Session] Added Arena combatant to Atlas pending:', newEntry.name, 'imagePath:', newEntry.imagePath);
     });
 
     console.log('[Session] Sync complete. Added', addedCount, 'new enemies to Atlas');

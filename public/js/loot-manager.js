@@ -354,10 +354,15 @@ async function fetchMonstersIfNeeded(force = false) {
         cachedMonsterData = rawMonsters.map(normalizeMonsterData);
         console.log('[MonsterLibrary] Normalized monsters:', cachedMonsterData.length, cachedMonsterData[0]);
         monstersById = new Map(cachedMonsterData.map(monster => [monster.id, monster]));
+        
+        // Expose to window for other modules to access
+        window.monstersById = monstersById;
+        console.log('[MonsterLibrary] Exposed monstersById to window with', monstersById.size, 'monsters');
     } catch (error) {
         console.error('Error loading monster library:', error);
         cachedMonsterData = [];
         monstersById = new Map();
+        window.monstersById = monstersById;
     }
 }
 

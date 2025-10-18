@@ -378,13 +378,27 @@ function buildDisplayState() {
     currentSessionEncounter.placedEnemies.forEach(enemy => {
       // Only include placed and visible enemies
       if (enemy.placed && enemy.visible !== false && enemy.position) {
+        // Try multiple sources for image path
+        let imagePath = enemy.imagePath 
+          || enemy.payload?.imagePath 
+          || enemy.payload?.tokenImage 
+          || enemy.payload?.portraitImage 
+          || null;
+        
+        // If it's a relative path for library monsters, prepend the library path
+        if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+          imagePath = `/data/creatures/library/${imagePath}`;
+        }
+        
+        console.log(`[Server] Token ${enemy.name}: imagePath=${imagePath}`);
+        
         tokens.push({
           id: enemy.id,
           name: enemy.name,
           x: enemy.position.x,
           y: enemy.position.y,
           mapId: enemy.position.mapId,
-          imagePath: enemy.payload?.imagePath || null
+          imagePath: imagePath
         });
       }
     });

@@ -164,7 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
       // Convert token map coordinates to screen coordinates
       const screenX = mapTransform.offsetX + (token.x * mapTransform.scale);
       const screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
-      const tokenRadius = (cellSize * mapTransform.scale) / 2;
+      
+      // Calculate token radius with minimum size for visibility
+      let tokenRadius = (cellSize * mapTransform.scale) / 2;
+      tokenRadius = Math.max(tokenRadius, 25); // Minimum 25px radius for player display
+      
+      console.log('[Display] Drawing token:', token.name, 'at', screenX, screenY, 'radius:', tokenRadius);
 
       // Preload image if available
       const imagePath = token.imagePath;
@@ -196,10 +201,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.stroke();
         ctx.restore();
       } else {
-        // Draw default red circle if no image
-        ctx.fillStyle = 'rgba(220, 38, 38, 0.7)'; // Red color for enemies
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-        ctx.lineWidth = 3;
+        // Draw default red circle if no image - BRIGHT and SOLID for visibility
+        ctx.fillStyle = '#dc2626'; // Solid bright red (no transparency)
+        ctx.strokeStyle = '#ffffff'; // White border
+        ctx.lineWidth = 5; // Thicker border
 
         ctx.beginPath();
         ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
@@ -210,20 +215,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Draw name label below the token
       ctx.save();
-      const fontSize = Math.max(14, tokenRadius / 1.5);
+      const fontSize = Math.max(18, tokenRadius / 1.2); // Larger minimum font size
       ctx.font = `bold ${fontSize}px Roboto, Arial, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
 
       // Draw text with background for better visibility
-      const textY = screenY + tokenRadius + 6;
+      const textY = screenY + tokenRadius + 8;
       const textMetrics = ctx.measureText(token.name);
       const textWidth = textMetrics.width;
-      const textHeight = fontSize + 6;
+      const textHeight = fontSize + 8;
 
       // Draw semi-transparent background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.fillRect(screenX - textWidth / 2 - 6, textY - 3, textWidth + 12, textHeight);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.85)'; // Slightly more opaque
+      ctx.fillRect(screenX - textWidth / 2 - 8, textY - 4, textWidth + 16, textHeight);
 
       // Draw text
       ctx.fillStyle = '#ffffff';
