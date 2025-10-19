@@ -634,6 +634,247 @@ async function init() {
     initCodex();
     attachAtlasEventListeners();
     initAtlasMapModule();
+    initSettings(); // Initialize settings
+
+    // Display viewport panning controls (for port 3001 display)
+    const panUpBtn = document.getElementById('display-pan-up');
+    const panDownBtn = document.getElementById('display-pan-down');
+    const panLeftBtn = document.getElementById('display-pan-left');
+    const panRightBtn = document.getElementById('display-pan-right');
+
+    console.log('[Init] Pan display buttons found:', {
+        up: !!panUpBtn,
+        down: !!panDownBtn,
+        left: !!panLeftBtn,
+        right: !!panRightBtn
+    });
+
+    if (panUpBtn) panUpBtn.addEventListener('click', () => panDisplayViewport('up'));
+    if (panDownBtn) panDownBtn.addEventListener('click', () => panDisplayViewport('down'));
+    if (panLeftBtn) panLeftBtn.addEventListener('click', () => panDisplayViewport('left'));
+    if (panRightBtn) panRightBtn.addEventListener('click', () => panDisplayViewport('right'));
+}
+
+function panMap(xDirection, yDirection) {
+    const canvas = document.getElementById('atlas-encounter-canvas');
+    const panAmountX = canvas.width * 0.75 * xDirection;
+    const panAmountY = canvas.height * 0.75 * yDirection;
+
+    if (window.atlasMapState && window.atlasMapState.viewport) {
+        window.atlasMapState.viewport.offset.x += panAmountX;
+        window.atlasMapState.viewport.offset.y += panAmountY;
+        drawAtlasEncounter();
+        saveAtlasSettings();
+    }
+}
+
+// Pan the display viewport (port 3001) by 3/4 of the display resolution
+function panDisplayViewport(direction) {
+    console.log('[panDisplayViewport] Called with direction:', direction);
+    console.log('[panDisplayViewport] atlasMapState.settings:', atlasMapState.settings);
+
+    if (!atlasMapState.settings?.display) {
+        console.error('[panDisplayViewport] Display settings not loaded! atlasMapState.settings:', atlasMapState.settings);
+        alert('Display settings not loaded. Please ensure Atlas settings are initialized.');
+        return;
+    }
+
+    const resolution = atlasMapState.settings.display.resolution || { w: 1920, h: 1080 };
+    const viewport = atlasMapState.settings.display.viewport || { offset: { x: 0, y: 0 } };
+
+    // Ensure offset exists
+    if (!viewport.offset) {
+        viewport.offset = { x: 0, y: 0 };
+    }
+
+    console.log('[panDisplayViewport] Current viewport offset:', JSON.parse(JSON.stringify(viewport.offset)));
+    console.log('[panDisplayViewport] Resolution:', resolution);
+
+    // Check if fine adjustment mode is enabled
+    const fineAdjustCheckbox = document.getElementById('display-pan-fine');
+    const useFineAdjust = fineAdjustCheckbox?.checked || false;
+    const panFactor = useFineAdjust ? 0.25 : 0.75; // 1/4 screen for fine, 3/4 for normal
+
+    // Calculate pan amount
+    const panAmountX = resolution.w * panFactor;
+    const panAmountY = resolution.h * panFactor;
+
+    console.log('[panDisplayViewport] Pan amounts (fine=' + useFineAdjust + ') - X:', panAmountX, 'Y:', panAmountY);
+
+    // Store original offset
+    const oldOffset = { ...viewport.offset };
+
+    // Update offset based on direction (FLIPPED to fix backwards behavior)
+    switch(direction) {
+        case 'up':
+            viewport.offset.y += panAmountY; // FLIPPED
+            break;
+        case 'down':
+            viewport.offset.y -= panAmountY; // FLIPPED
+            break;
+        case 'left':
+            viewport.offset.x += panAmountX; // FLIPPED
+            break;
+        case 'right':
+            viewport.offset.x -= panAmountX; // FLIPPED
+            break;
+    }
+
+    console.log('[panDisplayViewport] New viewport offset:', viewport.offset);
+    console.log('[panDisplayViewport] Change:', {
+        x: viewport.offset.x - oldOffset.x,
+        y: viewport.offset.y - oldOffset.y
+    });
+
+    // Update the settings
+    atlasMapState.settings.display.viewport = viewport;
+
+    // Save to server and broadcast to display
+    // IMPORTANT: Only send the viewport offset to avoid triggering applyStartAreaViewport()
+    console.log('[panDisplayViewport] Sending PATCH request...');
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                viewport: {
+                    offset: viewport.offset
+                }
+            }
+        })
+    })
+    .then(res => {
+        console.log('[panDisplayViewport] Response status:', res.status);
+        return res.json();
+    })
+    .then(settings => {
+        atlasMapState.settings = settings;
+        console.log('[panDisplayViewport] Display viewport panned', direction, '- new offset:', settings.display.viewport.offset);
+
+        // Also pan the local encounter canvas to match
+        panLocalEncounterCanvas(direction, panFactor);
+    })
+    .catch(error => {
+        console.error('[panDisplayViewport] Failed to pan display viewport:', error);
+        alert('Failed to pan display. Check console for details.');
+    });
+}
+
+// Pan the local encounter canvas (port 3000) to match the display viewport
+function panLocalEncounterCanvas(direction, panFactor) {
+    if (!atlasMapState.encounter?.render) {
+        console.log('[panLocalEncounterCanvas] No encounter render state');
+        return;
+    }
+
+    const canvas = document.getElementById('atlas-encounter-canvas');
+    if (!canvas) {
+        return;
+    }
+
+    // Use canvas dimensions for local panning
+    const panAmountX = canvas.width * panFactor;
+    const panAmountY = canvas.height * panFactor;
+
+    console.log('[panLocalEncounterCanvas] Panning local canvas:', direction, 'by', panAmountX, 'x', panAmountY);
+
+    // Update encounter offset (FLIPPED to match display panning)
+    switch(direction) {
+        case 'up':
+            atlasMapState.encounter.offset.y += panAmountY; // FLIPPED
+            break;
+        case 'down':
+            atlasMapState.encounter.offset.y -= panAmountY; // FLIPPED
+            break;
+        case 'left':
+            atlasMapState.encounter.offset.x += panAmountX; // FLIPPED
+            break;
+        case 'right':
+            atlasMapState.encounter.offset.x -= panAmountX; // FLIPPED
+            break;
+    }
+
+    // Redraw the encounter canvas
+    drawAtlasEncounter();
+}
+
+// Save atlas settings to server (used by panMap)
+function saveAtlasSettings() {
+    if (!atlasMapState.settings) {
+        console.warn('No atlas settings to save');
+        return;
+    }
+
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(atlasMapState.settings)
+    })
+    .then(res => res.json())
+    .then(settings => {
+        atlasMapState.settings = settings;
+    })
+    .catch(error => {
+        console.error('Failed to save atlas settings:', error);
+    });
+}
+
+// --- SETTINGS --- //
+
+let mainUiScale = 100;
+let displayUiScale = 100;
+
+function initSettings() {
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsModalCloseBtn = document.getElementById('settings-modal-close-btn');
+
+    const mainUiScaleDecreaseBtn = document.getElementById('main-ui-scale-decrease-btn');
+    const mainUiScaleIncreaseBtn = document.getElementById('main-ui-scale-increase-btn');
+    const displayUiScaleDecreaseBtn = document.getElementById('display-ui-scale-decrease-btn');
+    const displayUiScaleIncreaseBtn = document.getElementById('display-ui-scale-increase-btn');
+
+    settingsBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'flex';
+    });
+
+    settingsModalCloseBtn.addEventListener('click', () => {
+        settingsModal.style.display = 'none';
+    });
+
+    mainUiScaleDecreaseBtn.addEventListener('click', () => setMainUiScale(mainUiScale - 5));
+    mainUiScaleIncreaseBtn.addEventListener('click', () => setMainUiScale(mainUiScale + 5));
+    displayUiScaleDecreaseBtn.addEventListener('click', () => setDisplayUiScale(displayUiScale - 5));
+    displayUiScaleIncreaseBtn.addEventListener('click', () => setDisplayUiScale(displayUiScale + 5));
+
+    // Load saved settings
+    const savedMainUiScale = localStorage.getItem('mainUiScale');
+    if (savedMainUiScale) {
+        setMainUiScale(parseInt(savedMainUiScale));
+    }
+
+    const savedDisplayUiScale = localStorage.getItem('displayUiScale');
+    if (savedDisplayUiScale) {
+        setDisplayUiScale(parseInt(savedDisplayUiScale));
+    }
+}
+
+function setMainUiScale(scale) {
+    mainUiScale = Math.max(50, Math.min(200, scale)); // Clamp between 50% and 200%
+    document.documentElement.style.fontSize = `${mainUiScale}%`;
+    document.getElementById('main-ui-scale-value').textContent = `${mainUiScale}%`;
+    localStorage.setItem('mainUiScale', mainUiScale);
+}
+
+function setDisplayUiScale(scale) {
+    displayUiScale = Math.max(50, Math.min(200, scale)); // Clamp between 50% and 200%
+    document.getElementById('display-ui-scale-value').textContent = `${displayUiScale}%`;
+    localStorage.setItem('displayUiScale', displayUiScale);
+
+    // Send to server via socket
+    if (window.socket) {
+        window.socket.emit('settings:ui-scale', { scale: displayUiScale });
+    }
 }
 
 // Load encounter state from server
@@ -2362,26 +2603,39 @@ const atlasMapState = {
 // and ensures bidirectional sync can run reliably.
 window.atlasMapState = atlasMapState;
 
-// Lightweight sync debug HUD
-function updateSyncDebugHUD(extra) {
+// Save indicator with LED
+function updateSaveIndicator() {
     try {
-        const el = document.getElementById('sync-debug');
-        if (!el) return;
+        const ledEl = document.getElementById('save-led');
+        const timeEl = document.getElementById('save-time');
+        if (!ledEl || !timeEl) return;
 
-        const arenaCount = (window.encounterState?.combatants?.length) || 0;
-        const pending = (window.atlasMapState?.encounter?.pending) || [];
-        const pendingCount = pending.length;
-        const placedCount = pending.filter(e => e.placed && e.position).length;
-        const lastSaved = window.__lastEncounterSaveAt ? new Date(window.__lastEncounterSaveAt).toLocaleTimeString() : '—';
+        const lastSaveTime = window.__lastEncounterSaveAt;
 
-        el.textContent = `Sync • Arena: ${arenaCount} • Atlas (pending/placed): ${pendingCount}/${placedCount} • Saved: ${lastSaved}${extra ? ' • ' + extra : ''}`;
+        if (lastSaveTime) {
+            const timeSinceLastSave = Date.now() - lastSaveTime;
+            const timeStr = new Date(lastSaveTime).toLocaleTimeString();
+
+            // Green if saved within last 5 seconds, red otherwise
+            if (timeSinceLastSave < 5000) {
+                ledEl.className = 'save-led save-led-green';
+            } else {
+                ledEl.className = 'save-led save-led-red';
+            }
+
+            timeEl.textContent = timeStr;
+        } else {
+            // No save yet - show red LED
+            ledEl.className = 'save-led save-led-red';
+            timeEl.textContent = '—';
+        }
     } catch (e) {
         // no-op
     }
 }
 
-// Periodically refresh the HUD
-setInterval(() => updateSyncDebugHUD(), 1000);
+// Periodically refresh the save indicator
+setInterval(() => updateSaveIndicator(), 1000);
 
 function getAtlasElements() {
     return {
@@ -2543,15 +2797,27 @@ function bindAtlasMapEvents() {
 
     if (gridZoomIn) {
         gridZoomIn.addEventListener('click', () => {
-            atlasMapState.preview.gridZoom = Math.min(atlasMapState.preview.gridZoom + 0.1, 3);
+            const newZoom = Math.min(atlasMapState.preview.gridZoom + 0.1, 3);
+            atlasMapState.preview.gridZoom = newZoom;
             drawAtlasPreview();
+            // Update display viewport gridZoom
+            if (atlasMapState.settings?.display?.viewport) {
+                atlasMapState.settings.display.viewport.gridZoom = newZoom;
+            }
+            updateGridZoomOnServer(newZoom);
         });
     }
 
     if (gridZoomOut) {
         gridZoomOut.addEventListener('click', () => {
-            atlasMapState.preview.gridZoom = Math.max(atlasMapState.preview.gridZoom - 0.1, 0.1);
+            const newZoom = Math.max(atlasMapState.preview.gridZoom - 0.1, 0.1);
+            atlasMapState.preview.gridZoom = newZoom;
             drawAtlasPreview();
+            // Update display viewport gridZoom
+            if (atlasMapState.settings?.display?.viewport) {
+                atlasMapState.settings.display.viewport.gridZoom = newZoom;
+            }
+            updateGridZoomOnServer(newZoom);
         });
     }
 
@@ -2559,8 +2825,46 @@ function bindAtlasMapEvents() {
         gridZoomReset.addEventListener('click', () => {
             atlasMapState.preview.gridZoom = 1;
             drawAtlasPreview();
+            // Update display viewport gridZoom
+            if (atlasMapState.settings?.display?.viewport) {
+                atlasMapState.settings.display.viewport.gridZoom = 1;
+            }
+            updateGridZoomOnServer(1);
         });
     }
+
+    // Grid settings - update display immediately on change
+    elements.gridColor?.addEventListener('change', (event) => {
+        const color = event.target.value;
+        if (atlasMapState.settings?.display?.grid) {
+            atlasMapState.settings.display.grid.color = color;
+        }
+        updateGridSettingsOnServer({ color: color });
+    });
+
+    elements.gridOpacity?.addEventListener('change', (event) => {
+        const opacity = parseFloat(event.target.value);
+        if (atlasMapState.settings?.display?.grid) {
+            atlasMapState.settings.display.grid.opacity = opacity;
+        }
+        updateGridSettingsOnServer({ opacity: opacity });
+    });
+
+    elements.gridLine?.addEventListener('change', (event) => {
+        const line_px = parseInt(event.target.value, 10);
+        if (atlasMapState.settings?.display?.grid) {
+            atlasMapState.settings.display.grid.line_px = line_px;
+        }
+        updateGridSettingsOnServer({ line_px: line_px });
+    });
+
+    elements.gridEnabled?.addEventListener('change', (event) => {
+        const enabled = event.target.checked;
+        if (atlasMapState.settings?.display?.grid) {
+            atlasMapState.settings.display.grid.enabled = enabled;
+        }
+        updateGridSettingsOnServer({ enabled: enabled });
+    });
 
     elements.autoCalibrateBtn?.addEventListener('click', handleAtlasAutoCalibrate);
     elements.manualCalibrateBtn?.addEventListener('click', toggleAtlasManualCalibration);
@@ -2572,7 +2876,21 @@ function bindAtlasMapEvents() {
     elements.previewCanvas?.addEventListener('mouseleave', endPreviewDrag);
 }
 
+let lastCanvasWidth = 0;
+let lastCanvasHeight = 0;
+
 function handleAtlasResize() {
+    const canvas = document.getElementById('atlas-encounter-canvas');
+    if (!canvas) return;
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    if (container.clientWidth === lastCanvasWidth && container.clientHeight === lastCanvasHeight) {
+        return; // Do nothing if the size hasn't changed
+    }
+    lastCanvasWidth = container.clientWidth;
+    lastCanvasHeight = container.clientHeight;
+
     drawAtlasPreview();
     drawAtlasEncounter();
 }
@@ -5316,7 +5634,20 @@ window.debugAtlasTokens = function() {
     console.log('=== END DEBUG ===');
 };
 
+// DEBUG: Track draw calls to identify infinite loop
+let drawCallCount = 0;
+let lastDrawLog = 0;
+
 function drawAtlasEncounter() {
+    drawCallCount++;
+    const now = Date.now();
+
+    // Log every 10th call or once per second
+    if (drawCallCount % 10 === 0 || now - lastDrawLog > 1000) {
+        console.trace('[drawAtlasEncounter] Call #' + drawCallCount);
+        lastDrawLog = now;
+    }
+
     const { encounterCanvas, encounterEmpty, startAreaHint } = getAtlasElements();
     if (!encounterCanvas) {
         return;
@@ -5381,8 +5712,8 @@ function drawAtlasEncounter() {
         actualX = clamp(actualX, minActualX, maxActualX);
         actualY = clamp(actualY, minActualY, maxActualY);
 
-        atlasMapState.encounter.offset.x = actualX - centerX;
-        atlasMapState.encounter.offset.y = actualY - centerY;
+        // Don't modify state in the draw function - this causes infinite redraws!
+        // Just use the clamped actualX/actualY values for rendering
 
         ctx.clearRect(0, 0, width, height);
         ctx.drawImage(image, actualX, actualY, drawWidth, drawHeight);
@@ -5520,6 +5851,7 @@ function startEncounterDrag(event) {
     if (!atlasMapState.encounter.render) {
         return;
     }
+    console.log('[startEncounterDrag] Starting drag');
     atlasMapState.encounter.dragging = true;
     atlasMapState.encounter.dragMoved = false;
     atlasMapState.encounter.dragStart = { x: event.clientX, y: event.clientY };
@@ -5530,6 +5862,7 @@ function handleEncounterDrag(event) {
     if (!atlasMapState.encounter.dragging) {
         return;
     }
+    console.log('[handleEncounterDrag] Dragging - clientX:', event.clientX, 'clientY:', event.clientY);
     const dx = event.clientX - atlasMapState.encounter.dragStart.x;
     const dy = event.clientY - atlasMapState.encounter.dragStart.y;
     if (!atlasMapState.encounter.dragMoved) {
@@ -5543,6 +5876,7 @@ function handleEncounterDrag(event) {
 }
 
 function endEncounterDrag() {
+    console.log('[endEncounterDrag] Ending drag');
     atlasMapState.encounter.dragging = false;
 }
 
@@ -5570,14 +5904,12 @@ function handleEncounterCanvasClick(event) {
     const clickedToken = findTokenAtPosition(pointer.mapX, pointer.mapY);
     if (clickedToken) {
         atlasMapState.encounter.selectedToken = clickedToken;
-        drawAtlasEncounter();
         return;
     }
 
     // Deselect token if clicking empty space
     if (atlasMapState.encounter.selectedToken) {
         atlasMapState.encounter.selectedToken = null;
-        drawAtlasEncounter();
         return;
     }
 
@@ -5588,7 +5920,6 @@ function handleEncounterCanvasClick(event) {
     positionEncounterStartArea(pointer.mapX, pointer.mapY);
     atlasMapState.encounter.dirty = true;
     updateEncounterControls();
-    drawAtlasEncounter();
 }
 
 function handleEncounterKeydown(event) {
@@ -5717,6 +6048,32 @@ function setEncounterFrameZoom(nextZoom) {
 
     updateEncounterSummary(null);
     drawAtlasEncounter();
+
+    // Send update to server and broadcast to display (port 3001)
+    updateViewportZoomOnServer(clamped);
+}
+
+// Update viewport zoom on server and broadcast to display (port 3001)
+function updateViewportZoomOnServer(zoom) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                viewport: {
+                    zoom: zoom,
+                    fit: 'pixel'
+                }
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        console.log('[updateViewportZoomOnServer] Viewport zoom updated to', zoom);
+    })
+    .catch(error => {
+        console.error('[updateViewportZoomOnServer] Failed to update viewport zoom:', error);
+    });
 }
 
 function changeEncounterGridZoom(delta) {
@@ -5740,6 +6097,9 @@ function changeEncounterGridZoom(delta) {
     updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
     drawAtlasPreview();
     drawAtlasEncounter();
+
+    // Send update to server immediately
+    updateGridZoomOnServer(rounded);
 }
 
 function resetEncounterGridZoom() {
@@ -5753,6 +6113,52 @@ function resetEncounterGridZoom() {
     updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
     drawAtlasPreview();
     drawAtlasEncounter();
+
+    // Send update to server immediately
+    updateGridZoomOnServer(1);
+}
+
+// Update grid zoom on server and broadcast to display (port 3001)
+function updateGridZoomOnServer(gridZoom) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                viewport: {
+                    gridZoom: gridZoom
+                }
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        console.log('[updateGridZoomOnServer] Grid zoom updated to', gridZoom);
+    })
+    .catch(error => {
+        console.error('[updateGridZoomOnServer] Failed to update grid zoom:', error);
+    });
+}
+
+// Update grid settings (color, opacity, line width, enabled) on server immediately
+function updateGridSettingsOnServer(settingsPartial) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                grid: settingsPartial
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        atlasMapState.settings = settings;
+        console.log('[updateGridSettingsOnServer] Grid settings updated:', settingsPartial);
+    })
+    .catch(error => {
+        console.error('[updateGridSettingsOnServer] Failed to update grid settings:', error);
+    });
 }
 
 function changeEncounterZoom(delta, focusPoint) {

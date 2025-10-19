@@ -481,6 +481,10 @@ mainIo.on('connection', (socket) => {
     }
     socket.emit('display:state', buildDisplayState());
   });
+
+  socket.on('settings:ui-scale', (payload) => {
+    displayIo.emit('settings:ui-scale', payload);
+  });
 });
 
 displayIo.on('connection', (socket) => {
@@ -626,17 +630,39 @@ app.get('/api/atlas/settings', (req, res) => {
 });
 
 app.patch('/api/atlas/settings', (req, res) => {
-  atlasSettings = {
-    ...atlasSettings,
-    ...req.body
-  };
+  // Deep merge for nested objects like display.viewport.offset
+  function deepMerge(target, source) {
+    const output = { ...target };
+    for (const key in source) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        output[key] = deepMerge(target[key] || {}, source[key]);
+      } else {
+        output[key] = source[key];
+      }
+    }
+    return output;
+  }
+
+  atlasSettings = deepMerge(atlasSettings, req.body);
 
   ensureAtlasDefaults();
 
+  // Only apply start area viewport if encounter settings changed
+  // Don't apply if we're just updating viewport settings (offset, zoom, gridZoom, etc.)
+  const isViewportOnlyUpdate = req.body?.display?.viewport && !req.body?.encounter && !req.body?.display?.grid && !req.body?.display?.resolution;
+
+  console.log('[PATCH /api/atlas/settings] Request body:', JSON.stringify(req.body, null, 2));
+  console.log('[PATCH /api/atlas/settings] isViewportOnlyUpdate:', isViewportOnlyUpdate);
+  console.log('[PATCH /api/atlas/settings] Current viewport.zoom:', atlasSettings.display?.viewport?.zoom);
+
   if (req.body?.encounter) {
+    console.log('[PATCH /api/atlas/settings] Applying start area viewport (encounter changed)');
     applyStartAreaViewport({ enforce: true });
-  } else {
+  } else if (!isViewportOnlyUpdate) {
+    console.log('[PATCH /api/atlas/settings] Applying start area viewport (not viewport-only update)');
     applyStartAreaViewport();
+  } else {
+    console.log('[PATCH /api/atlas/settings] Skipping start area viewport (viewport-only update)');
   }
 
   if (!atlasSettings.display?.physical?.ppi_override) {
@@ -1584,10 +1610,27 @@ app.get('/api/atlas/displays', (req, res) => {
   res.json({ count: sockets.length, displays: sockets });
 });
 
+// Create a default session if none exist
+function createDefaultSession() {
+  if (!fs.existsSync(SESSIONS_DIR) || fs.readdirSync(SESSIONS_DIR).filter(f => f.endsWith('.json')).length === 0) {
+    console.log('[Server] No sessions found. Creating a default session.');
+    const defaultSession = {
+      id: `session-${Date.now()}`,
+      name: 'Welcome to ArcForge!',
+      description: 'This is your first session. Create an encounter to get started.',
+      createdAt: new Date().toISOString(),
+      encounters: []
+    };
+    const sessionPath = path.join(SESSIONS_DIR, `${defaultSession.id}.json`);
+    fs.writeFileSync(sessionPath, JSON.stringify(defaultSession, null, 2));
+  }
+}
+
 // Start server
 controlServer.listen(PORT, () => {
   const address = `http://${process.env.HOSTNAME || 'localhost'}:${PORT}`;
   console.log(`ArcForge control server listening on ${address}`);
+  createDefaultSession();
 });
 
 displayServer.listen(DISPLAY_PORT, () => {

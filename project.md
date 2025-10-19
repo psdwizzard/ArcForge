@@ -111,7 +111,75 @@ The app has TWO separate encounter persistence systems that need to work togethe
 
 ## Recent Session Accomplishments
 
-### Token Display & Image Rendering Fixes (2025-10-18)
+### Atlas Display Controls & Real-time Updates (2025-01-18)
+
+**Goal:** Improve DM workflow by adding real-time viewport controls and fixing UI/sync issues.
+
+**Issues Fixed:**
+1. **Session Auto-load Errors:** Fresh installs showed alert popups when localStorage contained stale session IDs
+2. **Verbose Debug Display:** Sync debug text cluttered the UI header
+3. **Atlas Encounters Layout:** Section expanded uncontrollably when clicking in map area
+4. **No Display Pan Controls:** No way to adjust viewport on player display (port 3001) without manual saves
+5. **Infinite Redraw Loops:** State mutations in draw functions caused continuous re-rendering, preventing token interaction
+6. **Manual Save Required:** Grid and viewport zoom required clicking "Save" button to update display
+
+**Solutions Implemented:**
+
+*Session Management (session-manager.js):*
+- Added `isAutoLoad` parameter to `loadSession()` and `loadEncounter()` for graceful error handling
+- Silent localStorage cleanup on auto-load failures instead of showing alerts
+- Improved UX on fresh installs
+
+*UI Improvements (index.html, styles.css):*
+- Replaced sync debug div with compact LED indicator (green when saved <5s ago, red otherwise)
+- Added save timestamp display below LED
+- Fixed broken `.atlas-start-area-hint` CSS causing layout expansion
+- Set `.atlas-encounter-layout` height to 900px for proper content visibility
+- Fixed `.atlas-enemy-list-wrapper` overlapping detail section
+
+*Display Pan Controls (app.js, index.html, styles.css):*
+- Added directional arrow buttons (up/down/left/right) in encounter header
+- Pan amount: 3/4 of display resolution by default, 1/4 when "Fine" checkbox enabled
+- Buttons update BOTH local canvas (port 3000) AND player display (port 3001)
+- Created `panDisplayViewport()` to send viewport offset updates to server
+- Created `panLocalEncounterCanvas()` to sync local view with display
+- Fixed backwards pan directions (up was down, left was right)
+
+*Real-time Settings Updates (app.js):*
+- Grid settings (color, opacity, line width, enabled) update display immediately on change
+- Grid zoom buttons (+/-/reset) broadcast to display without save button
+- Viewport zoom buttons broadcast to display without save button
+- Created `updateGridSettingsOnServer()`, `updateGridZoomOnServer()`, `updateViewportZoomOnServer()`
+- All settings use PATCH requests with minimal payloads to avoid triggering unwanted side effects
+
+*Infinite Loop Fixes (app.js):*
+- **Critical:** Removed state mutations from `drawAtlasEncounter()` (lines 5570-5571 commented out)
+- State mutations during rendering caused continuous redraws, blocking all user interaction
+- Added debug logging to track draw call frequency
+
+*Server Improvements (server/server.js):*
+- Enhanced `/api/atlas/settings` PATCH endpoint to use deep merge for nested objects
+- Added detection for viewport-only updates vs encounter changes
+- Skip `applyStartAreaViewport()` when only panning/zooming to prevent server from reverting changes
+- Added debug logging for troubleshooting viewport update issues
+
+*Display Client Fixes (public-display/js/display.js):*
+- Fixed `handleDisplayState()` to redraw when viewport/grid settings change (not just on new map load)
+- Check if map URL unchanged before reloading image - immediate redraw for settings changes
+- Enables real-time zoom/pan/grid updates on player display
+
+**Current Status:**
+- ✅ Session auto-load works cleanly on fresh installs
+- ✅ Clean LED indicator shows save status
+- ✅ Atlas Encounters layout stable and properly sized
+- ✅ Pan display buttons work with fine adjustment mode
+- ✅ Grid settings update player display in real-time
+- ✅ Grid zoom updates player display in real-time
+- ✅ Viewport zoom updates control interface (port 3000) correctly
+- ⚠️ Viewport zoom server persistence needs verification - may require restart to test
+- ⚠️ Token click functionality needs testing after redraw loop fix
+
+### Token Display & Image Rendering Fixes (2025-01-17)
 
 **Issue:** Enemy tokens were invisible in Atlas Encounters view and showing as red circles (no images) on player display (port 3001).
 

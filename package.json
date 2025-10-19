@@ -5,7 +5,7 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "node_modules\\.bin\\nodemon server/server.js"
   },
   "keywords": [
     "dnd",

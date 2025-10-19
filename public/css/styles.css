@@ -346,6 +346,21 @@ header {
     border-color: rgba(255, 165, 0, 0.6);
 }
 
+.btn-icon {
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+    padding: 0.4rem 0.6rem;
+    line-height: 1;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+}
+
 .header-actions {
     display: flex;
     align-items: center;
@@ -388,6 +403,40 @@ header {
 .round-display {
     font-size: 1.2rem;
     font-weight: 600;
+}
+
+/* Save Indicator LED */
+.save-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    margin-left: 12px;
+}
+
+.save-led {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+}
+
+.save-led-green {
+    background-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6), 0 0 12px rgba(16, 185, 129, 0.3);
+}
+
+.save-led-red {
+    background-color: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6), 0 0 12px rgba(239, 68, 68, 0.3);
+}
+
+.save-time {
+    font-size: 10px;
+    color: #6b7280;
+    white-space: nowrap;
+    line-height: 1;
 }
 
 main {
@@ -1964,6 +2013,40 @@ h2 {
 }
 
 .codex-sheet-list {
+
+.settings-section {
+    margin-bottom: 1.5rem;
+}
+
+.settings-section h3 {
+    font-size: 1.1rem;
+    color: var(--accent-primary);
+    margin-bottom: 1rem;
+}
+
+.setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.setting-item:last-child {
+    border-bottom: none;
+}
+
+.scale-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.scale-control span {
+    font-weight: 600;
+    width: 50px;
+    text-align: center;
+}
     background-color: var(--bg-secondary);
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -2856,7 +2939,6 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    min-height: 60vh;
 }
 
 .atlas-encounter-header .atlas-encounter-actions {
@@ -2874,6 +2956,70 @@ h2 {
     flex-wrap: wrap;
 }
 
+/* Display Pan Controls */
+.atlas-display-pan-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.display-pan-arrows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.display-pan-horizontal {
+    display: flex;
+    gap: 2px;
+}
+
+.btn-pan-arrow {
+    background: rgba(15, 23, 42, 0.85);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #e2e8f0;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    min-width: 32px;
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-pan-arrow:hover {
+    background: rgba(59, 130, 246, 0.25);
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #60a5fa;
+}
+
+.btn-pan-arrow:active {
+    background: rgba(59, 130, 246, 0.4);
+    transform: scale(0.95);
+}
+
+.display-pan-fine-label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.display-pan-fine-label input[type="checkbox"] {
+    cursor: pointer;
+}
+
+.display-pan-fine-label:hover {
+    color: var(--text-primary);
+}
+
 .atlas-grid-controls .zoom-label {
     font-size: 0.85rem;
     color: var(--text-secondary);
@@ -2887,6 +3033,9 @@ h2 {
     display: flex;
     gap: 1rem;
     align-items: stretch;
+    height: 900px;
+    min-height: 900px;
+    overflow: visible;
 }
 
 /* New right-side panel for Agent Editor */
@@ -2894,16 +3043,18 @@ h2 {
     flex: 0 0 480px;
     max-width: 520px;
     width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    overflow-y: auto;
 }
 
 .atlas-encounter-stage {
     flex: 1 1 auto;
     min-width: 0;
     position: relative;
-    min-height: 60vh;
+    height: 100%;
     border-radius: 10px;
     overflow: hidden;
     background: rgba(15, 23, 42, 0.5);
@@ -2914,6 +3065,7 @@ h2 {
     height: 100%;
     display: block;
     cursor: grab;
+    touch-action: none;
 }
 
 .atlas-encounter-stage canvas:active {
@@ -2940,6 +3092,25 @@ h2 {
     color: #e2e8f0;
     max-width: 320px;
     pointer-events: none;
+}
+
+.atlas-panning-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pan-arrow {
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    font-size: 1rem;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.pan-arrow:hover {
+    background-color: var(--bg-hover);
 }
 
 .atlas-encounter-footer {
@@ -2970,6 +3141,7 @@ h2 {
     flex: 0 0 360px;
     max-width: 360px;
     width: 360px;
+    height: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
@@ -2977,6 +3149,7 @@ h2 {
     background: rgba(15, 23, 42, 0.45);
     border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 10px;
+    overflow-y: auto;
 }
 
 .atlas-enemy-panel-header {
@@ -3021,13 +3194,15 @@ h2 {
 .atlas-enemy-list-wrapper {
     position: relative;
     min-height: 180px;
+    max-height: 240px;
+    flex-shrink: 0;
 }
 
 .atlas-enemy-list {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    max-height: 240px;
+    max-height: 100%;
     overflow-y: auto;
     padding-right: 0.25rem;
 }
@@ -3099,6 +3274,8 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    flex-shrink: 0;
+    min-height: 60px;
 }
 
 .atlas-enemy-detail-empty {

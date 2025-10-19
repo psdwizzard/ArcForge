@@ -238,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function handleDisplayState(payload) {
+    const previousMapUrl = state.payload?.map?.url;
     state.payload = payload;
 
     // Update map name header
@@ -263,6 +264,13 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // If map hasn't changed, just redraw with new viewport/grid settings
+    if (previousMapUrl === payload.map.url && state.image) {
+      draw();
+      return;
+    }
+
+    // Load new map image
     const img = new Image();
     img.onload = () => {
       state.image = img;
@@ -300,5 +308,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   socket.on('display:state', (payload) => {
     handleDisplayState(payload);
+  });
+
+  socket.on('settings:ui-scale', (payload) => {
+    if (payload && payload.scale) {
+        document.documentElement.style.fontSize = `${payload.scale}%`;
+    }
   });
 });

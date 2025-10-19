@@ -38,8 +38,10 @@
                 <div class="round-display">
                     Round: <span id="round-number">1</span>
                 </div>
-                <div id="sync-debug" style="font-size: 12px; color: #6b7280; margin-left: 12px; white-space: nowrap;" title="Arena ↔ Atlas sync status">
-                    Sync • Arena: 0 • Atlas (pending/placed): 0/0 • Saved: —
+                <button id="settings-btn" class="btn btn-icon" title="Settings">⚙️</button>
+                <div id="save-indicator" class="save-indicator" title="Save status">
+                    <div id="save-led" class="save-led"></div>
+                    <div id="save-time" class="save-time">—</div>
                 </div>
             </div>
         </header>
@@ -644,6 +646,21 @@
                                 <button type="button" id="atlas-start-area-place" class="btn btn-secondary btn-small">Place Starting Area</button>
                                 <button type="button" id="atlas-start-area-clear" class="btn btn-secondary btn-small">Clear</button>
                                 <button type="button" id="atlas-start-area-save" class="btn btn-primary btn-small">Save</button>
+                                <div class="atlas-display-pan-controls">
+                                    <span class="zoom-label">Pan Display</span>
+                                    <div class="display-pan-arrows">
+                                        <button type="button" id="display-pan-up" class="btn-pan-arrow" title="Pan display up">▲</button>
+                                        <div class="display-pan-horizontal">
+                                            <button type="button" id="display-pan-left" class="btn-pan-arrow" title="Pan display left">◀</button>
+                                            <button type="button" id="display-pan-right" class="btn-pan-arrow" title="Pan display right">▶</button>
+                                        </div>
+                                        <button type="button" id="display-pan-down" class="btn-pan-arrow" title="Pan display down">▼</button>
+                                    </div>
+                                    <label class="display-pan-fine-label">
+                                        <input type="checkbox" id="display-pan-fine">
+                                        <span>Fine</span>
+                                    </label>
+                                </div>
                             </div>
                         </header>
                         <div class="atlas-encounter-layout">
@@ -1113,8 +1130,39 @@
     <script src="js/character-builder.js?v=3"></script>
     <script src="js/effects-builder.js?v=2"></script>
     <script src="js/loot-manager.js?v=2"></script>
-    <script src="js/data-manager.js?v=2"></script>
-    <script src="js/atlas-sync-enhancements.js?v=1"></script>
-</body>
+        <script src="js/data-manager.js?v=2"></script>
+        <script src="js/atlas-sync-enhancements.js?v=1"></script>
+    
+        <!-- Settings Modal -->
+        <div id="settings-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Settings</h2>
+                    <button class="modal-close" id="settings-modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-section">
+                        <h3>UI Scale</h3>
+                        <div class="setting-item">
+                            <label for="main-ui-scale">Main UI Scale</label>
+                            <div class="scale-control">
+                                <button id="main-ui-scale-decrease-btn" class="btn btn-secondary btn-small">-</button>
+                                <span id="main-ui-scale-value">100%</span>
+                                <button id="main-ui-scale-increase-btn" class="btn btn-secondary btn-small">+</button>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label for="display-ui-scale">Display UI Scale</label>
+                            <div class="scale-control">
+                                <button id="display-ui-scale-decrease-btn" class="btn btn-secondary btn-small">-</button>
+                                <span id="display-ui-scale-value">100%</span>
+                                <button id="display-ui-scale-increase-btn" class="btn btn-secondary btn-small">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
 </html>
 

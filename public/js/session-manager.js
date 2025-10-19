@@ -40,7 +40,7 @@ function initSessionManager() {
     const lastSessionId = localStorage.getItem('lastSessionId');
     if (lastSessionId) {
         console.log('Auto-loading last session:', lastSessionId);
-        loadSession(lastSessionId);
+        loadSession(lastSessionId, true); // Pass true to indicate this is an auto-load
     }
 }
 
@@ -159,7 +159,7 @@ function renderSessionsList(sessions) {
     }).join('');
 }
 
-async function loadSession(sessionId) {
+async function loadSession(sessionId, isAutoLoad = false) {
     try {
         const response = await fetch(`${API_BASE}/sessions/${sessionId}`);
 
@@ -183,10 +183,11 @@ async function loadSession(sessionId) {
                 const encounterExists = session.encounters.find(e => e.id === lastEncounterId);
                 if (encounterExists) {
                     console.log('Auto-loading last encounter:', lastEncounterId);
-                    loadEncounter(lastEncounterId);
+                    loadEncounter(lastEncounterId, true); // Pass true for auto-load
                 } else {
                     // Clear current encounter if the saved one doesn't exist
                     sessionState.currentEncounter = null;
+                    localStorage.removeItem('lastEncounterId_' + sessionId);
                 }
             } else {
                 // Clear current encounter when loading a new session
@@ -197,7 +198,16 @@ async function loadSession(sessionId) {
         }
     } catch (error) {
         console.error('Error loading session:', error);
-        alert('Failed to load session. Please try again.');
+
+        // If this is an auto-load (on startup), handle gracefully without alert
+        if (isAutoLoad) {
+            console.warn('Auto-load failed - session may have been deleted. Clearing localStorage.');
+            localStorage.removeItem('lastSessionId');
+            updateSessionDisplay();
+        } else {
+            // User manually tried to load - show the error
+            alert('Failed to load session. Please try again.');
+        }
     }
 }
 window.loadSession = loadSession;
@@ -377,9 +387,11 @@ function renderEncountersList() {
     }).join('');
 }
 
-async function loadEncounter(encounterId) {
+async function loadEncounter(encounterId, isAutoLoad = false) {
     if (!sessionState.currentSession) {
-        alert('No active session!');
+        if (!isAutoLoad) {
+            alert('No active session!');
+        }
         return;
     }
 
@@ -567,7 +579,17 @@ async function loadEncounter(encounterId) {
         }
     } catch (error) {
         console.error('Error loading encounter:', error);
-        alert('Failed to load encounter. Please try again.');
+
+        // If this is an auto-load (on startup), handle gracefully without alert
+        if (isAutoLoad) {
+            console.warn('Auto-load failed - encounter may have been deleted. Clearing localStorage.');
+            if (sessionState.currentSession) {
+                localStorage.removeItem('lastEncounterId_' + sessionState.currentSession.id);
+            }
+        } else {
+            // User manually tried to load - show the error
+            alert('Failed to load encounter. Please try again.');
+        }
     }
 }
 window.loadEncounter = loadEncounter;

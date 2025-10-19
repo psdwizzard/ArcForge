@@ -1,0 +1,217 @@
+{
+  "id": "id_1760824489634_j2uoyiu2z",
+  "name": "s1",
+  "description": "",
+  "createdAt": "2025-10-18T21:54:49.634Z",
+  "encounters": [
+    {
+      "id": "id_1760824501447_kfycf1ln8",
+      "name": "e1",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-18T21:55:01.448Z",
+      "combatants": [],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1760824509600-q1o4r8",
+          "name": "Pig - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760391803246",
+                "name": "bite",
+                "attackBonus": 6,
+                "damageDice": "1d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760397315751",
+                "name": "puck",
+                "attackBonus": 2,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 1229.99,
+            "y": 1597.15,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760824509600-q1o4r8"
+        },
+        {
+          "id": "enc-enemy-1760824514897-dv6cbg",
+          "name": "Adult Black Dragon - 01",
+          "source": "library",
+          "payload": {
+            "id": "M4eX4Mu5IHCr3TMf"
+          },
+          "imagePath": "/data/creatures/library/tokens/dragon/BlackDragonAdult.webp",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 679.25,
+            "y": 1927.59,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760824514897-dv6cbg"
+        },
+        {
+          "id": "enc-enemy-1760824462734-bz6inz",
+          "name": "Pig - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 165.22,
+            "y": 1854.16,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760824462734-bz6inz"
+        },
+        {
+          "id": "enc-enemy-1760824181854-nofy3z",
+          "name": "Aboleth - 01",
+          "source": "library",
+          "payload": {
+            "id": "shhHtE7b92PefCWB"
+          },
+          "imagePath": "/data/creatures/library/tokens/aberration/Aboleth.webp",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 348.8,
+            "y": 1780.73,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760824181854-nofy3z"
+        },
+        {
+          "id": "enc-enemy-1760827229138-j3m0d1",
+          "name": "Pig",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760391803246",
+                "name": "bite",
+                "attackBonus": 6,
+                "damageDice": "1d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760397315751",
+                "name": "puck",
+                "attackBonus": 2,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1760827229138-j3m0d1"
+        },
+        {
+          "id": "enc-enemy-1760827229880-yb4f9s",
+          "name": "Pig",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760391803246",
+                "name": "bite",
+                "attackBonus": 6,
+                "damageDice": "1d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760397315751",
+                "name": "puck",
+                "attackBonus": 2,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1760827229880-yb4f9s"
+        }
+      ]
+    }
+  ]
+}
