@@ -293,6 +293,141 @@ The app has TWO separate encounter persistence systems that need to work togethe
 - `public-display/js/display.js:262-299` - Fixed image URL comparison with proper normalization
 - `public/js/app.js:3695-3706` - Added debugging logs for enemy library filtering
 
+## 🧠 Playtest Learnings — Arena Module (2025-01-20)
+
+Based on live D&D session feedback, identified key improvements for DM workflow and player experience.
+
+### ✅ What Worked Well
+
+- Core initiative flow was smooth and reliable
+- Encounter setup and sync worked flawlessly between DM and player displays
+- Visual clarity was solid overall; players tracked turns easily once announced
+- HP tracking, damage application, and status effects performed without issues
+- Flavor media reveals enhanced dramatic moments
+
+### ⚙️ Priority Feature Requests
+
+**1. Custom Effects Tracker**
+
+**Goal:** Track temporary effects (spells, conditions, cooldowns) directly in Arena without switching views.
+
+**Requirements:**
+- Simple input field: Effect Name + Duration (rounds)
+- Add button → logs effect to combatant sheet
+- Each round, effect counter decrements automatically
+- Optional: visual timer icon or list in combatant panel
+
+**Examples:**
+- "Poison – 6 rounds"
+- "Shield of Faith – 3 rounds cooldown"
+- "Bless – 10 rounds"
+
+**Implementation Notes:**
+- Integrate with existing status effects system
+- Add to combatant card UI alongside HP/AC controls
+- Persist in encounter state for save/restore
+- Consider visual distinction between conditions (negative) vs buffs (positive)
+
+---
+
+**2. Enemy Movement Controls (in Arena)**
+
+**Goal:** Avoid switching back to Atlas for repositioning tokens during combat.
+
+**Requirements:**
+- Add "Move" button next to each enemy in the Arena list
+- Clicking opens quick grid controls (arrow pad or numeric input)
+- Show counter of how many grid squares moved (based on grid size from Atlas)
+- Update token position on map display in real-time
+
+**Optional Enhancements:**
+- Arrow keys for manual movement when token selected
+- Display movement summary: "Goblin-01 moved 20 ft."
+- Highlight movement range based on creature speed
+- Undo last move button
+
+**Implementation Notes:**
+- Sync with Atlas `placedEnemies` positions
+- Broadcast position updates to port 3001 display
+- Respect grid snapping settings from Atlas
+- Consider movement history for tactical replay
+
+---
+
+**3. Initiative Display Repositioning**
+
+**Goal:** Improve visibility of active turn on player map (port 3001).
+
+**Current Issue:** "Whose Turn It Is" displayed at bottom of screen, easy to miss.
+
+**Requirements:**
+- Move current turn indicator to top of screen, directly beneath map name
+- Add subtle animation or highlight to draw player attention
+- Ensure text is large and readable from across the table
+
+**Acceptance Criteria:**
+- Active turn name visible at a glance without scanning screen edges
+- No overlap with map content or grid
+- Smooth transition between turns
+
+**Implementation Notes:**
+- Update `public-display/js/display.js` draw order
+- Position after map name/header, before map rendering
+- Consider pulse animation or glow effect
+- Test visibility at various display resolutions
+
+---
+
+**4. Enemy Health Ring Color System**
+
+**Goal:** Provide instant HP visual feedback for enemies on map display.
+
+**Requirements:**
+
+| HP %        | Ring Color |
+|-------------|------------|
+| 100%        | Green      |
+| 75%         | Yellow     |
+| 50%         | Orange     |
+| 25%         | Red        |
+| 0% (dead)   | Gray       |
+
+**Settings:**
+- Toggle in DM settings: "Show enemy health ring colors"
+- Default: Enabled for DM view, optional for player view
+- Consider separate toggle for player display (hide enemy HP hints)
+
+**Implementation Notes:**
+- Update token rendering in `drawTokens()` functions
+- Calculate HP percentage: `(current / max) * 100`
+- Smooth color transitions optional
+- Apply to both port 3000 (DM) and port 3001 (player) displays
+- Consider color-blind friendly palette option
+
+---
+
+**5. Active Turn Glow**
+
+**Goal:** Make it easy for players to identify whose turn it is visually on the map.
+
+**Requirements:**
+- When an enemy or player token is active, add soft glow effect (outline or radial)
+- Glow color distinct from HP ring (suggest white or cyan)
+- Only one glow active at a time (current initiative actor)
+
+**Behavior:**
+- Glow appears when turn starts
+- Glow disappears when turn ends
+- Synchronize with Arena turn advancement
+- Works for both player and enemy tokens
+
+**Implementation Notes:**
+- Add to `buildDisplayState()` to include `currentTurn` token ID
+- Update display client to render glow effect
+- Use canvas shadow/blur or stroke for glow
+- Test performance with multiple tokens on screen
+- Consider pulsing animation vs static glow
+
 ## Next Steps
 - Add token duplication/deletion features in Atlas UI
 - Implement token color customization (enemy vs NPC vs ally)
