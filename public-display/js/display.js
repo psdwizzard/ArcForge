@@ -8,7 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     payload: null,
     image: null,
     connected: false,
-    tokenImages: {}
+    tokenImages: {},
+    flavorMediaImage: null
   };
 
   function setStatus(text, isConnected) {
@@ -35,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const height = canvas.height / DPR;
     ctx.clearRect(0, 0, width, height);
 
-    if (!state.payload || !state.image) {
+    // If no payload at all, show awaiting message
+    if (!state.payload) {
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
       ctx.fillRect(0, 0, width, height);
       ctx.fillStyle = 'rgba(226, 232, 240, 0.7)';
@@ -44,6 +46,20 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillText('Awaiting map...', width / 2, height / 2);
       return;
     }
+
+    // If no map but we have flavor media, skip to flavor media (no return here)
+    if (!state.image && !state.payload.flavorMedia) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = 'rgba(226, 232, 240, 0.7)';
+      ctx.font = '24px Roboto, Arial, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Awaiting map...', width / 2, height / 2);
+      return;
+    }
+
+    // Draw map if we have one
+    if (state.image) {
 
     const fitMode = state.payload.viewport?.fit || 'fit';
     const zoom = state.payload.viewport?.zoom || 1;
@@ -88,23 +104,29 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.drawImage(state.image, offsetX, offsetY, drawWidth, drawHeight);
     }
 
-    if (state.payload.grid?.enabled && state.payload.grid?.cell_px) {
-      drawGrid({
-        x: offsetX,
-        y: offsetY,
-        width: drawWidth,
-        height: drawHeight,
-        scale: drawWidth / state.image.width
-      });
-    }
+      if (state.payload.grid?.enabled && state.payload.grid?.cell_px) {
+        drawGrid({
+          x: offsetX,
+          y: offsetY,
+          width: drawWidth,
+          height: drawHeight,
+          scale: drawWidth / state.image.width
+        });
+      }
 
-    // Draw enemy tokens
-    drawTokens({
-      offsetX,
-      offsetY,
-      scale,
-      mapId: state.payload.map?.url
-    });
+      // Draw enemy tokens
+      drawTokens({
+        offsetX,
+        offsetY,
+        scale,
+        mapId: state.payload.map?.url
+      });
+    } // End of if (state.image) block
+
+    // Draw flavor media overlay if present (works with or without map)
+    if (state.payload.flavorMedia) {
+      drawFlavorMediaOverlay(width, height);
+    }
   }
 
   function drawGrid(area) {
@@ -237,9 +259,83 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function drawFlavorMediaOverlay(width, height) {
+    if (!state.payload.flavorMedia) {
+      return;
+    }
+
+    console.log('[Display] Drawing flavor media overlay:', state.payload.flavorMedia);
+
+    const imagePath = state.payload.flavorMedia.imagePath;
+    console.log('[Display] Flavor media image path:', imagePath);
+    console.log('[Display] Current location:', window.location.href);
+
+    // Preload flavor media image if not already loaded
+    // Convert both to absolute URLs for comparison
+    const absoluteImagePath = new URL(imagePath, window.location.href).href;
+    const currentImageSrc = state.flavorMediaImage ? new URL(state.flavorMediaImage.src, window.location.href).href : null;
+
+    console.log('[Display] Absolute image path:', absoluteImagePath);
+    console.log('[Display] Current image src:', currentImageSrc);
+
+    if (!state.flavorMediaImage || currentImageSrc !== absoluteImagePath) {
+      const img = new Image();
+      img.onload = () => {
+        console.log('[Display] Flavor media image loaded successfully!');
+        state.flavorMediaImage = img;
+        draw(); // Redraw when image loads
+      };
+      img.onerror = (error) => {
+        console.error('[Display] Failed to load flavor media:', imagePath);
+        console.error('[Display] Image error event:', error);
+        console.error('[Display] Attempted URL:', img.src);
+        state.flavorMediaImage = null;
+      };
+      console.log('[Display] Attempting to load flavor media from:', imagePath);
+      img.src = imagePath;
+      return; // Wait for image to load
+    }
+
+    console.log('[Display] Image already loaded, proceeding to draw');
+
+    // Draw semi-transparent black background
+    ctx.save();
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+    ctx.fillRect(0, 0, width, height);
+
+    // Draw the flavor media image centered
+    const img = state.flavorMediaImage;
+    if (img.complete && img.naturalWidth > 0) {
+      // Calculate scaling to fit the image on screen while maintaining aspect ratio
+      const imgAspect = img.width / img.height;
+      const screenAspect = width / height;
+
+      let drawWidth, drawHeight, drawX, drawY;
+
+      if (imgAspect > screenAspect) {
+        // Image is wider than screen
+        drawWidth = width * 0.9; // Use 90% of screen width
+        drawHeight = drawWidth / imgAspect;
+      } else {
+        // Image is taller than screen
+        drawHeight = height * 0.9; // Use 90% of screen height
+        drawWidth = drawHeight * imgAspect;
+      }
+
+      drawX = (width - drawWidth) / 2;
+      drawY = (height - drawHeight) / 2;
+
+      ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+    }
+
+    ctx.restore();
+  }
+
   function handleDisplayState(payload) {
     const previousMapUrl = state.payload?.map?.url;
     state.payload = payload;
+
+    console.log('[Display] Received state update, flavorMedia:', payload?.flavorMedia);
 
     // Update map name header
     const mapNameHeader = document.getElementById('map-name-header');

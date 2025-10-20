@@ -84,7 +84,7 @@ const mapStorage = multer.diskStorage({
 
 const mapUpload = multer({
   storage: mapStorage,
-  limits: { fileSize: 25 * 1024 * 1024 }
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB limit for high-quality battle maps
 });
 
 function readJsonFile(filePath, fallback) {
@@ -445,7 +445,8 @@ function buildDisplayState() {
       opacity: atlasSettings.display?.grid?.opacity ?? 0.25
     },
     tokens: tokens,
-    currentTurn: currentTurn
+    currentTurn: currentTurn,
+    flavorMedia: activeFlavorMedia
   };
 }
 
@@ -504,6 +505,9 @@ displayIo.on('connection', (socket) => {
   });
 });
 
+// Active flavor media state (shown on player display)
+let activeFlavorMedia = null;
+
 // Flavor media upload endpoint (separate from maps)
 app.post('/api/flavor-media', mapUpload.single('file'), (req, res) => {
   if (!req.file) {
@@ -525,48 +529,88 @@ app.post('/api/flavor-media', mapUpload.single('file'), (req, res) => {
   }
 });
 
+// Show flavor media to players
+app.post('/api/atlas/flavor-media/show', (req, res) => {
+  const { imagePath } = req.body;
+
+  if (!imagePath) {
+    return res.status(400).json({ error: 'imagePath is required' });
+  }
+
+  activeFlavorMedia = { imagePath };
+  console.log('[FlavorMedia] Showing to players:', imagePath);
+
+  broadcastDisplayState();
+  res.json({ success: true, activeFlavorMedia });
+});
+
+// Hide flavor media from players
+app.post('/api/atlas/flavor-media/hide', (req, res) => {
+  console.log('[FlavorMedia] Hiding from players');
+  activeFlavorMedia = null;
+
+  broadcastDisplayState();
+  res.json({ success: true });
+});
+
 // Map management endpoints
 app.get('/api/maps', (req, res) => {
   res.json(mapsState);
 });
 
-app.post('/api/maps', mapUpload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file provided' });
-  }
-
-  try {
-    const storedPath = path.join(req.file.destination, req.file.filename);
-    let dimensions = null;
-    try {
-      dimensions = imageSize(storedPath);
-    } catch (dimError) {
-      console.warn('[Atlas] Could not determine image size, continuing without dimensions:', dimError.message);
-      try {
-        const fileBuffer = fs.readFileSync(storedPath);
-        dimensions = imageSize(fileBuffer);
-      } catch (bufferError) {
-        console.warn('[Atlas] Buffer fallback also failed:', bufferError.message);
+app.post('/api/maps', (req, res) => {
+  mapUpload.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('[Atlas] Multer error during map upload:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'File too large. Maximum size is 100MB.' });
       }
+      return res.status(500).json({ error: `Upload failed: ${err.message}` });
     }
-    const record = {
-      id: generateId('map'),
-      name: req.body?.name || path.parse(req.file.originalname).name,
-      file: `/maps/${req.file.filename}`,
-      width_px: dimensions?.width ?? null,
-      height_px: dimensions?.height ?? null,
-      created_at: new Date().toISOString(),
-      meta: req.body?.meta || {}
-    };
 
-    mapsState.push(record);
-    writeJsonFile(MAPS_DB_PATH, mapsState);
-    broadcastDisplayState();
-    res.json(record);
-  } catch (error) {
-    console.error('[Atlas] Failed to process uploaded map:', error);
-    res.status(500).json({ error: 'Failed to process map' });
-  }
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file provided' });
+    }
+
+    try {
+      const storedPath = path.join(req.file.destination, req.file.filename);
+      let dimensions = null;
+
+      // Try to get image dimensions (optional, continue if it fails)
+      try {
+        dimensions = imageSize(storedPath);
+      } catch (dimError) {
+        console.warn('[Atlas] Could not determine image size from path:', dimError.message);
+        // Image dimensions will remain null
+      }
+
+      const record = {
+        id: generateId('map'),
+        name: req.body?.name || path.parse(req.file.originalname).name,
+        file: `/maps/${req.file.filename}`,
+        width_px: dimensions?.width ?? null,
+        height_px: dimensions?.height ?? null,
+        created_at: new Date().toISOString(),
+        meta: req.body?.meta || {}
+      };
+
+      console.log('[Atlas] Uploading map:', record.name, 'Size:', dimensions ? `${dimensions.width}x${dimensions.height}` : 'unknown');
+
+      mapsState.push(record);
+      writeJsonFile(MAPS_DB_PATH, mapsState);
+
+      try {
+        broadcastDisplayState();
+      } catch (broadcastError) {
+        console.warn('[Atlas] Failed to broadcast display state after map upload:', broadcastError.message);
+      }
+
+      res.json(record);
+    } catch (error) {
+      console.error('[Atlas] Failed to process uploaded map:', error);
+      res.status(500).json({ error: 'Failed to process map' });
+    }
+  });
 });
 
 app.patch('/api/maps/:id', (req, res) => {

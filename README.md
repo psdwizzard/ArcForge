@@ -21,9 +21,10 @@ ArcForge is a lightweight, local-first companion app for Dungeon Masters running
 - **Monster Library:** Browse 331+ monsters from the SRD with full stat blocks, traits, actions, and abilities
 - **Items Catalog:** Searchable item database with categories and descriptions
 - **Quick Add to Combat:** Add monsters directly to the Arena with all attacks and special abilities pre-configured
-- **Battle Map Management:** Upload JPG/PNG/WEBP maps, view them in the Atlas preview, and push them to a dedicated player display (`http://<host>:3001/display`).
+- **Battle Map Management:** Upload JPG/PNG/WEBP maps (up to 100MB), view them in the Atlas preview, and push them to a dedicated player display (`http://<host>:3001/display`).
+- **Flavor Media:** Upload encounter images and reveal them to players in real-time as dramatic reveals or handouts during gameplay.
 - **Viewport Controls:** Configure fit mode, zoom level, and pan offsets in the control UI; the player display mirrors the exact portion of the map you choose.
-- **Grid Calibration:** Auto-compute pixels-per-inch from diagonal/ resolution or manually calibrate with on-screen rulers; display grid color, opacity, and line width are customizable.
+- **Grid Calibration:** Auto-compute pixels-per-inch from diagonal/resolution or manually calibrate with on-screen rulers; display grid color, opacity, and line width are customizable.
 - **Persistent Settings:** Map metadata and display configuration persist under `data/maps.json` and `data/atlas_settings.json` so restarts retain the last active display state.
 
 ### Codex (Reference Sheets)

@@ -13,9 +13,7 @@
     }
 }
 
-// API Base URL
-// Use current hostname so it works on LAN
-const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
+// API_BASE is defined in session-manager.js (loaded first)
 const DISPLAY_SOCKET_PATH = '/display';
 
 // State
@@ -3696,8 +3694,12 @@ function normalizeEncounterAgent(agent) {
 
 function refreshEncounterEnemyAgents() {
     const state = atlasMapState.encounter.enemies;
+    console.log('[Atlas][Encounter] Total savedAgents:', savedAgents?.length || 0);
     const enemies = (savedAgents || []).filter((agent) => isEnemyType(agent.agentType));
+    console.log('[Atlas][Encounter] Filtered enemies:', enemies.length);
+    enemies.forEach(e => console.log('  -', e.name, 'agentType:', e.agentType));
     state.agents = enemies.map(normalizeEncounterAgent).filter(Boolean);
+    console.log('[Atlas][Encounter] Normalized agents:', state.agents.length);
     if (!state.loading) {
         applyEncounterEnemyFilters();
     }
@@ -6756,14 +6758,30 @@ function renderFlavorImagesList() {
         name.textContent = item.filename;
         name.title = item.filename;
 
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'atlas-flavor-media-item-buttons';
+
+        const showBtn = document.createElement('button');
+        const fullPath = imgPath.startsWith('/') ? imgPath : '/maps/' + imgPath;
+        const isActive = atlasMapState.activeFlavorMediaPath === fullPath;
+
+        showBtn.className = isActive ? 'btn btn-success btn-small' : 'btn btn-primary btn-small';
+        showBtn.textContent = isActive ? 'Hide from Players' : 'Show to Players';
+        showBtn.style.fontSize = '0.75rem';
+        showBtn.style.padding = '4px 8px';
+        showBtn.onclick = () => toggleFlavorMediaDisplay(item);
+
         const removeBtn = document.createElement('button');
         removeBtn.className = 'atlas-flavor-media-item-remove';
         removeBtn.textContent = '×';
         removeBtn.onclick = () => removeFlavorMedia('image', index);
 
+        btnContainer.appendChild(showBtn);
+        btnContainer.appendChild(removeBtn);
+
         itemEl.appendChild(img);
         itemEl.appendChild(name);
-        itemEl.appendChild(removeBtn);
+        itemEl.appendChild(btnContainer);
         container.appendChild(itemEl);
     });
 }
@@ -6850,6 +6868,72 @@ function removeFlavorMedia(type, index) {
 
     renderFlavorMediaLists();
     saveFlavorMediaToEncounter();
+}
+
+// Track currently displayed flavor media
+if (!atlasMapState.activeFlavorMediaPath) {
+    atlasMapState.activeFlavorMediaPath = null;
+}
+
+// Toggle flavor media display on/off
+function toggleFlavorMediaDisplay(mediaItem) {
+    const imgPath = mediaItem.path || mediaItem.filename;
+    const fullPath = imgPath.startsWith('/') ? imgPath : '/maps/' + imgPath;
+
+    // If this image is currently showing, hide it
+    if (atlasMapState.activeFlavorMediaPath === fullPath) {
+        console.log('[FlavorMedia] Hiding from players:', fullPath);
+
+        fetch(`${API_BASE}/atlas/flavor-media/hide`, {
+            method: 'POST'
+        })
+        .then(res => res.json())
+        .then(result => {
+            console.log('[FlavorMedia] Display cleared:', result);
+            atlasMapState.activeFlavorMediaPath = null;
+            renderFlavorMediaLists(); // Re-render to update button state
+        })
+        .catch(error => {
+            console.error('[FlavorMedia] Failed to hide media:', error);
+        });
+    } else {
+        // Show this image
+        console.log('[FlavorMedia] Showing to players:', fullPath);
+
+        fetch(`${API_BASE}/atlas/flavor-media/show`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imagePath: fullPath })
+        })
+        .then(res => res.json())
+        .then(result => {
+            console.log('[FlavorMedia] Display updated:', result);
+            atlasMapState.activeFlavorMediaPath = fullPath;
+            renderFlavorMediaLists(); // Re-render to update button state
+        })
+        .catch(error => {
+            console.error('[FlavorMedia] Failed to show media:', error);
+            alert('Failed to show flavor media. Check console for details.');
+        });
+    }
+}
+
+// Hide flavor media from players (for hide button)
+function hideFlavorMediaFromPlayers() {
+    console.log('[FlavorMedia] Hiding from players');
+
+    fetch(`${API_BASE}/atlas/flavor-media/hide`, {
+        method: 'POST'
+    })
+    .then(res => res.json())
+    .then(result => {
+        console.log('[FlavorMedia] Display cleared:', result);
+        atlasMapState.activeFlavorMediaPath = null;
+        renderFlavorMediaLists(); // Re-render to update button state
+    })
+    .catch(error => {
+        console.error('[FlavorMedia] Failed to hide media:', error);
+    });
 }
 
 function saveFlavorMediaToEncounter() {

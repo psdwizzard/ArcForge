@@ -252,6 +252,47 @@ The app has TWO separate encounter persistence systems that need to work togethe
 - Client: `drawTokens()` converts map coordinates to screen coordinates and renders tokens
 - Client: Token radius calculated as `(cellSize * scale) / 2` for proper grid alignment
 
+### Bug Fixes & Network Playtest Success (2025-01-20)
+
+**Goal:** Fix critical bugs blocking gameplay and successfully playtest over LAN with player display.
+
+**Issues Fixed:**
+
+1. **Duplicate API_BASE Declaration**
+   - Error: `Uncaught SyntaxError: Identifier 'API_BASE' has already been declared`
+   - Both `session-manager.js` and `app.js` declared the same constant
+   - Fixed by removing duplicate from `app.js:18`, keeping only in `session-manager.js:4`
+
+2. **Map Upload File Size & Error Handling**
+   - Issue: Maps larger than 25MB failed with server crashes
+   - Increased limit from 25MB → 100MB for high-quality battle maps (server/server.js:87)
+   - Added proper multer error handling with helpful messages
+   - Graceful fallback when imageSize library can't read dimensions
+   - Maps now upload successfully without crashing server
+
+3. **Flavor Media Display on Network Devices**
+   - Issue: Flavor images loaded but never displayed on port 3001 player view
+   - Root cause: Image URL comparison bug - relative paths vs absolute URLs never matched
+   - Fixed URL normalization in display client (public-display/js/display.js:275-276)
+   - Flavor media now works with or without active map loaded
+   - Display client properly detects when image is already loaded vs needs reload
+
+**Playtest Results:**
+- ✅ **Successful first live playtest over LAN!**
+- ✅ DM workflow significantly reduced cognitive load
+- ✅ Combat tracker, initiative, and HP management worked flawlessly
+- ✅ Atlas map display on separate screen (port 3001) enhanced player immersion
+- ✅ Flavor media system allowed DM to reveal encounter art in real-time
+- ✅ Custom enemies from character builder integrated smoothly with encounters
+
+**Technical Changes:**
+- `public/js/app.js:18` - Removed duplicate API_BASE constant
+- `server/server.js:87` - Increased map upload limit to 100MB
+- `server/server.js:561-614` - Enhanced error handling for map uploads
+- `public-display/js/display.js:34-130` - Refactored draw() to support flavor media without maps
+- `public-display/js/display.js:262-299` - Fixed image URL comparison with proper normalization
+- `public/js/app.js:3695-3706` - Added debugging logs for enemy library filtering
+
 ## Next Steps
 - Add token duplication/deletion features in Atlas UI
 - Implement token color customization (enemy vs NPC vs ally)

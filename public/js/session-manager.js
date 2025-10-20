@@ -1,5 +1,8 @@
 // Session and Encounter Management System
 
+// API Base URL
+const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port || 3000}/api`;
+
 // State
 const sessionState = {
     currentSession: null,
