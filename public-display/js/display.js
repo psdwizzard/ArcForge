@@ -157,6 +157,25 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
+  function getHealthRingColor(percent) {
+    if (!Number.isFinite(percent)) {
+      return 'rgba(220, 38, 38, 0.9)';
+    }
+    if (percent <= 0) {
+      return '#6b7280';
+    }
+    if (percent <= 25) {
+      return '#ef4444';
+    }
+    if (percent <= 50) {
+      return '#f97316';
+    }
+    if (percent <= 75) {
+      return '#facc15';
+    }
+    return '#22c55e';
+  }
+
   function preloadTokenImage(imagePath) {
     if (!imagePath || state.tokenImages[imagePath]) {
       return;
@@ -181,17 +200,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const tokens = state.payload.tokens;
     const grid = state.payload.grid;
     const cellSize = grid?.cell_px || 50;
+    const activeTokenId = state.payload?.currentTurn?.tokenId || state.payload?.currentTurn?.atlasTokenId || null;
+    const showHealthRings = state.payload?.tokenSettings?.showEnemyHealthColors !== false;
 
     tokens.forEach(token => {
-      // Convert token map coordinates to screen coordinates
       const screenX = mapTransform.offsetX + (token.x * mapTransform.scale);
       const screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
-      
-      // Calculate token radius with minimum size for visibility
+
       let tokenRadius = (cellSize * mapTransform.scale) / 2;
-      tokenRadius = Math.max(tokenRadius, 25); // Minimum 25px radius for player display
-      
-      console.log('[Display] Drawing token:', token.name, 'at', screenX, screenY, 'radius:', tokenRadius);
+      tokenRadius = Math.max(tokenRadius, 25);
+
+      const basePercent = Number.isFinite(token.hpPercent)
+        ? token.hpPercent
+        : (Number.isFinite(token.hpCurrent) && Number.isFinite(token.hpMax) && token.hpMax > 0
+            ? Math.round((token.hpCurrent / token.hpMax) * 100)
+            : null);
+      const clampedPercent = Number.isFinite(basePercent) ? Math.max(0, Math.min(100, basePercent)) : null;
+      const defaultRingColor = 'rgba(220, 38, 38, 0.9)';
+      const isDead = token.isDead === true;
+      const ringColor = showHealthRings
+        ? (isDead
+            ? getHealthRingColor(0)
+            : (clampedPercent !== null ? getHealthRingColor(clampedPercent) : defaultRingColor))
+        : defaultRingColor;
+      const ringLineWidth = Math.max(4, tokenRadius * 0.18);
+
+      const isActiveToken = Boolean(activeTokenId) && (token.id === activeTokenId || token.atlasTokenId === activeTokenId);
+      if (isActiveToken) {
+        ctx.save();
+        const glowRadius = tokenRadius + Math.max(10, tokenRadius * 0.25);
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, glowRadius, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.lineWidth = Math.max(6, tokenRadius * 0.18);
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.75)';
+        ctx.shadowBlur = Math.max(18, tokenRadius * 0.6);
+        ctx.globalAlpha = 0.9;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      console.log('[Display] Drawing token:', token.name, 'at', screenX, screenY, 'radius:', tokenRadius, 'hp%', clampedPercent);
 
       // Preload image if available
       const imagePath = token.imagePath;
@@ -218,15 +267,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.save();
         ctx.beginPath();
         ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);
-        ctx.strokeStyle = 'rgba(220, 38, 38, 0.9)';
-        ctx.lineWidth = 4;
+        ctx.strokeStyle = ringColor;
+        ctx.lineWidth = ringLineWidth;
         ctx.stroke();
         ctx.restore();
       } else {
         // Draw default red circle if no image - BRIGHT and SOLID for visibility
         ctx.fillStyle = '#dc2626'; // Solid bright red (no transparency)
-        ctx.strokeStyle = '#ffffff'; // White border
-        ctx.lineWidth = 5; // Thicker border
+        ctx.strokeStyle = ringColor;
+        ctx.lineWidth = Math.max(ringLineWidth, 5);
 
         ctx.beginPath();
         ctx.arc(screenX, screenY, tokenRadius, 0, Math.PI * 2);

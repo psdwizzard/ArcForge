@@ -647,6 +647,38 @@ h2 {
     min-width: 0;
 }
 
+.combatant-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.combatant-map-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.combatant-map-controls .combatant-map-move {
+    min-width: 0;
+    padding: 0.35rem 0.5rem;
+    line-height: 1;
+    font-size: 0.8rem;
+}
+
+.combatant-map-counter {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.25rem;
+    padding: 0.35rem 0.55rem;
+    border-radius: 4px;
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
 .combatant-name-section {
     display: flex;
     flex-direction: column;

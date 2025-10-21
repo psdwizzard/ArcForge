@@ -23,6 +23,7 @@ ArcForge is a lightweight, local-first companion app for Dungeon Masters running
 - **Quick Add to Combat:** Add monsters directly to the Arena with all attacks and special abilities pre-configured
 - **Battle Map Management:** Upload JPG/PNG/WEBP maps (up to 100MB), view them in the Atlas preview, and push them to a dedicated player display (`http://<host>:3001/display`).
 - **Flavor Media:** Upload encounter images and reveal them to players in real-time as dramatic reveals or handouts during gameplay.
+- **Player Display Enhancements:** Active token glow plus optional enemy HP ring colors (Green/Yellow/Orange/Red/Gray) that can be toggled from Atlas -> Token Display.
 - **Viewport Controls:** Configure fit mode, zoom level, and pan offsets in the control UI; the player display mirrors the exact portion of the map you choose.
 - **Grid Calibration:** Auto-compute pixels-per-inch from diagonal/resolution or manually calibrate with on-screen rulers; display grid color, opacity, and line width are customizable.
 - **Persistent Settings:** Map metadata and display configuration persist under `data/maps.json` and `data/atlas_settings.json` so restarts retain the last active display state.
@@ -69,7 +70,7 @@ The dev script uses `nodemon` for automatic server restarts when files in `serve
 2. **Start Combat:** Once combatants have initiative values, start combat to lock in turn order and begin round tracking.
 3. **Resolve Attacks:** For NPCs and enemies, choose an attack and target from the inline controls, roll to hit, adjust damage if needed, and confirm to apply HP changes.
 4. **Track Effects:** Apply conditions and timed effects from the status controls. Durations automatically decrement at the end of each round.
-5. **Manage Loot & Maps:** Switch to Atlas to manage items, monsters, and push battle maps to the player display.
+5. **Manage Loot & Maps:** Switch to Atlas to manage items, monsters, and push battle maps to the player display. Use the Token Display toggle to enable/disable enemy HP ring colors before broadcasting to the table.
 
 ## Project Structure
 

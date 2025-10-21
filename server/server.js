@@ -179,6 +179,9 @@ let atlasSettings = readJsonFile(ATLAS_SETTINGS_PATH, {
       zoom: 1,
       gridZoom: 1,
       offset: { x: 0, y: 0 }
+    },
+    tokens: {
+      showEnemyHealthColors: true
     }
   },
   active_map_id: null,
@@ -205,6 +208,10 @@ function ensureAtlasDefaults() {
     gridZoom: 1,
     offset: { x: 0, y: 0 },
     ...(atlasSettings.display.viewport || {})
+  };
+  atlasSettings.display.tokens = {
+    showEnemyHealthColors: true,
+    ...(atlasSettings.display.tokens || {})
   };
   atlasSettings.encounter = atlasSettings.encounter || {};
   atlasSettings.encounter.startingAreas = atlasSettings.encounter.startingAreas || {};
@@ -374,32 +381,91 @@ function buildDisplayState() {
 
   // Get visible enemy tokens from current encounter
   const tokens = [];
+  const toNumber = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : null;
+  };
+  const combatantsByAtlasId = new Map();
+  const combatantsByName = new Map();
+  if (currentEncounter?.combatants?.length) {
+    currentEncounter.combatants.forEach((combatant) => {
+      if (combatant?.atlasTokenId) {
+        combatantsByAtlasId.set(combatant.atlasTokenId, combatant);
+      }
+      if (combatant?.name && !combatantsByName.has(combatant.name)) {
+        combatantsByName.set(combatant.name, combatant);
+      }
+    });
+  }
+
   if (currentSessionEncounter && currentSessionEncounter.placedEnemies) {
-    currentSessionEncounter.placedEnemies.forEach(enemy => {
-      // Only include placed and visible enemies
+    currentSessionEncounter.placedEnemies.forEach((enemy) => {
       if (enemy.placed && enemy.visible !== false && enemy.position) {
-        // Try multiple sources for image path
-        let imagePath = enemy.imagePath 
-          || enemy.payload?.imagePath 
-          || enemy.payload?.tokenImage 
-          || enemy.payload?.portraitImage 
+        let imagePath = enemy.imagePath
+          || enemy.payload?.imagePath
+          || enemy.payload?.tokenImage
+          || enemy.payload?.portraitImage
           || null;
-        
-        // If it's a relative path for library monsters, prepend the library path
+
         if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
           imagePath = `/data/creatures/library/${imagePath}`;
         }
-        
-        console.log(`[Server] Token ${enemy.name}: imagePath=${imagePath}`);
-        
-        tokens.push({
+
+        const combatantMatch = combatantsByAtlasId.get(enemy.id)
+          || (enemy.atlasTokenId ? combatantsByAtlasId.get(enemy.atlasTokenId) : null)
+          || combatantsByName.get(enemy.name);
+
+        let hpCurrent = null;
+        let hpMax = null;
+        let hpTemp = null;
+
+        const stagedHp = enemy.stats?.hp;
+        if (stagedHp) {
+          if (hpCurrent === null) hpCurrent = toNumber(stagedHp.current);
+          if (hpMax === null) hpMax = toNumber(stagedHp.max);
+          if (hpTemp === null) hpTemp = toNumber(stagedHp.temp);
+        }
+
+        if (hpCurrent === null && enemy.hp !== undefined) {
+          hpCurrent = toNumber(enemy.hp);
+        }
+
+        if (combatantMatch?.hp) {
+          const combatantHp = combatantMatch.hp;
+          if (hpCurrent === null) hpCurrent = toNumber(combatantHp.current ?? combatantHp.value ?? combatantHp);
+          if (hpMax === null) hpMax = toNumber(combatantHp.max);
+          if (hpTemp === null) hpTemp = toNumber(combatantHp.temp);
+        }
+
+        if (hpMax === null && stagedHp) {
+          hpMax = toNumber(stagedHp.max);
+        }
+
+        let hpPercent = null;
+        if (hpCurrent !== null && hpMax !== null && hpMax > 0) {
+          hpPercent = Math.max(0, Math.min(100, Math.round((hpCurrent / hpMax) * 100)));
+        } else if (hpCurrent !== null && hpMax === null) {
+          hpPercent = null;
+        }
+
+        const tokenRecord = {
           id: enemy.id,
+          atlasTokenId: enemy.atlasTokenId || enemy.id,
+          combatantId: combatantMatch?.id || null,
           name: enemy.name,
           x: enemy.position.x,
           y: enemy.position.y,
           mapId: enemy.position.mapId,
-          imagePath: imagePath
-        });
+          imagePath,
+          isEnemy: true,
+          hpCurrent,
+          hpMax,
+          hpTemp,
+          hpPercent,
+          isDead: hpCurrent !== null ? hpCurrent <= 0 : false
+        };
+
+        tokens.push(tokenRecord);
       }
     });
   }
@@ -417,9 +483,14 @@ function buildDisplayState() {
       // Only show if the combatant is visible (for enemies on the map, check their visibility)
       const isVisible = placedEnemy ? (placedEnemy.visible !== false) : true;
 
+      const tokenId = placedEnemy?.id || currentCombatant.atlasTokenId || null;
+
       currentTurn = {
         name: currentCombatant.name,
-        visible: isVisible
+        visible: isVisible,
+        tokenId,
+        atlasTokenId: currentCombatant.atlasTokenId || null,
+        combatantId: currentCombatant.id
       };
     }
   }
@@ -445,6 +516,9 @@ function buildDisplayState() {
       opacity: atlasSettings.display?.grid?.opacity ?? 0.25
     },
     tokens: tokens,
+    tokenSettings: {
+      showEnemyHealthColors: atlasSettings.display?.tokens?.showEnemyHealthColors !== false
+    },
     currentTurn: currentTurn,
     flavorMedia: activeFlavorMedia
   };

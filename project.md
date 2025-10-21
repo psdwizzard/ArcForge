@@ -380,29 +380,17 @@ Based on live D&D session feedback, identified key improvements for DM workflow 
 
 **4. Enemy Health Ring Color System**
 
-**Goal:** Provide instant HP visual feedback for enemies on map display.
+**Status:** Completed (Oct 20, 2025)
 
-**Requirements:**
+**What changed:**
+- Server now emits combatant HP (current/max/temp, derived percent, death state) with each display payload.
+- Player display (`public-display/js/display.js`) renders a ring using the 100/75/50/25/0 color tiers and falls back to the legacy red ring when data is missing.
+- Active token glow remains distinct (white halo) and layers above the health ring.
+- New Atlas setting toggle (`Show enemy health ring colors`) controls the feature; defaults to on and persists in `data/atlas_settings.json`.
 
-| HP %        | Ring Color |
-|-------------|------------|
-| 100%        | Green      |
-| 75%         | Yellow     |
-| 50%         | Orange     |
-| 25%         | Red        |
-| 0% (dead)   | Gray       |
-
-**Settings:**
-- Toggle in DM settings: "Show enemy health ring colors"
-- Default: Enabled for DM view, optional for player view
-- Consider separate toggle for player display (hide enemy HP hints)
-
-**Implementation Notes:**
-- Update token rendering in `drawTokens()` functions
-- Calculate HP percentage: `(current / max) * 100`
-- Smooth color transitions optional
-- Apply to both port 3000 (DM) and port 3001 (player) displays
-- Consider color-blind friendly palette option
+**Follow-ups:**
+- Optionally extend to the DM-side canvas if we revive the `port 3000` map view.
+- Explore an alternate palette for color-blind accessibility.
 
 ---
 

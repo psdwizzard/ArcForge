@@ -40,6 +40,10 @@ window.combatantCollapseState = combatantCollapseState;
 let lastActiveCombatantId = null;
 window.lastActiveCombatantId = lastActiveCombatantId;
 
+// Track per-turn movement for combatants nudged from Arena
+const combatantMovementTracker = {};
+window.combatantMovementTracker = combatantMovementTracker;
+
 // Track collapsed state for sidebar agent cards
 const agentCollapseState = {};
 window.agentCollapseState = agentCollapseState;
@@ -1227,6 +1231,83 @@ async function handleNewEncounter() {
     }
 }
 
+function resetCombatantMovementTracker(combatantId) {
+    if (!combatantId) {
+        return;
+    }
+    combatantMovementTracker[combatantId] = {
+        count: 0,
+        diagonalPending: false,
+        lastAxis: null
+    };
+    updateCombatantMovementCounter(combatantId);
+}
+
+function clearAllCombatantMovementTrackers() {
+    for (const key of Object.keys(combatantMovementTracker)) {
+        delete combatantMovementTracker[key];
+    }
+}
+
+function recordCombatantMovementStep(combatantId, direction) {
+    if (!combatantId || !direction) {
+        return 0;
+    }
+
+    const tracker = combatantMovementTracker[combatantId] || {
+        count: 0,
+        diagonalPending: false,
+        lastAxis: null
+    };
+
+    const axis = getMovementAxis(direction);
+    if (!axis) {
+        combatantMovementTracker[combatantId] = tracker;
+        return tracker.count;
+    }
+
+    if (tracker.diagonalPending && tracker.lastAxis && tracker.lastAxis !== axis) {
+        tracker.diagonalPending = false;
+        tracker.lastAxis = axis;
+        combatantMovementTracker[combatantId] = tracker;
+        return tracker.count;
+    }
+
+    tracker.count += 1;
+    tracker.diagonalPending = true;
+    tracker.lastAxis = axis;
+    combatantMovementTracker[combatantId] = tracker;
+    return tracker.count;
+}
+
+function getCombatantMovementCount(combatantId) {
+    if (!combatantId) {
+        return 0;
+    }
+    return combatantMovementTracker[combatantId]?.count || 0;
+}
+
+function updateCombatantMovementCounter(combatantId) {
+    const counter = document.getElementById(`combatant-move-count-${combatantId}`);
+    if (!counter) {
+        return;
+    }
+    counter.textContent = getCombatantMovementCount(combatantId);
+}
+
+function getMovementAxis(direction) {
+    switch (direction) {
+        case 'left':
+        case 'right':
+            return 'horizontal';
+        case 'up':
+        case 'down':
+            return 'vertical';
+        default:
+            return null;
+    }
+}
+
 // Render combatants list
 function renderCombatantsList() {
     const container = document.getElementById('combatants-list');
@@ -1234,6 +1315,7 @@ function renderCombatantsList() {
     if (encounterState.combatants.length === 0) {
         container.innerHTML = '<div class="empty-state">No agents yet. Add some to start combat!</div>';
         updateCombatButtons();
+        clearAllCombatantMovementTrackers();
         return;
     }
 
@@ -1244,6 +1326,10 @@ function renderCombatantsList() {
     const activeCombatantId = encounterState.combatActive && encounterState.combatants.length > 0
         ? encounterState.combatants[encounterState.currentTurnIndex].id
         : null;
+
+    if (activeCombatantId && activeCombatantId !== lastActiveCombatantId) {
+        resetCombatantMovementTracker(activeCombatantId);
+    }
 
     if (lastActiveCombatantId && lastActiveCombatantId !== activeCombatantId) {
         if (combatantCollapseState[lastActiveCombatantId] === false) {
@@ -1760,6 +1846,22 @@ function createCombatantCard(combatant, isCurrentTurn) {
     </div>`;
     const typeLabel = getTypeDisplayName(combatant.type);
 
+    let mapControlsHTML = '';
+    if (combatant.atlasTokenId && Array.isArray(atlasMapState?.encounter?.pending)) {
+        const linkedAtlasToken = atlasMapState.encounter.pending.find(entry => entry.id === combatant.atlasTokenId);
+        if (linkedAtlasToken && linkedAtlasToken.position) {
+            mapControlsHTML = `
+                <div class="combatant-map-controls" role="group" aria-label="Move token on map">
+                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token up" aria-label="Move token up" onclick="nudgeCombatantToken('${combatant.id}', 'up')">&uarr;</button>
+                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token down" aria-label="Move token down" onclick="nudgeCombatantToken('${combatant.id}', 'down')">&darr;</button>
+                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token left" aria-label="Move token left" onclick="nudgeCombatantToken('${combatant.id}', 'left')">&larr;</button>
+                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token right" aria-label="Move token right" onclick="nudgeCombatantToken('${combatant.id}', 'right')">&rarr;</button>
+                    <span class="combatant-map-counter" id="combatant-move-count-${combatant.id}" aria-live="polite" title="Squares moved this turn">${getCombatantMovementCount(combatant.id)}</span>
+                </div>
+            `;
+        }
+    }
+
     const initiativeRollValue = getInitiativeRollValue(combatant);
     const totalInitiativeDisplay = getInitiativeTotalDisplay(combatant);
 
@@ -1774,7 +1876,10 @@ function createCombatantCard(combatant, isCurrentTurn) {
                         <div class="combatant-type">${typeLabel}</div>
                     </div>
                 </div>
-                <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
+                <div class="combatant-actions">
+                    ${mapControlsHTML}
+                    <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
+                </div>
             </div>
             <div class="combatant-summary">
             <div class="combatant-initiative">
@@ -1861,6 +1966,7 @@ async function applyDamage(combatantId) {
         });
 
         if (response.ok) {
+            delete combatantMovementTracker[combatantId];
             await loadEncounterState();
             renderCombatantsList();
         }
@@ -2016,6 +2122,7 @@ async function removeCombatant(combatantId) {
         });
 
         if (response.ok) {
+            delete combatantMovementTracker[combatantId];
             await loadEncounterState();
             renderCombatantsList();
         }
@@ -2651,6 +2758,7 @@ function getAtlasElements() {
         gridOpacity: document.getElementById('atlas-grid-opacity'),
         gridColor: document.getElementById('atlas-grid-color'),
         gridEnabled: document.getElementById('atlas-grid-enabled'),
+        tokenHealthRings: document.getElementById('atlas-token-health-rings'),
         saveSettingsBtn: document.getElementById('atlas-save-settings-btn'),
         pushDisplayBtn: document.getElementById('atlas-push-display-btn'),
         previewCanvas: document.getElementById('atlas-preview-canvas'),
@@ -2862,6 +2970,15 @@ function bindAtlasMapEvents() {
             atlasMapState.settings.display.grid.enabled = enabled;
         }
         updateGridSettingsOnServer({ enabled: enabled });
+    });
+
+    elements.tokenHealthRings?.addEventListener('change', (event) => {
+        const enabled = event.target.checked;
+        atlasMapState.settings = atlasMapState.settings || {};
+        atlasMapState.settings.display = atlasMapState.settings.display || {};
+        atlasMapState.settings.display.tokens = atlasMapState.settings.display.tokens || {};
+        atlasMapState.settings.display.tokens.showEnemyHealthColors = enabled;
+        updateTokenSettingsOnServer({ showEnemyHealthColors: enabled });
     });
 
     elements.autoCalibrateBtn?.addEventListener('click', handleAtlasAutoCalibrate);
@@ -3114,6 +3231,9 @@ function populateSettingsForm() {
         return;
     }
 
+    settings.display = settings.display || {};
+    settings.display.tokens = settings.display.tokens || {};
+
     const resolution = settings.display?.resolution || { w: 1920, h: 1080 };
     elements.resolutionWidth.value = resolution.w;
     elements.resolutionHeight.value = resolution.h;
@@ -3129,6 +3249,9 @@ function populateSettingsForm() {
         elements.gridColor.value = settings.display.grid.color;
     }
     elements.gridEnabled.checked = settings.display?.grid?.enabled ?? true;
+    if (elements.tokenHealthRings) {
+        elements.tokenHealthRings.checked = settings.display?.tokens?.showEnemyHealthColors !== false;
+    }
     atlasMapState.preview.showGrid = elements.previewGridToggle.checked = settings.display?.grid?.enabled ?? true;
     atlasMapState.preview.fit = settings.display?.viewport?.fit || 'fit';
     atlasMapState.preview.zoom = settings.display?.viewport?.zoom || 1;
@@ -3166,6 +3289,9 @@ function gatherSettingsPayload() {
                 opacity: Number(elements.gridOpacity.value) || 0.25,
                 color: elements.gridColor.value || '#3aaaff',
                 enabled: elements.gridEnabled.checked
+            },
+            tokens: {
+                showEnemyHealthColors: elements.tokenHealthRings ? elements.tokenHealthRings.checked : true
             },
             viewport: {
                 fit: atlasMapState.preview.fit,
@@ -5924,6 +6050,20 @@ function handleEncounterCanvasClick(event) {
     updateEncounterControls();
 }
 
+function getAtlasGridCellSize() {
+    const settings = atlasMapState?.settings;
+    if (!settings?.display?.grid) {
+        return null;
+    }
+
+    const grid = settings.display.grid;
+    const ppi = settings.display.physical?.ppi_override || grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
+    const gridZoom = settings.display?.viewport?.gridZoom ?? atlasMapState?.preview?.gridZoom ?? 1;
+
+    return cellPx * gridZoom;
+}
+
 function handleEncounterKeydown(event) {
     // Only handle arrow keys when in Atlas Encounters view
     const activeView = document.querySelector('.atlas-section.active');
@@ -5951,17 +6091,11 @@ function handleEncounterKeydown(event) {
     // Prevent default page scrolling for arrow keys
     event.preventDefault();
 
-    // Calculate grid cell size
-    const settings = atlasMapState.settings;
-    if (!settings?.display?.grid) {
+    // Calculate grid cell size (one movement step)
+    const cellSize = getAtlasGridCellSize();
+    if (!cellSize) {
         return;
     }
-
-    const grid = settings.display.grid;
-    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
-    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
-    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
-    const cellSize = cellPx * gridZoom;
 
     let moved = false;
 
@@ -5998,6 +6132,74 @@ function handleEncounterKeydown(event) {
         if (typeof saveCurrentEncounter === 'function') {
             saveCurrentEncounter();
         }
+    }
+}
+
+function nudgeCombatantToken(combatantId, direction) {
+    if (!window.encounterState || !Array.isArray(window.encounterState.combatants)) {
+        console.warn('[Atlas] Cannot move token - encounter state unavailable');
+        return;
+    }
+
+    const combatant = window.encounterState.combatants.find(c => c.id === combatantId);
+    if (!combatant || !combatant.atlasTokenId) {
+        console.warn('[Atlas] No linked atlas token for combatant:', combatantId);
+        return;
+    }
+
+    if (!atlasMapState?.encounter) {
+        console.warn('[Atlas] Encounter map state unavailable, cannot move token.');
+        return;
+    }
+
+    const pending = atlasMapState.encounter.pending || [];
+    const token = pending.find(entry => entry.id === combatant.atlasTokenId);
+    if (!token || !token.position) {
+        console.warn('[Atlas] Linked token not placed on map for combatant:', combatantId);
+        return;
+    }
+
+    const cellSize = getAtlasGridCellSize();
+    if (!cellSize) {
+        console.warn('[Atlas] Grid settings unavailable, cannot move token.');
+        return;
+    }
+
+    let dx = 0;
+    let dy = 0;
+
+    switch (direction) {
+        case 'up':
+            dy = -cellSize;
+            break;
+        case 'down':
+            dy = cellSize;
+            break;
+        case 'left':
+            dx = -cellSize;
+            break;
+        case 'right':
+            dx = cellSize;
+            break;
+        default:
+            return;
+    }
+
+    token.position.x = Number((token.position.x + dx).toFixed(2));
+    token.position.y = Number((token.position.y + dy).toFixed(2));
+
+    const totalSquares = recordCombatantMovementStep(combatantId, direction);
+    console.debug('[Arena] Movement counter', { combatantId, direction, totalSquares });
+    updateCombatantMovementCounter(combatantId);
+
+    atlasMapState.encounter.selectedToken = token;
+    atlasMapState.encounter.dirty = true;
+
+    renderStagedEnemiesList();
+    drawAtlasEncounter();
+
+    if (typeof saveCurrentEncounter === 'function') {
+        saveCurrentEncounter();
     }
 }
 
@@ -6160,6 +6362,26 @@ function updateGridSettingsOnServer(settingsPartial) {
     })
     .catch(error => {
         console.error('[updateGridSettingsOnServer] Failed to update grid settings:', error);
+    });
+}
+
+function updateTokenSettingsOnServer(tokenSettings) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                tokens: tokenSettings
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        atlasMapState.settings = settings;
+        console.log('[updateTokenSettingsOnServer] Token settings updated:', tokenSettings);
+    })
+    .catch(error => {
+        console.error('[updateTokenSettingsOnServer] Failed to update token settings:', error);
     });
 }
 
