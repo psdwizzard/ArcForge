@@ -67,50 +67,58 @@ canvas:hover {
   box-shadow: 0 24px 120px rgba(94, 234, 212, 0.25);
 }
 
-.map-name-header {
+.map-info-banner {
   position: absolute;
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 0.75rem 2rem;
-  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 10;
+}
+
+.map-name-header {
+  padding: 1.25rem 3rem;
+  border-radius: 16px;
   background: rgba(15, 23, 42, 0.9);
   border: 1px solid rgba(148, 163, 184, 0.3);
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 4.5rem;
+  font-weight: 700;
   color: #f1f5f9;
   backdrop-filter: blur(8px);
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+  letter-spacing: 0.02em;
 }
 
-.current-turn-footer {
-  position: absolute;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 1rem 2.5rem;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.95);
+.current-turn-banner {
+  padding: 0.85rem 2.5rem;
+  border-radius: 14px;
+  background: rgba(30, 41, 59, 0.95);
   border: 2px solid rgba(99, 102, 241, 0.5);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 1rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  z-index: 10;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
 .turn-label {
-  font-size: 1rem;
-  color: #94a3b8;
-  font-weight: 500;
+  font-size: 1.4rem;
+  color: #cbd5f5;
+  font-weight: 600;
 }
 
 .turn-name {
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  color: #fbbf24;
+  color: #facc15;
   text-shadow: 0 2px 8px rgba(251, 191, 36, 0.4);
 }
+
+
+
+

@@ -665,8 +665,11 @@
                                         <button type="button" id="display-pan-down" class="btn-pan-arrow" title="Pan display down">▼</button>
                                     </div>
                                     <label class="display-pan-fine-label">
-                                        <input type="checkbox" id="display-pan-fine">
-                                        <span>Fine</span>
+                                        <span class="display-pan-fine-top">
+                                            <input type="checkbox" id="display-pan-fine">
+                                            <span class="display-pan-fine-text">Fine</span>
+                                        </span>
+                                        <input type="number" id="display-pan-fine-squares" class="display-pan-fine-input" min="0.25" step="0.25" value="1" aria-label="Fine pan squares">
                                     </label>
                                 </div>
                             </div>

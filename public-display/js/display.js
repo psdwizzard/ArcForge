@@ -394,15 +394,15 @@ document.addEventListener('DOMContentLoaded', () => {
       mapNameHeader.textContent = payload?.map?.name || 'No Map Loaded';
     }
 
-    // Update current turn footer
-    const currentTurnFooter = document.getElementById('current-turn-footer');
+    // Update current turn banner
+    const currentTurnBanner = document.getElementById('current-turn-banner');
     const currentTurnName = document.getElementById('current-turn-name');
 
     if (payload?.currentTurn && payload.currentTurn.visible !== false) {
-      if (currentTurnFooter) currentTurnFooter.style.display = 'flex';
+      if (currentTurnBanner) currentTurnBanner.style.display = 'flex';
       if (currentTurnName) currentTurnName.textContent = payload.currentTurn.name || '—';
     } else {
-      if (currentTurnFooter) currentTurnFooter.style.display = 'none';
+      if (currentTurnBanner) currentTurnBanner.style.display = 'none';
     }
 
     if (!payload?.map?.url) {

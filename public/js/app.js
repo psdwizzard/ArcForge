@@ -1,4 +1,4 @@
-﻿function toggleAgentDetails(agentId) {
+function toggleAgentDetails(agentId) {
     const card = document.querySelector(`.agent-card[data-agent-id="${agentId}"]`);
     if (!card) {
         return;
@@ -15,6 +15,10 @@
 
 // API_BASE is defined in session-manager.js (loaded first)
 const DISPLAY_SOCKET_PATH = '/display';
+const DISPLAY_STANDARD_PAN_FACTOR = 0.75;
+const DISPLAY_FINE_PAN_FACTOR = 0.25;
+const DISPLAY_FINE_PAN_DEFAULT_SQUARES = 1;
+const DISPLAY_MIN_FINE_PAN_SQUARES = 0.25;
 
 // State
 let encounterState = {
@@ -695,11 +699,23 @@ function panDisplayViewport(direction) {
     // Check if fine adjustment mode is enabled
     const fineAdjustCheckbox = document.getElementById('display-pan-fine');
     const useFineAdjust = fineAdjustCheckbox?.checked || false;
-    const panFactor = useFineAdjust ? 0.25 : 0.75; // 1/4 screen for fine, 3/4 for normal
+    const panFactor = useFineAdjust ? DISPLAY_FINE_PAN_FACTOR : DISPLAY_STANDARD_PAN_FACTOR; // 1/4 screen for fine, 3/4 for normal
 
     // Calculate pan amount
-    const panAmountX = resolution.w * panFactor;
-    const panAmountY = resolution.h * panFactor;
+    let panAmountX = resolution.w * panFactor;
+    let panAmountY = resolution.h * panFactor;
+
+    if (useFineAdjust) {
+        const fineSquares = getFinePanSquaresSetting();
+        const cellSize = getAtlasGridCellSize();
+        if (cellSize && Number.isFinite(cellSize) && cellSize > 0) {
+            panAmountX = cellSize * fineSquares;
+            panAmountY = cellSize * fineSquares;
+        } else {
+            panAmountX = resolution.w * DISPLAY_FINE_PAN_FACTOR;
+            panAmountY = resolution.h * DISPLAY_FINE_PAN_FACTOR;
+        }
+    }
 
     console.log('[panDisplayViewport] Pan amounts (fine=' + useFineAdjust + ') - X:', panAmountX, 'Y:', panAmountY);
 
@@ -2918,6 +2934,7 @@ function loadAtlasInitialData() {
         populateSettingsForm();
         drawAtlasPreview();
         drawAtlasEncounter();
+        updateDisplayPanFineInfo();
     }).catch((error) => {
         console.error('[Atlas] Failed to load initial data:', error);
         updateEncounterSummary(null);
@@ -2976,6 +2993,7 @@ function bindAtlasMapEvents() {
             if (atlasMapState.settings?.display?.viewport) {
                 atlasMapState.settings.display.viewport.gridZoom = newZoom;
             }
+            updateDisplayPanFineInfo();
             updateGridZoomOnServer(newZoom);
         });
     }
@@ -2989,6 +3007,7 @@ function bindAtlasMapEvents() {
             if (atlasMapState.settings?.display?.viewport) {
                 atlasMapState.settings.display.viewport.gridZoom = newZoom;
             }
+            updateDisplayPanFineInfo();
             updateGridZoomOnServer(newZoom);
         });
     }
@@ -3001,6 +3020,7 @@ function bindAtlasMapEvents() {
             if (atlasMapState.settings?.display?.viewport) {
                 atlasMapState.settings.display.viewport.gridZoom = 1;
             }
+            updateDisplayPanFineInfo();
             updateGridZoomOnServer(1);
         });
     }
@@ -3037,6 +3057,66 @@ function bindAtlasMapEvents() {
         }
         updateGridSettingsOnServer({ enabled: enabled });
     });
+
+    elements.resolutionWidth?.addEventListener('input', (event) => {
+        if (!atlasMapState.settings?.display) {
+            updateDisplayPanFineInfo();
+            return;
+        }
+        const width = Number(event.target.value);
+        atlasMapState.settings.display.resolution = atlasMapState.settings.display.resolution || {};
+        if (Number.isFinite(width) && width > 0) {
+            atlasMapState.settings.display.resolution.w = width;
+        }
+        updateDisplayPanFineInfo();
+    });
+
+    elements.resolutionHeight?.addEventListener('input', (event) => {
+        if (!atlasMapState.settings?.display) {
+            updateDisplayPanFineInfo();
+            return;
+        }
+        const height = Number(event.target.value);
+        atlasMapState.settings.display.resolution = atlasMapState.settings.display.resolution || {};
+        if (Number.isFinite(height) && height > 0) {
+            atlasMapState.settings.display.resolution.h = height;
+        }
+        updateDisplayPanFineInfo();
+    });
+
+    elements.ppi?.addEventListener('input', (event) => {
+        if (!atlasMapState.settings?.display) {
+            updateDisplayPanFineInfo();
+            return;
+        }
+        const ppiValue = Number(event.target.value);
+        atlasMapState.settings.display.physical = atlasMapState.settings.display.physical || {};
+        if (Number.isFinite(ppiValue) && ppiValue > 0) {
+            atlasMapState.settings.display.physical.ppi_override = ppiValue;
+        } else if (event.target.value === '') {
+            atlasMapState.settings.display.physical.ppi_override = null;
+        }
+        updateDisplayPanFineInfo();
+    });
+
+    elements.gridInches?.addEventListener('input', (event) => {
+        if (!atlasMapState.settings?.display?.grid) {
+            updateDisplayPanFineInfo();
+            return;
+        }
+        const inches = Number(event.target.value);
+        if (Number.isFinite(inches) && inches > 0) {
+            atlasMapState.settings.display.grid.inches_per_cell = inches;
+        }
+        updateDisplayPanFineInfo();
+    });
+
+    const fineSquaresInput = document.getElementById('display-pan-fine-squares');
+    if (fineSquaresInput) {
+        fineSquaresInput.addEventListener('change', handleFinePanSquaresChange);
+    }
+
+    updateDisplayPanFineInfo();
 
     elements.tokenHealthRings?.addEventListener('change', (event) => {
         const enabled = event.target.checked;
@@ -3333,6 +3413,7 @@ function populateSettingsForm() {
     updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
     drawAtlasPreview();
     drawAtlasEncounter();
+    updateDisplayPanFineInfo();
 }
 
 function gatherSettingsPayload() {
@@ -3363,7 +3444,8 @@ function gatherSettingsPayload() {
                 fit: atlasMapState.preview.fit,
                 zoom: atlasMapState.preview.zoom,
                 gridZoom: atlasMapState.preview.gridZoom,
-                offset: atlasMapState.preview.offset
+                offset: atlasMapState.preview.offset,
+                fineSquares: getFinePanSquaresSetting()
             }
         }
     };
@@ -3441,6 +3523,7 @@ function handleAtlasAutoCalibrate() {
     const ppi = Math.sqrt((width ** 2) + (height ** 2)) / diagonal;
     elements.ppi.value = ppi.toFixed(2);
     atlasMapState.settings.display.physical.ppi_override = ppi;
+    updateDisplayPanFineInfo();
 }
 
 function toggleAtlasManualCalibration() {
@@ -3516,6 +3599,7 @@ function applyDisplayResolution(viewport) {
     }
     elements.resolutionWidth.value = viewport.w;
     elements.resolutionHeight.value = viewport.h;
+    updateDisplayPanFineInfo();
 }
 
 function applyDisplayGrid(grid) {
@@ -3531,6 +3615,7 @@ function applyDisplayGrid(grid) {
         const inches = grid.cell_px / atlasMapState.settings.display.physical.ppi_override;
         elements.gridInches.value = inches.toFixed(2);
     }
+    updateDisplayPanFineInfo();
 }
 
 function clamp(value, min, max) {
@@ -3630,6 +3715,7 @@ function syncEncounterStateFromSettings(force) {
 
     atlasMapState.encounter.dirty = false;
     atlasMapState.encounter.placing = false;
+    updateDisplayPanFineInfo();
 }
 
 function resetEncounterView() {
@@ -6155,6 +6241,94 @@ function getAtlasGridCellSize() {
     return cellPx * gridZoom;
 }
 
+function getFinePanSquaresSetting() {
+    const raw = Number(atlasMapState?.settings?.display?.viewport?.fineSquares);
+    if (!Number.isFinite(raw) || raw <= 0) {
+        return DISPLAY_FINE_PAN_DEFAULT_SQUARES;
+    }
+    return raw;
+}
+
+function clampFinePanSquares(value) {
+    if (!Number.isFinite(value) || value <= 0) {
+        return DISPLAY_FINE_PAN_DEFAULT_SQUARES;
+    }
+    return Math.max(DISPLAY_MIN_FINE_PAN_SQUARES, Number(value.toFixed(2)));
+}
+
+function setFinePanSquaresSetting(value) {
+    atlasMapState.settings = atlasMapState.settings || {};
+    atlasMapState.settings.display = atlasMapState.settings.display || {};
+    atlasMapState.settings.display.viewport = atlasMapState.settings.display.viewport || {};
+    atlasMapState.settings.display.viewport.fineSquares = value;
+}
+
+function updateDisplayPanFineInfo(force = false) {
+    const input = document.getElementById('display-pan-fine-squares');
+    const settings = atlasMapState?.settings;
+    let value = getFinePanSquaresSetting();
+
+    if (settings?.display?.viewport) {
+        setFinePanSquaresSetting(value);
+    } else {
+        value = DISPLAY_FINE_PAN_DEFAULT_SQUARES;
+    }
+
+    if (input) {
+        if (force || document.activeElement !== input) {
+            input.value = value;
+        }
+        const cellSize = getAtlasGridCellSize();
+        if (cellSize && Number.isFinite(cellSize) && cellSize > 0) {
+            const pixels = (cellSize * value).toFixed(1);
+            input.title = `Fine pan moves about ${value} squares (${pixels}px) when enabled.`;
+        } else {
+            input.title = 'Fine pan moves the entered number of squares when enabled.';
+        }
+    }
+}
+
+function handleFinePanSquaresChange(event) {
+    const input = event.target;
+    let sanitized = clampFinePanSquares(Number(input.value));
+    const previous = getFinePanSquaresSetting();
+    if (Math.abs(previous - sanitized) < 0.0001) {
+        input.value = sanitized;
+        updateDisplayPanFineInfo(true);
+        return;
+    }
+    setFinePanSquaresSetting(sanitized);
+    input.value = sanitized;
+    updateFinePanSquaresOnServer(sanitized);
+    updateDisplayPanFineInfo(true);
+}
+
+function updateFinePanSquaresOnServer(value) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                viewport: {
+                    fineSquares: value
+                }
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        atlasMapState.settings = settings;
+        const serverValue = Number(settings?.display?.viewport?.fineSquares);
+        if (!Number.isFinite(serverValue) || serverValue <= 0) {
+            setFinePanSquaresSetting(value);
+        }
+        updateDisplayPanFineInfo(true);
+    })
+    .catch(error => {
+        console.error('[updateFinePanSquaresOnServer] Failed to update fine pan squares:', error);
+    });
+}
+
 function handleEncounterKeydown(event) {
     // Only handle arrow keys when in Atlas Encounters view
     const activeView = document.querySelector('.atlas-section.active');
@@ -6395,6 +6569,8 @@ function changeEncounterGridZoom(delta) {
     drawAtlasPreview();
     drawAtlasEncounter();
 
+    updateDisplayPanFineInfo();
+
     // Send update to server immediately
     updateGridZoomOnServer(rounded);
 }
@@ -6410,6 +6586,8 @@ function resetEncounterGridZoom() {
     updateEncounterSummary(atlasMapState.encounter.render?.startRect || null);
     drawAtlasPreview();
     drawAtlasEncounter();
+
+    updateDisplayPanFineInfo();
 
     // Send update to server immediately
     updateGridZoomOnServer(1);
@@ -6430,6 +6608,8 @@ function updateGridZoomOnServer(gridZoom) {
     })
     .then(res => res.json())
     .then(settings => {
+        atlasMapState.settings = settings;
+        updateDisplayPanFineInfo();
         console.log('[updateGridZoomOnServer] Grid zoom updated to', gridZoom);
     })
     .catch(error => {
@@ -6451,6 +6631,7 @@ function updateGridSettingsOnServer(settingsPartial) {
     .then(res => res.json())
     .then(settings => {
         atlasMapState.settings = settings;
+        updateDisplayPanFineInfo();
         console.log('[updateGridSettingsOnServer] Grid settings updated:', settingsPartial);
     })
     .catch(error => {

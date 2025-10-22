@@ -23,8 +23,8 @@ ArcForge is a lightweight, local-first companion app for Dungeon Masters running
 - **Quick Add to Combat:** Add monsters directly to the Arena with all attacks and special abilities pre-configured
 - **Battle Map Management:** Upload JPG/PNG/WEBP maps (up to 100MB), view them in the Atlas preview, and push them to a dedicated player display (`http://<host>:3001/display`).
 - **Flavor Media:** Upload encounter images and reveal them to players in real-time as dramatic reveals or handouts during gameplay.
-- **Player Display Enhancements:** Active token glow plus optional enemy HP ring colors (Green/Yellow/Orange/Red/Gray) that can be toggled from Atlas -> Token Display.
-- **Viewport Controls:** Configure fit mode, zoom level, and pan offsets in the control UI; the player display mirrors the exact portion of the map you choose.
+- **Player Display Enhancements:** Active token glow plus optional enemy HP ring colors (Green/Yellow/Orange/Red/Gray) that can be toggled from Atlas -> Token Display, with an enlarged header that keeps the map title and active turn visible from across the table.
+- **Viewport Controls:** Configure fit mode, zoom level, and pan offsets in the control UI; set a custom fine-pan square distance for precise nudges; the player display mirrors the exact portion of the map you choose.
 - **Grid Calibration:** Auto-compute pixels-per-inch from diagonal/resolution or manually calibrate with on-screen rulers; display grid color, opacity, and line width are customizable.
 - **Persistent Settings:** Map metadata and display configuration persist under `data/maps.json` and `data/atlas_settings.json` so restarts retain the last active display state.
 
@@ -107,6 +107,11 @@ You can back up or version control these JSON files to capture campaign history.
 ## Testing
 
 The project currently does not include automated tests. When adding new features, consider introducing JavaScript testing frameworks such as Jest or Vitest to cover critical workflows (initiative ordering, attack resolution, map broadcasting).
+
+## Known Issues
+
+- On some sessions the `Start Combat` button reports no combatants even when Atlas tokens are present; re-syncing the encounter usually resolves the mismatch. Investigation is ongoing.
+
 
 ## Contributing
 

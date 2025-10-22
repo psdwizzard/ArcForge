@@ -464,3 +464,13 @@ Context: Agent Editor, items picker, Arena↔Atlas sync, flavor media, and playe
 - Any upcoming UX changes that require additional asset or data restructuring?
 
 
+### Atlas Fine Pan Controls & Display Header (2025-10-22)
+
+**Highlights:**
+- Added a dedicated square-count input tied to the "Fine" pan toggle so DMs can define exact grid movement without leaving the Arena.
+- Fine pans now translate the chosen square count into pixel offsets, preventing unintended zoom/resize effects in Atlas Encounters.
+- Persist fine-pan preferred distance alongside other viewport settings; autosave restores the custom value on reload.
+- Player display (port 3001) banner now stacks an enlarged map title with the active turn label for better table visibility.
+
+**Follow-Up:**
+- Investigate intermittent start-combat failures when the Arena shows no combatants despite active Atlas tokens (likely sync edge case).
