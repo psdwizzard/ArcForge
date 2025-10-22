@@ -201,6 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = state.payload.grid;
     const cellSize = grid?.cell_px || 50;
     const activeTokenId = state.payload?.currentTurn?.tokenId || state.payload?.currentTurn?.atlasTokenId || null;
+    const activeCombatantId = state.payload?.currentTurn?.combatantId || null;
     const showHealthRings = state.payload?.tokenSettings?.showEnemyHealthColors !== false;
 
     tokens.forEach(token => {
@@ -225,7 +226,8 @@ document.addEventListener('DOMContentLoaded', () => {
         : defaultRingColor;
       const ringLineWidth = Math.max(4, tokenRadius * 0.18);
 
-      const isActiveToken = Boolean(activeTokenId) && (token.id === activeTokenId || token.atlasTokenId === activeTokenId);
+      const isActiveToken = (Boolean(activeTokenId) && (token.id === activeTokenId || token.atlasTokenId === activeTokenId))
+        || (Boolean(activeCombatantId) && token.combatantId === activeCombatantId);
       if (isActiveToken) {
         ctx.save();
         const glowRadius = tokenRadius + Math.max(10, tokenRadius * 0.25);

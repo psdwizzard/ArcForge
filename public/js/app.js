@@ -1308,6 +1308,74 @@ function getMovementAxis(direction) {
     }
 }
 
+function findAtlasTokenForCombatant(combatant) {
+    if (!combatant || !atlasMapState?.encounter) {
+        return null;
+    }
+
+    const pending = atlasMapState.encounter.pending || [];
+    const candidates = [];
+
+    if (combatant.atlasTokenId) {
+        candidates.push(entry => entry.id === combatant.atlasTokenId);
+        candidates.push(entry => entry.atlasTokenId === combatant.atlasTokenId);
+    }
+    if (combatant.id) {
+        candidates.push(entry => entry.combatantId === combatant.id);
+        candidates.push(entry => entry.atlasTokenId === combatant.id);
+        candidates.push(entry => entry.id === combatant.id);
+    }
+
+    for (const matcher of candidates) {
+        const match = pending.find(matcher);
+        if (match) {
+            if (!match.combatantId && combatant.id) {
+                match.combatantId = combatant.id;
+            }
+            if (!match.atlasTokenId && combatant.atlasTokenId) {
+                match.atlasTokenId = combatant.atlasTokenId;
+            }
+            return match;
+        }
+    }
+
+    const displayTokens = atlasMapState.lastDisplayState?.tokens || [];
+    if (displayTokens.length === 0) {
+        return null;
+    }
+
+    const displayMatch = displayTokens.find(token => {
+        if (combatant.atlasTokenId && (token.atlasTokenId === combatant.atlasTokenId || token.id === combatant.atlasTokenId)) {
+            return true;
+        }
+        if (combatant.id && (token.combatantId === combatant.id || token.atlasTokenId === combatant.id || token.id === combatant.id)) {
+            return true;
+        }
+        return false;
+    });
+
+    if (!displayMatch) {
+        return null;
+    }
+
+    const entryId = displayMatch.atlasTokenId || displayMatch.id || combatant.atlasTokenId || `atlas-${displayMatch.combatantId || combatant.id || Date.now()}`;
+    const reconstructed = {
+        id: entryId,
+        name: displayMatch.name || combatant.name || 'Unknown',
+        source: 'display-sync',
+        payload: null,
+        imagePath: displayMatch.imagePath || combatant.imagePath || null,
+        placed: true,
+        visible: displayMatch.visible !== false,
+        position: { x: displayMatch.x, y: displayMatch.y, mapId: displayMatch.mapId },
+        atlasTokenId: entryId,
+        combatantId: displayMatch.combatantId || combatant.id || null
+    };
+
+    pending.push(reconstructed);
+    return reconstructed;
+}
+
 // Render combatants list
 function renderCombatantsList() {
     const container = document.getElementById('combatants-list');
@@ -1847,19 +1915,17 @@ function createCombatantCard(combatant, isCurrentTurn) {
     const typeLabel = getTypeDisplayName(combatant.type);
 
     let mapControlsHTML = '';
-    if (combatant.atlasTokenId && Array.isArray(atlasMapState?.encounter?.pending)) {
-        const linkedAtlasToken = atlasMapState.encounter.pending.find(entry => entry.id === combatant.atlasTokenId);
-        if (linkedAtlasToken && linkedAtlasToken.position) {
-            mapControlsHTML = `
-                <div class="combatant-map-controls" role="group" aria-label="Move token on map">
-                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token up" aria-label="Move token up" onclick="nudgeCombatantToken('${combatant.id}', 'up')">&uarr;</button>
-                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token down" aria-label="Move token down" onclick="nudgeCombatantToken('${combatant.id}', 'down')">&darr;</button>
-                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token left" aria-label="Move token left" onclick="nudgeCombatantToken('${combatant.id}', 'left')">&larr;</button>
-                    <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token right" aria-label="Move token right" onclick="nudgeCombatantToken('${combatant.id}', 'right')">&rarr;</button>
-                    <span class="combatant-map-counter" id="combatant-move-count-${combatant.id}" aria-live="polite" title="Squares moved this turn">${getCombatantMovementCount(combatant.id)}</span>
-                </div>
-            `;
-        }
+    const linkedAtlasToken = findAtlasTokenForCombatant(combatant);
+    if (linkedAtlasToken && linkedAtlasToken.position) {
+        mapControlsHTML = `
+            <div class="combatant-map-controls" role="group" aria-label="Move token on map">
+                <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token up" aria-label="Move token up" onclick="nudgeCombatantToken('${combatant.id}', 'up')">&uarr;</button>
+                <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token down" aria-label="Move token down" onclick="nudgeCombatantToken('${combatant.id}', 'down')">&darr;</button>
+                <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token left" aria-label="Move token left" onclick="nudgeCombatantToken('${combatant.id}', 'left')">&larr;</button>
+                <button type="button" class="btn btn-small btn-secondary combatant-map-move" title="Move token right" aria-label="Move token right" onclick="nudgeCombatantToken('${combatant.id}', 'right')">&rarr;</button>
+                <span class="combatant-map-counter" id="combatant-move-count-${combatant.id}" aria-live="polite" title="Squares moved this turn">${getCombatantMovementCount(combatant.id)}</span>
+            </div>
+        `;
     }
 
     const initiativeRollValue = getInitiativeRollValue(combatant);
@@ -4482,9 +4548,14 @@ function placeEnemyToken(rawMapX, rawMapY) {
 async function addPlacedEnemyToCombat(entry) {
     // Check if this enemy has already been added to combat
     if (window.encounterState && window.encounterState.combatants) {
-        const existing = window.encounterState.combatants.find(c => c.atlasTokenId === entry.id);
+        const existing = window.encounterState.combatants.find(c => c.atlasTokenId === entry.id || c.id === entry.combatantId);
         if (existing) {
-            console.log('[Atlas] Enemy already in combat, skipping:', entry.name);
+            console.log('[Atlas] Enemy already in combat, syncing metadata:', entry.name);
+            entry.combatantId = existing.id;
+            entry.atlasTokenId = entry.id;
+            if (!existing.atlasTokenId) {
+                existing.atlasTokenId = entry.id;
+            }
             return;
         }
     }
@@ -4644,10 +4715,30 @@ async function addPlacedEnemyToCombat(entry) {
         });
 
         if (response.ok) {
+            let created = null;
+            try {
+                created = await response.json();
+            } catch (e) {
+                console.warn('[Atlas] Unable to parse combatant response JSON:', e);
+            }
+
+            if (created?.id) {
+                entry.combatantId = created.id;
+            }
+            entry.atlasTokenId = entry.id;
+
             // Trigger a refresh of the combat view
             if (typeof window.loadCombatants === 'function') {
                 await window.loadCombatants();
+            } else if (created && window.encounterState?.combatants) {
+                const existingIndex = window.encounterState.combatants.findIndex(c => c.id === created.id);
+                if (existingIndex === -1) {
+                    window.encounterState.combatants.push(created);
+                } else {
+                    window.encounterState.combatants[existingIndex] = created;
+                }
             }
+
             if (typeof updateSyncDebugHUD === 'function') {
                 updateSyncDebugHUD('added');
             }
@@ -6152,12 +6243,14 @@ function nudgeCombatantToken(combatantId, direction) {
         return;
     }
 
-    const pending = atlasMapState.encounter.pending || [];
-    const token = pending.find(entry => entry.id === combatant.atlasTokenId);
+    const token = findAtlasTokenForCombatant(combatant);
     if (!token || !token.position) {
         console.warn('[Atlas] Linked token not placed on map for combatant:', combatantId);
         return;
     }
+
+    token.combatantId = token.combatantId || combatant.id;
+    token.atlasTokenId = token.atlasTokenId || token.id;
 
     const cellSize = getAtlasGridCellSize();
     if (!cellSize) {

@@ -413,6 +413,7 @@ function buildDisplayState() {
 
         const combatantMatch = combatantsByAtlasId.get(enemy.id)
           || (enemy.atlasTokenId ? combatantsByAtlasId.get(enemy.atlasTokenId) : null)
+          || (enemy.combatantId ? currentEncounter.combatants.find(c => c.id === enemy.combatantId) : null)
           || combatantsByName.get(enemy.name);
 
         let hpCurrent = null;
@@ -451,7 +452,7 @@ function buildDisplayState() {
         const tokenRecord = {
           id: enemy.id,
           atlasTokenId: enemy.atlasTokenId || enemy.id,
-          combatantId: combatantMatch?.id || null,
+          combatantId: combatantMatch?.id || enemy.combatantId || null,
           name: enemy.name,
           x: enemy.position.x,
           y: enemy.position.y,

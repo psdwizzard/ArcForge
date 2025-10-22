@@ -703,7 +703,8 @@ async function saveCurrentEncounter() {
                     y: Number(entry.position.y.toFixed(2)),
                     mapId: entry.position.mapId
                 } : null,
-                atlasTokenId: entry.id  // Link to the placed token
+                atlasTokenId: entry.id,  // Link to the placed token
+                combatantId: entry.combatantId || null
             };
         });
         sessionState.currentEncounter.placedEnemies = placedEnemies;
@@ -819,8 +820,20 @@ function syncCombatantsToAtlas() {
         }
 
         // Check if this combatant is already in the pending list
-        const existingEntry = pending.find(entry => entry.atlasTokenId === combatant.id || entry.name === combatant.name);
+        const existingEntry = pending.find(entry => {
+            const entryId = entry.id || entry.atlasTokenId;
+            const entryTokenId = entry.atlasTokenId || entry.id;
+            return entryId === combatant.atlasTokenId
+                || entryTokenId === combatant.atlasTokenId
+                || entryTokenId === combatant.id
+                || entry.combatantId === combatant.id
+                || entry.name === combatant.name;
+        });
         if (existingEntry) {
+            existingEntry.combatantId = combatant.id;
+            if (!existingEntry.atlasTokenId && combatant.atlasTokenId) {
+                existingEntry.atlasTokenId = combatant.atlasTokenId;
+            }
             console.log('[Session] Combatant already exists in pending:', combatant.name);
             return;  // Already exists, skip
         }
@@ -855,15 +868,17 @@ function syncCombatantsToAtlas() {
             }
         }
         
+        const atlasTokenId = combatant.atlasTokenId || combatant.id;
         const newEntry = {
-            id: combatant.atlasTokenId || `atlas-${combatant.id}`,
+            id: atlasTokenId || `atlas-${combatant.id}`,
             name: combatant.name,
             source: combatant.sourceId ? 'library' : 'custom',
             payload: fullPayload,
             imagePath: imagePath,
             placed: false,  // Not placed on map yet
             position: null,
-            atlasTokenId: combatant.id
+            atlasTokenId: atlasTokenId,
+            combatantId: combatant.id
         };
 
         pending.push(newEntry);
