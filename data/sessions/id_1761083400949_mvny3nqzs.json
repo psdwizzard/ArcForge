@@ -1,0 +1,211 @@
+{
+  "id": "id_1761083400949_mvny3nqzs",
+  "name": "s2",
+  "description": "",
+  "createdAt": "2025-10-21T21:50:00.949Z",
+  "encounters": [
+    {
+      "id": "id_1761083417730_csz5aa2ll",
+      "name": "e12",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-21T21:50:17.730Z",
+      "combatants": [
+        {
+          "id": "combatant-1761083419160-2oegbg2di",
+          "name": "Todd",
+          "type": "p",
+          "initiative": 18,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356841744-226858974.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 52,
+            "max": 52,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1761083452257-n2ep2c5mk",
+          "name": "Pig - 01",
+          "type": "enemy",
+          "initiative": 16,
+          "dexModifier": 4,
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1761083436024-0kf6ul",
+          "hp": {
+            "current": 0,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1761083420557-3pp98ul6r",
+          "name": "MeanGrean",
+          "type": "p",
+          "initiative": 6,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760356807448-51809731.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 43,
+            "max": 43,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1761083455670-pncv446wh",
+          "name": "Acolyte - 01",
+          "type": "enemy",
+          "initiative": 1,
+          "dexModifier": 0,
+          "imagePath": "/data/creatures/library/tokens/humanoid/Acolyte.webp",
+          "sourceId": "CHEUjiYrVM9X0vIT",
+          "atlasTokenId": "enc-enemy-1761083448380-odl86q",
+          "hp": {
+            "current": 2,
+            "max": 9,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [
+            {
+              "name": "Club",
+              "attackBonus": 1,
+              "damageRoll": "1d4+0",
+              "description": "<p><em>Melee Weapon Attack:</em><strong>+2 to hit,</strong>, <strong>5 ft.,</strong> one target. Hit: <strong>2 (1d4) <em>bludgeoning damage</em></strong>.</p>"
+            }
+          ],
+          "specialAbilities": [
+            {
+              "name": "Light",
+              "description": "<p>You touch one object that is no larger than 10 feet in any dimension. Until the spell ends, the object sheds bright light in a 20-foot radius and dim light for an additional 20 feet. The light can be colored as you like. Completely covering the object with something opaque blocks the light. The spell ends if you cast it again or dismiss it as an action.</p><p>If you target an object held or worn by a hostile creature, that creature must succeed on a Dexterity saving throw to avoid the spell.</p>"
+            },
+            {
+              "name": "Sacred Flame",
+              "description": "<p>Flame-like radiance descends on a creature that you can see within range. The target must succeed on a Dexterity saving throw or take 1d8 radiant damage. The target gains no benefit from cover for this saving throw.</p><p>The spell's damage increases by 1d8 when you reach 5th level (2d8), 11th level (3d8), and 17th level (4d8).</p>"
+            },
+            {
+              "name": "Thaumaturgy",
+              "description": "<p>You create one of the following magical effects within range:</p>\n<ul>\n<li>Your voice booms up to three times as loud as normal for 1 minute.</li>\n<li>You cause flames to flicker, brighten, dim, or change color for 1 minute.</li>\n<li>You cause harmless tremors in the ground for 1 minute.</li>\n<li>You create a sound that originates from a point of your choice within range.</li>\n<li>You cause an unlocked door or window to fly open or slam shut.</li>\n<li>You alter the appearance of your eyes for 1 minute.</li>\n</ul>\n<p>If you cast this spell multiple times, you can have up to three of its 1-minute effects active at a time, and you can dismiss such an effect as an action.</p>"
+            },
+            {
+              "name": "Bless",
+              "description": "<p>You bless up to three creatures of your choice within range. Whenever a target makes an attack roll or a saving throw before the spell ends, the target can roll 1d4 and add the number rolled to the attack roll or saving throw.</p>\n<p><strong>Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, you can target one additional creature for each slot level above 1st.</p>"
+            },
+            {
+              "name": "Sanctuary",
+              "description": "<p>You ward a creature within range against attack. Until the spell ends, any creature who targets the warded creature with an attack or a harmful spell must first make a Wisdom saving throw. On a failed save, the creature must choose a new target or lose the attack or spell. This spell doesn't protect the warded creature from area effects, such as the explosion of a Fireball.</p><p>If the warded creature makes an attack or casts a spell that affects an enemy creature, this spell ends.</p>"
+            },
+            {
+              "name": "Cure Wounds",
+              "description": "<p>A creature you touch regains a number of hit points equal to 1d8 + your spellcasting ability modifier. This spell has no effect on undead or constructs.</p><p><strong>Higher Levels.</strong> When you cast this spell using a spell slot of 2nd level or higher, the healing increases by 1d8 for each slot level above 1st.</p>"
+            }
+          ]
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 3,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1761083436024-0kf6ul",
+          "name": "Pig - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760462067060",
+                "name": "puckYou",
+                "attackBonus": 50,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 1129.02,
+            "y": 1679.76,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1761083436024-0kf6ul"
+        },
+        {
+          "id": "enc-enemy-1761083448380-odl86q",
+          "name": "Acolyte - 01",
+          "source": "library",
+          "payload": {
+            "id": "CHEUjiYrVM9X0vIT"
+          },
+          "imagePath": "/data/creatures/library/tokens/humanoid/Acolyte.webp",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 302.9,
+            "y": 1789.91,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1761083448380-odl86q"
+        }
+      ]
+    }
+  ]
+}

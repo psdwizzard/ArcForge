@@ -1,8 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
   const statusEl = document.getElementById('display-status');
+  const statusTextEl = statusEl ? statusEl.querySelector('.status-text') : null;
   const canvas = document.getElementById('display-canvas');
   const ctx = canvas.getContext('2d');
   const DPR = window.devicePixelRatio || 1;
+  const initiativeRail = document.getElementById('initiative-rail');
 
   const state = {
     payload: null,
@@ -13,9 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   function setStatus(text, isConnected) {
-    statusEl.textContent = text;
-    statusEl.classList.toggle('connected', isConnected);
-    statusEl.classList.toggle('disconnected', !isConnected);
+    if (statusTextEl) {
+      statusTextEl.textContent = text;
+    }
+    if (statusEl) {
+      statusEl.setAttribute('aria-label', text);
+      statusEl.classList.toggle('connected', Boolean(isConnected));
+      statusEl.classList.toggle('disconnected', !isConnected);
+    }
   }
 
   function resizeCanvas() {
@@ -30,6 +37,91 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   window.addEventListener('resize', resizeCanvas);
+
+  function getInitialLetter(name) {
+    if (!name || typeof name !== 'string') {
+      return '?';
+    }
+    const trimmed = name.trim();
+    if (!trimmed) {
+      return '?';
+    }
+    const parts = trimmed.split(/\s+/);
+    if (parts.length === 1) {
+      return parts[0].charAt(0).toUpperCase();
+    }
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+  }
+
+  function renderInitiativeRail(payload) {
+    if (!initiativeRail) {
+      return;
+    }
+
+    const entries = Array.isArray(payload?.initiativeOrder) ? payload.initiativeOrder : [];
+    if (!entries.length) {
+      initiativeRail.classList.add('hidden');
+      initiativeRail.setAttribute('aria-hidden', 'true');
+      initiativeRail.replaceChildren();
+      return;
+    }
+
+    const total = entries.length;
+    const fragment = document.createDocumentFragment();
+
+    entries.forEach((entry, index) => {
+      const slot = document.createElement('div');
+      slot.className = 'initiative-slot';
+      slot.setAttribute('role', 'listitem');
+      slot.setAttribute('aria-label', `${entry?.name || 'Combatant'} (${index + 1} of ${total})`);
+      slot.title = entry?.name || 'Unknown combatant';
+
+      if (entry?.isEnemy) {
+        slot.classList.add('initiative-slot--enemy');
+      } else {
+        slot.classList.add('initiative-slot--ally');
+      }
+      if (entry?.isCurrent) {
+        slot.classList.add('initiative-slot--current');
+      }
+      if (entry?.isDead) {
+        slot.classList.add('initiative-slot--dead');
+      }
+      if (entry?.isVisible === false) {
+        slot.classList.add('initiative-slot--dim');
+      }
+
+      const avatar = document.createElement('div');
+      avatar.className = 'initiative-avatar';
+
+      const appendFallback = () => {
+        avatar.innerHTML = '';
+        const fallback = document.createElement('div');
+        fallback.className = 'initiative-fallback';
+        fallback.textContent = getInitialLetter(entry?.name);
+        avatar.appendChild(fallback);
+      };
+
+      if (entry?.imagePath) {
+        const img = new Image();
+        img.src = entry.imagePath;
+        img.alt = entry?.name || 'Combatant token';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.addEventListener('error', appendFallback, { once: true });
+        avatar.appendChild(img);
+      } else {
+        appendFallback();
+      }
+
+      slot.appendChild(avatar);
+      fragment.appendChild(slot);
+    });
+
+    initiativeRail.setAttribute('aria-hidden', 'false');
+    initiativeRail.classList.remove('hidden');
+    initiativeRail.replaceChildren(fragment);
+  }
 
   function draw() {
     const width = canvas.width / DPR;
@@ -400,10 +492,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (payload?.currentTurn && payload.currentTurn.visible !== false) {
       if (currentTurnBanner) currentTurnBanner.style.display = 'flex';
-      if (currentTurnName) currentTurnName.textContent = payload.currentTurn.name || '—';
+      if (currentTurnName) currentTurnName.textContent = payload.currentTurn.name || '\\u2014';
     } else {
       if (currentTurnBanner) currentTurnBanner.style.display = 'none';
     }
+
+    renderInitiativeRail(payload);
 
     if (!payload?.map?.url) {
       state.image = null;

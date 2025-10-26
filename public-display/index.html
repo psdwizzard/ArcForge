@@ -7,14 +7,18 @@
   <link rel="stylesheet" href="./css/display.css">
 </head>
 <body>
-  <div id="display-status" class="status disconnected">Connecting...</div>
+  <div id="display-status" class="status-indicator disconnected" role="status" aria-live="polite" aria-label="Display not connected">
+    <span class="status-dot"></span>
+    <span class="status-text sr-only">Display not connected</span>
+  </div>
   <div id="map-info-banner" class="map-info-banner">
     <div id="map-name-header" class="map-name-header">No Map Loaded</div>
     <div id="current-turn-banner" class="current-turn-banner" style="display: none;">
       <span class="turn-label">Current Turn:</span>
-      <span id="current-turn-name" class="turn-name">&amp;mdash;</span>
+      <span id="current-turn-name" class="turn-name">&mdash;</span>
     </div>
   </div>
+  <div id="initiative-rail" class="initiative-rail hidden" role="list" aria-label="Initiative order"></div>
   <div id="root">
     <canvas id="display-canvas" width="1920" height="1080">Your browser does not support the canvas element.</canvas>
   </div>
@@ -22,5 +26,3 @@
   <script src="./js/display.js"></script>
 </body>
 </html>
-
-

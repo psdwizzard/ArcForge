@@ -1,8 +1,8 @@
 {
   "display": {
     "resolution": {
-      "w": 1366,
-      "h": 768
+      "w": 2560,
+      "h": 1440
     },
     "physical": {
       "diagonal_in": 8,
@@ -18,12 +18,15 @@
     },
     "viewport": {
       "fit": "pixel",
-      "zoom": 1,
-      "gridZoom": 0.4,
+      "zoom": 1.5,
+      "gridZoom": 0.3,
       "offset": {
-        "x": 511.5,
-        "y": -768
+        "x": 256,
+        "y": -828.6300000000001
       }
+    },
+    "tokens": {
+      "showEnemyHealthColors": true
     }
   },
   "active_map_id": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc",
@@ -31,196 +34,10 @@
     "startingAreas": {
       "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc": {
         "x": 0,
-        "y": 1536,
+        "y": 1280,
         "zoom": 1.5
       }
     },
-    "placedEnemies": [
-      {
-        "id": "enc-enemy-1760824509600-q1o4r8",
-        "name": "Pig - 02",
-        "source": "custom",
-        "payload": {
-          "id": "char-1760356699440",
-          "agentType": "e",
-          "name": "Pig",
-          "race": "human",
-          "class": "rogue",
-          "level": 8,
-          "abilities": {
-            "str": 17,
-            "dex": 18,
-            "con": 17,
-            "int": 15,
-            "wis": 12,
-            "cha": 19
-          },
-          "hp": 43,
-          "ac": 10,
-          "speed": 30,
-          "skills": [],
-          "attacks": [
-            {
-              "id": "attack-1760391803246",
-              "name": "bite",
-              "attackBonus": 6,
-              "damageDice": "1d6",
-              "damageType": "piercing"
-            },
-            {
-              "id": "attack-1760397315751",
-              "name": "puck",
-              "attackBonus": 2,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            }
-          ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
-        },
-        "placed": true,
-        "visible": true,
-        "position": {
-          "x": 1229.99,
-          "y": 1597.15,
-          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
-        }
-      },
-      {
-        "id": "enc-enemy-1760824514897-dv6cbg",
-        "name": "Adult Black Dragon - 01",
-        "source": "library",
-        "payload": {
-          "id": "M4eX4Mu5IHCr3TMf"
-        },
-        "placed": true,
-        "visible": true,
-        "position": {
-          "x": 679.25,
-          "y": 1927.59,
-          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
-        }
-      },
-      {
-        "id": "enc-enemy-1760824462734-bz6inz",
-        "name": "Pig - 01",
-        "source": "custom",
-        "payload": null,
-        "placed": true,
-        "visible": true,
-        "position": {
-          "x": 165.22,
-          "y": 1854.16,
-          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
-        }
-      },
-      {
-        "id": "enc-enemy-1760824181854-nofy3z",
-        "name": "Aboleth - 01",
-        "source": "library",
-        "payload": {
-          "id": "shhHtE7b92PefCWB"
-        },
-        "placed": true,
-        "visible": true,
-        "position": {
-          "x": 348.8,
-          "y": 1780.73,
-          "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
-        }
-      },
-      {
-        "id": "enc-enemy-1760827229138-j3m0d1",
-        "name": "Pig",
-        "source": "custom",
-        "payload": {
-          "id": "char-1760356699440",
-          "agentType": "e",
-          "name": "Pig",
-          "race": "human",
-          "class": "rogue",
-          "level": 8,
-          "abilities": {
-            "str": 17,
-            "dex": 18,
-            "con": 17,
-            "int": 15,
-            "wis": 12,
-            "cha": 19
-          },
-          "hp": 43,
-          "ac": 10,
-          "speed": 30,
-          "skills": [],
-          "attacks": [
-            {
-              "id": "attack-1760391803246",
-              "name": "bite",
-              "attackBonus": 6,
-              "damageDice": "1d6",
-              "damageType": "piercing"
-            },
-            {
-              "id": "attack-1760397315751",
-              "name": "puck",
-              "attackBonus": 2,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            }
-          ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
-        },
-        "placed": false,
-        "visible": true,
-        "position": null
-      },
-      {
-        "id": "enc-enemy-1760827229880-yb4f9s",
-        "name": "Pig",
-        "source": "custom",
-        "payload": {
-          "id": "char-1760356699440",
-          "agentType": "e",
-          "name": "Pig",
-          "race": "human",
-          "class": "rogue",
-          "level": 8,
-          "abilities": {
-            "str": 17,
-            "dex": 18,
-            "con": 17,
-            "int": 15,
-            "wis": 12,
-            "cha": 19
-          },
-          "hp": 43,
-          "ac": 10,
-          "speed": 30,
-          "skills": [],
-          "attacks": [
-            {
-              "id": "attack-1760391803246",
-              "name": "bite",
-              "attackBonus": 6,
-              "damageDice": "1d6",
-              "damageType": "piercing"
-            },
-            {
-              "id": "attack-1760397315751",
-              "name": "puck",
-              "attackBonus": 2,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            }
-          ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
-        },
-        "placed": false,
-        "visible": true,
-        "position": null
-      }
-    ]
+    "placedEnemies": []
   }
 }

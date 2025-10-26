@@ -134,6 +134,83 @@ function autoSaveEncounter() {
   }
 }
 
+function hydrateCurrentEncounterFromSource(encounter) {
+  const previousState = currentEncounter || {
+    combatants: [],
+    currentTurnIndex: 0,
+    roundNumber: 1,
+    encounterId: null,
+    combatActive: false
+  };
+
+  if (!encounter) {
+    currentEncounter = {
+      combatants: [],
+      currentTurnIndex: 0,
+      roundNumber: 1,
+      encounterId: null,
+      combatActive: false
+    };
+    return;
+  }
+
+  let safeEncounter;
+  try {
+    safeEncounter = JSON.parse(JSON.stringify(encounter));
+  } catch (error) {
+    console.error('[Encounter] Failed to clone encounter for hydration:', error);
+    safeEncounter = encounter;
+  }
+
+  const hasCombatants = Array.isArray(safeEncounter.combatants);
+  const sourceCombatants = hasCombatants ? safeEncounter.combatants : previousState.combatants;
+
+  const sanitizedCombatants = Array.isArray(sourceCombatants)
+    ? sourceCombatants.map((combatant) => {
+        if (!combatant || typeof combatant !== 'object') {
+          return combatant;
+        }
+        const copy = { ...combatant };
+        copy.hp = combatant.hp ? { ...combatant.hp } : { current: 0, max: 0, temp: 0 };
+        copy.deathSaves = combatant.deathSaves ? { ...combatant.deathSaves } : { successes: 0, failures: 0 };
+        copy.statusEffects = Array.isArray(combatant.statusEffects)
+          ? combatant.statusEffects.map((effect) => (effect && typeof effect === 'object' ? { ...effect } : effect))
+          : [];
+        return copy;
+      })
+    : [];
+
+  const hasIndex = Number.isInteger(safeEncounter.currentTurnIndex);
+  let currentTurnIndex = hasIndex ? safeEncounter.currentTurnIndex : previousState.currentTurnIndex || 0;
+
+  if (currentTurnIndex < 0) {
+    currentTurnIndex = 0;
+  }
+  if (currentTurnIndex >= sanitizedCombatants.length) {
+    currentTurnIndex = sanitizedCombatants.length > 0 ? sanitizedCombatants.length - 1 : 0;
+  }
+
+  const hasRound = Number.isInteger(safeEncounter.roundNumber) && safeEncounter.roundNumber > 0;
+  const roundNumber = hasRound
+    ? safeEncounter.roundNumber
+    : (previousState.roundNumber && previousState.roundNumber > 0 ? previousState.roundNumber : 1);
+
+  const encounterId = safeEncounter.encounterId || safeEncounter.id || previousState.encounterId || null;
+  const combatActive = Object.prototype.hasOwnProperty.call(safeEncounter, 'combatActive')
+    ? Boolean(safeEncounter.combatActive)
+    : Boolean(previousState.combatActive);
+
+  currentEncounter = {
+    ...previousState,
+    ...safeEncounter,
+    combatants: sanitizedCombatants,
+    currentTurnIndex,
+    roundNumber,
+    encounterId,
+    combatActive
+  };
+}
+
 function applyEffects(combatant, timing) {
   if (!combatant.statusEffects) return;
 
@@ -381,10 +458,35 @@ function buildDisplayState() {
 
   // Get visible enemy tokens from current encounter
   const tokens = [];
+  const tokensByCombatantId = new Map();
+  const tokensByAtlasId = new Map();
   const toNumber = (value) => {
     const num = Number(value);
     return Number.isFinite(num) ? num : null;
   };
+  const normalizeImagePath = (value) => {
+    if (!value) return null;
+    if (typeof value !== 'string') return null;
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('/')) {
+      return trimmed;
+    }
+    if (trimmed.startsWith('./')) {
+      return normalizeImagePath(trimmed.slice(2));
+    }
+    if (trimmed.startsWith('uploads/')) {
+      return `/${trimmed}`;
+    }
+    if (trimmed.startsWith('data/')) {
+      return `/${trimmed}`;
+    }
+    return `/data/creatures/library/${trimmed}`;
+  };
+  const enemyTypeSet = new Set(['enemy', 'monster', 'npc', 'e']);
   const combatantsByAtlasId = new Map();
   const combatantsByName = new Map();
   if (currentEncounter?.combatants?.length) {
@@ -467,6 +569,12 @@ function buildDisplayState() {
         };
 
         tokens.push(tokenRecord);
+        if (tokenRecord.combatantId) {
+          tokensByCombatantId.set(tokenRecord.combatantId, tokenRecord);
+        }
+        if (tokenRecord.atlasTokenId) {
+          tokensByAtlasId.set(tokenRecord.atlasTokenId, tokenRecord);
+        }
       }
     });
   }
@@ -496,6 +604,62 @@ function buildDisplayState() {
     }
   }
 
+  const initiativeOrder = [];
+  if (currentEncounter?.combatants?.length) {
+    currentEncounter.combatants.forEach((combatant, index) => {
+      const type = (combatant.type || '').toLowerCase();
+      const isEnemy = enemyTypeSet.has(type);
+      const linkedEnemy = currentSessionEncounter?.placedEnemies?.find((enemy) => {
+        if (!enemy) return false;
+        if (enemy.combatantId && enemy.combatantId === combatant.id) return true;
+        if (combatant.atlasTokenId && (enemy.atlasTokenId === combatant.atlasTokenId || enemy.id === combatant.atlasTokenId)) return true;
+        if (enemy.id === combatant.atlasTokenId) return true;
+        if (enemy.name && combatant.name && enemy.name === combatant.name) return true;
+        return false;
+      });
+      const tokenMatch = tokensByCombatantId.get(combatant.id)
+        || (combatant.atlasTokenId ? tokensByAtlasId.get(combatant.atlasTokenId) : null);
+
+      const isVisible = linkedEnemy ? linkedEnemy.visible !== false : Boolean(tokenMatch || !isEnemy);
+      if (!isVisible && isEnemy) {
+        return;
+      }
+
+      let imagePath = combatant.imagePath
+        || combatant.tokenImage
+        || combatant.portraitImage
+        || linkedEnemy?.imagePath
+        || linkedEnemy?.payload?.imagePath
+        || linkedEnemy?.payload?.tokenImage
+        || linkedEnemy?.payload?.portraitImage
+        || tokenMatch?.imagePath
+        || null;
+
+      imagePath = normalizeImagePath(imagePath);
+
+      const hpCurrent = toNumber(combatant.hp?.current ?? combatant.hp?.value ?? combatant.hp);
+      const hpMax = toNumber(combatant.hp?.max);
+      const hpPercent = (hpCurrent !== null && hpMax !== null && hpMax > 0)
+        ? Math.max(0, Math.min(100, Math.round((hpCurrent / hpMax) * 100)))
+        : null;
+
+      initiativeOrder.push({
+        id: combatant.id,
+        name: combatant.name,
+        type: combatant.type || null,
+        imagePath,
+        isEnemy,
+        isCurrent: Boolean(currentEncounter.combatActive && index === currentEncounter.currentTurnIndex),
+        isVisible,
+        atlasTokenId: combatant.atlasTokenId || linkedEnemy?.atlasTokenId || linkedEnemy?.id || tokenMatch?.atlasTokenId || null,
+        tokenId: linkedEnemy?.id || linkedEnemy?.atlasTokenId || tokenMatch?.id || combatant.atlasTokenId || null,
+        hpPercent,
+        isDead: hpCurrent !== null ? hpCurrent <= 0 : false,
+        order: index
+      });
+    });
+  }
+
   return {
     type: 'DISPLAY_STATE',
     connected: displayConnectionCount > 0,
@@ -521,6 +685,7 @@ function buildDisplayState() {
       showEnemyHealthColors: atlasSettings.display?.tokens?.showEnemyHealthColors !== false
     },
     currentTurn: currentTurn,
+    initiativeOrder: initiativeOrder,
     flavorMedia: activeFlavorMedia
   };
 }
@@ -1309,7 +1474,8 @@ app.get('/api/encounter/:id', (req, res) => {
     return res.status(404).json({ error: 'Encounter not found' });
   }
 
-  currentEncounter = JSON.parse(fs.readFileSync(encounterPath, 'utf8'));
+  const fileEncounter = JSON.parse(fs.readFileSync(encounterPath, 'utf8'));
+  hydrateCurrentEncounterFromSource(fileEncounter);
   res.json(currentEncounter);
 });
 
@@ -1650,6 +1816,7 @@ app.get('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
 
   // Update the current session encounter for display
   currentSessionEncounter = encounter;
+  hydrateCurrentEncounterFromSource(encounter);
   broadcastDisplayState();
 
   res.json(encounter);
@@ -1677,6 +1844,7 @@ app.put('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
 
   // Update the current session encounter for display
   currentSessionEncounter = session.encounters[encounterIndex];
+  hydrateCurrentEncounterFromSource(currentSessionEncounter);
 
   fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
 
