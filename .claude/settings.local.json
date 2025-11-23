@@ -15,7 +15,14 @@
       "Bash(git push)",
       "Read(//h/**)",
       "Bash(cd:*)",
-      "Bash(test:*)"
+      "Bash(test:*)",
+      "Bash(git config --global user.name \"psdwizzard\")",
+      "Bash(git config --global user.email \"kloebenberg@gmail.com\")",
+      "Bash(cmd //c kill-server.bat)",
+      "Bash(cmd //c \"C:\\Users\\Rabbit\\Documents\\ArcForge\\kill-server.bat\")",
+      "Bash(cat \"C:\\Users\\Rabbit\\Documents\\ArcForge\\data\\maps.json\")",
+      "Bash(cmd //c start.bat)",
+      "Bash(npm run dev)"
     ],
     "deny": [],
     "ask": []

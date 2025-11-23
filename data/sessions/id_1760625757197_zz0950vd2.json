@@ -1027,6 +1027,16 @@
           "type": "sound"
         }
       ]
+    },
+    {
+      "id": "id_1760872397463_cxtgabzli",
+      "name": "s2",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-19T11:13:17.463Z",
+      "combatants": [],
+      "roundNumber": 1,
+      "currentTurnIndex": 0
     }
   ]
 }

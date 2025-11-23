@@ -992,6 +992,14 @@ app.get('/api/encounter', (req, res) => {
 
 // Add combatant
 app.post('/api/combatants', (req, res) => {
+  try {
+    console.log('[API] POST /api/combatants', {
+      name: req.body?.name,
+      type: req.body?.type,
+      atlasTokenId: req.body?.atlasTokenId,
+      sourceId: req.body?.sourceId
+    });
+  } catch (e) { /* no-op */ }
   const { name, type = 'monster', sourceId = null } = req.body;
   const normalizedType = (type || 'monster').toLowerCase();
   const enemyTypes = ['enemy', 'monster', 'e'];
@@ -1059,6 +1067,9 @@ app.post('/api/combatants', (req, res) => {
   });
 
   autoSaveEncounter();
+  try {
+    console.log('[API] Added combatant:', { id: combatant.id, name: combatant.name, type: combatant.type, initiative: combatant.initiative });
+  } catch (e) { /* no-op */ }
   res.json(combatant);
 });
 
@@ -1796,6 +1807,16 @@ app.post('/api/sessions/:sessionId/encounters', (req, res) => {
   session.encounters.push(encounter);
   fs.writeFileSync(sessionPath, JSON.stringify(session, null, 2));
 
+  // Hydrate server in-memory state to this newly created encounter so
+  // Atlas placements can immediately add to Arena without requiring a load call.
+  try {
+    currentSessionEncounter = encounter;
+    hydrateCurrentEncounterFromSource(encounter);
+    broadcastDisplayState();
+  } catch (e) {
+    console.warn('[Sessions] Failed to hydrate new encounter into server state:', e);
+  }
+
   res.json(encounter);
 });
 
@@ -1837,10 +1858,121 @@ app.put('/api/sessions/:sessionId/encounters/:encounterId', (req, res) => {
     return res.status(404).json({ error: 'Encounter not found' });
   }
 
-  session.encounters[encounterIndex] = {
+  // Merge incoming payload
+  const mergedEncounter = {
     ...session.encounters[encounterIndex],
     ...req.body
   };
+
+  // Ensure arrays exist
+  mergedEncounter.combatants = Array.isArray(mergedEncounter.combatants) ? mergedEncounter.combatants : [];
+
+  // As a safety net, auto-create Arena combatants for any placed Atlas enemies
+  // that haven't been linked/added yet. This covers fresh sessions where
+  // placement happened before Arena was hydrated or the client call failed.
+  try {
+    const placedEnemies = Array.isArray(mergedEncounter.placedEnemies) ? mergedEncounter.placedEnemies : [];
+    const enemyTypeSet = new Set(['enemy', 'monster', 'npc', 'e', 'n']);
+
+    const findImagePath = (enemy) => {
+      let imagePath = enemy.imagePath
+        || enemy.payload?.imagePath
+        || enemy.payload?.tokenImage
+        || enemy.payload?.portraitImage
+        || null;
+      if (imagePath && !String(imagePath).startsWith('/') && !String(imagePath).startsWith('http')) {
+        imagePath = `/data/creatures/library/${imagePath}`;
+      }
+      return imagePath;
+    };
+
+    const coerceNumber = (val, fallback = null) => {
+      const n = Number(val);
+      return Number.isFinite(n) ? n : fallback;
+    };
+
+    placedEnemies.forEach((enemy) => {
+      if (!enemy || enemy.placed !== true) return;
+
+      // Skip if a matching combatant already exists
+      const exists = mergedEncounter.combatants.find((c) => (
+        (enemy.combatantId && c.id === enemy.combatantId)
+        || (enemy.id && c.atlasTokenId === enemy.id)
+      ));
+      if (exists) {
+        // Ensure atlasTokenId linkage
+        if (enemy.id && !exists.atlasTokenId) {
+          exists.atlasTokenId = enemy.id;
+        }
+        return;
+      }
+
+      // Build a minimal combatant record
+      const baseName = String((enemy.name || 'Enemy')).split(' - ')[0].trim();
+      // Count existing enemies with same base name for auto-numbering
+      const existingCount = mergedEncounter.combatants.filter((c) => {
+        const t = (c.type || '').toLowerCase();
+        if (!enemyTypeSet.has(t)) return false;
+        const cBase = String(c.name || '').split(' - ')[0].trim();
+        return cBase === baseName;
+      }).length;
+      const finalName = `${baseName} - ${String(existingCount + 1).padStart(2, '0')}`;
+
+      const hpFromStats = enemy.stats?.hp;
+      const hpCurrent = typeof hpFromStats === 'object'
+        ? coerceNumber(hpFromStats?.current ?? hpFromStats?.max, null)
+        : coerceNumber(enemy.hp, null);
+      const hpMax = typeof hpFromStats === 'object'
+        ? coerceNumber(hpFromStats?.max, null)
+        : coerceNumber(enemy.hp, null);
+      const acValue = coerceNumber(enemy.stats?.ac ?? enemy.ac, 10);
+      const dexMod = coerceNumber(enemy.stats?.dexModifier, 0);
+      const imagePath = findImagePath(enemy);
+
+      const combatant = {
+        id: `combatant-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        name: finalName,
+        type: 'enemy',
+        initiative: 0,
+        dexModifier: dexMod || 0,
+        imagePath: imagePath || null,
+        sourceId: enemy.source === 'library' ? (enemy.payload?.id || null) : null,
+        atlasTokenId: enemy.id || enemy.atlasTokenId || null,
+        hp: {
+          current: hpCurrent ?? 10,
+          max: hpMax ?? 10,
+          temp: 0
+        },
+        ac: acValue,
+        statusEffects: [],
+        deathSaves: { successes: 0, failures: 0 },
+        loot: [],
+        attacks: [],
+        specialAbilities: []
+      };
+
+      mergedEncounter.combatants.push(combatant);
+    });
+
+    // Prune Arena combatants that no longer have a placed token
+    const placedAtlasIds = new Set(
+      placedEnemies.filter(e => e && e.placed && e.position && (e.id || e.atlasTokenId)).map(e => e.id || e.atlasTokenId)
+    );
+    mergedEncounter.combatants = mergedEncounter.combatants.filter((c) => {
+      const t = (c.type || '').toLowerCase();
+      if (!enemyTypeSet.has(t)) {
+        return true; // keep non-enemy (e.g., PCs)
+      }
+      if (!c.atlasTokenId) {
+        return true; // keep enemies not linked to map token
+      }
+      return placedAtlasIds.has(c.atlasTokenId);
+    });
+  } catch (syncErr) {
+    console.warn('[Sessions] Failed to auto-sync placed enemies into combatants:', syncErr);
+  }
+
+  session.encounters[encounterIndex] = mergedEncounter;
 
   // Update the current session encounter for display
   currentSessionEncounter = session.encounters[encounterIndex];

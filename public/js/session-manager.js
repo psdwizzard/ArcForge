@@ -336,9 +336,15 @@ async function handleCreateEncounter(e) {
             sessionState.currentSession.encounters.push(savedEncounter);
             sessionState.encounters = sessionState.currentSession.encounters;
 
-            // Set as current encounter
+            // Set as current encounter and immediately load it via API
+            // This ensures the server hydrates currentSessionEncounter and Arena/Atlas stay in sync
             sessionState.currentEncounter = savedEncounter;
             updateEncounterDisplay();
+            try {
+                await loadEncounter(savedEncounter.id);
+            } catch (err) {
+                console.warn('[Session] Failed to auto-load new encounter:', err);
+            }
 
             // Clear form and refresh list
             e.target.reset();
@@ -485,6 +491,21 @@ async function loadEncounter(encounterId, isAutoLoad = false) {
                     };
                 });
                 console.log('[Session] Restored to Atlas pending array:', window.atlasMapState.encounter.pending);
+
+                // Refresh Atlas UI after loading pending enemies
+                try {
+                    if (typeof window.renderStagedEnemiesList === 'function') {
+                        window.renderStagedEnemiesList();
+                    }
+                    if (typeof window.updateEncounterEnemyStagingCount === 'function') {
+                        window.updateEncounterEnemyStagingCount('Loaded from encounter');
+                    }
+                    if (typeof window.drawAtlasEncounter === 'function') {
+                        window.drawAtlasEncounter();
+                    }
+                } catch (e) {
+                    console.warn('[Session] Failed to refresh Atlas UI after load:', e);
+                }
                 
                 // If monstersById or charactersData wasn't available, retry after they load
                 const needsMonsterLibrary = savedEnemies.some(e => e.source === 'library' && !e.imagePath);
@@ -677,36 +698,51 @@ async function saveCurrentEncounter() {
 
     // Sync placed enemies from Atlas state
     if (window.atlasMapState && window.atlasMapState.encounter) {
-        const placedEnemies = (window.atlasMapState.encounter.pending || []).map(entry => {
-            // Get image path from multiple possible sources
-            let imagePath = entry.imagePath 
-                || entry.payload?.imagePath 
-                || entry.payload?.tokenImage 
-                || entry.payload?.portraitImage 
-                || null;
-            
-            // Prepend library path if it's a relative path
-            if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
-                imagePath = `/data/creatures/library/${imagePath}`;
-            }
-            
-            return {
-                id: entry.id,
-                name: entry.name,
-                source: entry.source,
-                payload: entry.payload,
-                imagePath: imagePath,
-                placed: entry.placed || false,
-                visible: entry.visible !== false,
-                position: entry.position ? {
-                    x: Number(entry.position.x.toFixed(2)),
-                    y: Number(entry.position.y.toFixed(2)),
-                    mapId: entry.position.mapId
-                } : null,
-                atlasTokenId: entry.id,  // Link to the placed token
-                combatantId: entry.combatantId || null
-            };
-        });
+        const placedEnemies = (window.atlasMapState.encounter.pending || [])
+            .filter(entry => entry && entry.id && entry.name)
+            .map(entry => {
+                const clonedStats = entry.stats ? JSON.parse(JSON.stringify(entry.stats)) : null;
+                const clonedAbilities = entry.abilities ? { ...entry.abilities } : null;
+                const clonedInventory = Array.isArray(entry.inventory) ? entry.inventory.map(item => ({ ...item })) : null;
+                const hpValue = typeof entry.hp === 'number' ? entry.hp : null;
+                const acValue = typeof entry.ac === 'number' ? entry.ac : null;
+                const goldValue = typeof entry.gold === 'number' ? entry.gold : null;
+
+                // Get image path from multiple possible sources
+                let imagePath = entry.imagePath 
+                    || entry.payload?.imagePath 
+                    || entry.payload?.tokenImage 
+                    || entry.payload?.portraitImage 
+                    || null;
+                
+                // Prepend library path if it's a relative path
+                if (imagePath && !imagePath.startsWith('/') && !imagePath.startsWith('http')) {
+                    imagePath = `/data/creatures/library/${imagePath}`;
+                }
+                
+                return {
+                    id: entry.id,
+                    name: entry.name,
+                    source: entry.source,
+                    payload: entry.payload,
+                    imagePath: imagePath,
+                    placed: entry.placed || false,
+                    visible: entry.visible !== false,
+                    position: entry.placed && entry.position ? {
+                        x: Number((entry.position.x ?? 0).toFixed(2)),
+                        y: Number((entry.position.y ?? 0).toFixed(2)),
+                        mapId: entry.position.mapId
+                    } : null,
+                    atlasTokenId: entry.id,  // Link to the placed token
+                    combatantId: entry.combatantId || null,
+                    stats: clonedStats,
+                    abilities: clonedAbilities,
+                    inventory: clonedInventory,
+                    gold: goldValue,
+                    hp: hpValue,
+                    ac: acValue
+                };
+            });
         sessionState.currentEncounter.placedEnemies = placedEnemies;
         console.log('[Session] Saving placed enemies to encounter:', placedEnemies);
         
@@ -738,6 +774,10 @@ async function saveCurrentEncounter() {
                 updateSyncDebugHUD('autosave');
             }
             console.log('Encounter auto-saved');
+            // Reload Arena combatants from server in case server-side sync added any
+            if (typeof window.loadCombatants === 'function') {
+                try { await window.loadCombatants(); } catch (e) { /* no-op */ }
+            }
             return true;
         } else {
             console.error('Failed to auto-save encounter');

@@ -7,5 +7,32 @@
     "height_px": 2048,
     "created_at": "2025-10-16T14:43:23.254Z",
     "meta": {}
+  },
+  {
+    "id": "map-b4ec7a61-f971-4af5-853a-eff2cfbb4426",
+    "name": "Heavens Fall Forest",
+    "file": "/maps/75d6bea6-e7a6-4b42-bd41-e13eaa231cb0.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2025-10-19T12:14:16.766Z",
+    "meta": {}
+  },
+  {
+    "id": "map-963e7647-9413-47d2-ab9f-d621960f4fcc",
+    "name": "The_DNT",
+    "file": "/maps/f41d3993-d87b-4258-a369-198916d884fa.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2025-11-02T14:34:40.154Z",
+    "meta": {}
+  },
+  {
+    "id": "map-89f32c8f-e825-4a1a-bad0-5e160d531349",
+    "name": "Eathership-Recovered",
+    "file": "/maps/c667e185-0642-4fd7-a230-4ec194d01f77.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2025-11-02T14:35:06.456Z",
+    "meta": {}
   }
 ]

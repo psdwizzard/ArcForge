@@ -87,7 +87,44 @@
           "id": "enc-enemy-1760824462734-bz6inz",
           "name": "Pig - 01",
           "source": "custom",
-          "payload": null,
+          "payload": {
+            "id": "char-1760356699440",
+            "agentType": "e",
+            "name": "Pig",
+            "race": "human",
+            "class": "rogue",
+            "level": 8,
+            "abilities": {
+              "str": 17,
+              "dex": 18,
+              "con": 17,
+              "int": 15,
+              "wis": 12,
+              "cha": 19
+            },
+            "hp": 43,
+            "ac": 10,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760391803246",
+                "name": "bite",
+                "attackBonus": 6,
+                "damageDice": "1d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760397315751",
+                "name": "puck",
+                "attackBonus": 2,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png"
+          },
           "imagePath": "/uploads/characterImage/characterImage-1760356738110-748667359.png",
           "placed": true,
           "visible": true,
@@ -210,6 +247,624 @@
           "visible": true,
           "position": null,
           "atlasTokenId": "enc-enemy-1760827229880-yb4f9s"
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-5ed832e7-5b41-4cd0-a3e7-1cbfab9cfd29",
+          "path": "/maps/96bebaed-40f4-4240-84ab-c42b3a39cfa6.png",
+          "filename": "96bebaed-40f4-4240-84ab-c42b3a39cfa6.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-74045c13-8ae4-4cde-b501-b36422710e18",
+          "path": "/maps/493420be-08e3-47d5-a460-e73df0eb7228.png",
+          "filename": "493420be-08e3-47d5-a460-e73df0eb7228.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": []
+    },
+    {
+      "id": "id_1760877721819_iyexperot",
+      "name": "dnd",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-10-19T12:42:01.819Z",
+      "combatants": [
+        {
+          "id": "combatant-1760888050582-z5fhgvc0l",
+          "name": "synco",
+          "type": "p",
+          "initiative": 21,
+          "dexModifier": 3,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760882008104-nqwcv5c9x",
+          "name": "Mycoid Queen - 01",
+          "type": "enemy",
+          "initiative": 21,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1760878416894-161687158.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760881996096-zvjtv8",
+          "hp": {
+            "current": 10,
+            "max": 210,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "abilities": {
+            "str": 20,
+            "dex": 14,
+            "con": 20,
+            "int": 10,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": 0
+        },
+        {
+          "id": "combatant-1760894486765-y3snq7mb1",
+          "name": "Nanite Spider - 02",
+          "type": "enemy",
+          "initiative": 16,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760894476250-mdea3x",
+          "hp": {
+            "current": 64,
+            "max": 64,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760894523175-dnnblxyzs",
+          "name": "Nanite Spider - 04",
+          "type": "enemy",
+          "initiative": 15,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760894504199-92e4ex",
+          "hp": {
+            "current": 64,
+            "max": 64,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760888053448-rfilhds6u",
+          "name": "SmolderingEyeBalls",
+          "type": "p",
+          "initiative": 11,
+          "dexModifier": 4,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 50,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760888052629-1jpk2ryi2",
+          "name": "Del",
+          "type": "p",
+          "initiative": 11,
+          "dexModifier": 0,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 38,
+            "max": 54,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760894514678-7kl3rsgbd",
+          "name": "Nanite Spider - 03",
+          "type": "enemy",
+          "initiative": 10,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760894505637-a4zbjz",
+          "hp": {
+            "current": 64,
+            "max": 64,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760895608194-hewzuoyn2",
+          "name": "Nanite Spider - 05",
+          "type": "enemy",
+          "initiative": 9,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1760895595595-4ecw4p",
+          "hp": {
+            "current": 32,
+            "max": 64,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760888051788-sg1ts8kmf",
+          "name": "draven",
+          "type": "p",
+          "initiative": 9,
+          "dexModifier": 1,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 50,
+            "max": 59,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1760888054163-g3mztit8h",
+          "name": "Birtie",
+          "type": "p",
+          "initiative": 8,
+          "dexModifier": 2,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 9,
+            "max": 48,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1760877647133-ya6tul",
+          "name": "Ankheg - 01",
+          "source": "library",
+          "payload": {
+            "id": "Wcsjbl25uiUsyQwn"
+          },
+          "imagePath": "/data/creatures/library/tokens/monstrosity/Ankheg.webp",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1760877647133-ya6tul",
+          "combatantId": null
+        },
+        {
+          "id": "enc-enemy-1760881996096-zvjtv8",
+          "name": "Mycoid Queen - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760878540420",
+            "agentType": "e",
+            "name": "Mycoid Queen",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 20,
+              "dex": 14,
+              "con": 20,
+              "int": 10,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 210,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [],
+            "notes": "Saving Throws Dex +6, Con +9, Wis +6\nSkills Perception +6, Arcana +4, Nature +6\nDamage Resistances cold, lightning, psychic; bludgeoning from non-magical attacks\nDamage Immunities poison, necrotic\nCondition Immunities charmed, frightened, poisoned, paralyzed\nSenses darkvision 120 ft, tremorsense 30 ft, passive Perception 16\nLanguages understands Common, Binary, and Sylvan but speaks only through echoing telepathic phrases.",
+            "imagePath": "/uploads/characterImage/characterImage-1760878416894-161687158.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760878416894-161687158.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 192.76,
+            "y": 1789.91,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760881996096-zvjtv8",
+          "combatantId": "combatant-1760882008104-nqwcv5c9x"
+        },
+        {
+          "id": "enc-enemy-1760894476250-mdea3x",
+          "name": "Nanite Spider - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760876930428",
+            "agentType": "e",
+            "name": "Nanite Spider",
+            "race": "",
+            "class": "",
+            "level": 4,
+            "abilities": {
+              "str": 12,
+              "dex": 16,
+              "con": 14,
+              "int": 4,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 64,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760876752807",
+                "name": "Bite",
+                "attackBonus": 5,
+                "damageDice": "6d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760876868751",
+                "name": "Overclock",
+                "attackBonus": 2,
+                "damageDice": "3d6",
+                "damageType": "piercing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 82.61,
+            "y": 1679.76,
+            "mapId": "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc"
+          },
+          "atlasTokenId": "enc-enemy-1760894476250-mdea3x",
+          "combatantId": "combatant-1760894486765-y3snq7mb1"
+        },
+        {
+          "id": "enc-enemy-1760894504199-92e4ex",
+          "name": "Nanite Spider - 04",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760876930428",
+            "agentType": "e",
+            "name": "Nanite Spider",
+            "race": "",
+            "class": "",
+            "level": 4,
+            "abilities": {
+              "str": 12,
+              "dex": 16,
+              "con": 14,
+              "int": 4,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 64,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760876752807",
+                "name": "Bite",
+                "attackBonus": 5,
+                "damageDice": "6d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760876868751",
+                "name": "Overclock",
+                "attackBonus": 2,
+                "damageDice": "3d6",
+                "damageType": "piercing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 3579.81,
+            "y": 3579.81,
+            "mapId": "map-b4ec7a61-f971-4af5-853a-eff2cfbb4426"
+          },
+          "atlasTokenId": "enc-enemy-1760894504199-92e4ex",
+          "combatantId": "combatant-1760894523175-dnnblxyzs"
+        },
+        {
+          "id": "enc-enemy-1760894505637-a4zbjz",
+          "name": "Nanite Spider - 03",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760876930428",
+            "agentType": "e",
+            "name": "Nanite Spider",
+            "race": "",
+            "class": "",
+            "level": 4,
+            "abilities": {
+              "str": 12,
+              "dex": 16,
+              "con": 14,
+              "int": 4,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 64,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760876752807",
+                "name": "Bite",
+                "attackBonus": 5,
+                "damageDice": "6d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760876868751",
+                "name": "Overclock",
+                "attackBonus": 2,
+                "damageDice": "3d6",
+                "damageType": "piercing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 2661.91,
+            "y": 3396.23,
+            "mapId": "map-b4ec7a61-f971-4af5-853a-eff2cfbb4426"
+          },
+          "atlasTokenId": "enc-enemy-1760894505637-a4zbjz",
+          "combatantId": "combatant-1760894514678-7kl3rsgbd"
+        },
+        {
+          "id": "enc-enemy-1760895595595-4ecw4p",
+          "name": "Nanite Spider - 05",
+          "source": "custom",
+          "payload": {
+            "id": "char-1760876930428",
+            "agentType": "e",
+            "name": "Nanite Spider",
+            "race": "",
+            "class": "",
+            "level": 4,
+            "abilities": {
+              "str": 12,
+              "dex": 16,
+              "con": 14,
+              "int": 4,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 64,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1760876752807",
+                "name": "Bite",
+                "attackBonus": 5,
+                "damageDice": "6d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-1760876868751",
+                "name": "Overclock",
+                "attackBonus": 2,
+                "damageDice": "3d6",
+                "damageType": "piercing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1760876607467-985955038.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 4497.71,
+            "y": 5782.77,
+            "mapId": "map-b4ec7a61-f971-4af5-853a-eff2cfbb4426"
+          },
+          "atlasTokenId": "enc-enemy-1760895595595-4ecw4p",
+          "combatantId": "combatant-1760895608194-hewzuoyn2"
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-d6054dbf-4cd6-4c98-a265-ca2a1eab2194",
+          "path": "/maps/0a5d9068-052c-4172-aa7a-728d15f2dca3.png",
+          "filename": "0a5d9068-052c-4172-aa7a-728d15f2dca3.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-68493c69-4615-43e9-9906-119709c2aed1",
+          "path": "/maps/bd6a417a-4b8c-4401-9883-ec2cb5887609.png",
+          "filename": "bd6a417a-4b8c-4401-9883-ec2cb5887609.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-1f3473e8-523b-475d-8d72-25c3d9a0e545",
+          "path": "/maps/18cfeeb3-d970-4f7b-a554-aa578078f739.png",
+          "filename": "18cfeeb3-d970-4f7b-a554-aa578078f739.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-d4a40244-fc99-4dd9-8b61-136f0aaeab58",
+          "path": "/maps/ddd16a9e-eb18-4197-9f8c-ed5e275c4be5.png",
+          "filename": "ddd16a9e-eb18-4197-9f8c-ed5e275c4be5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-b094b59e-f194-4d4f-ad11-fe510c94f43a",
+          "path": "/maps/1dc0e7b8-e03a-44c3-b0cd-ef1fc7de2dd6.png",
+          "filename": "1dc0e7b8-e03a-44c3-b0cd-ef1fc7de2dd6.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-24f9e3eb-9f55-4dfb-ad85-283cd00aacab",
+          "path": "/maps/25b16a9f-7439-4a44-afa6-69f489cd9044.png",
+          "filename": "25b16a9f-7439-4a44-afa6-69f489cd9044.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-b046a492-8f57-4ae0-97c3-e88fc7b8b4a5",
+          "path": "/maps/5716b883-ec72-4954-b330-63dc454d48e5.png",
+          "filename": "5716b883-ec72-4954-b330-63dc454d48e5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-052b0108-f21c-4441-b518-8815cef4559d",
+          "path": "/maps/95b4baa1-9c71-412e-9b8f-c8aa71cad725.png",
+          "filename": "95b4baa1-9c71-412e-9b8f-c8aa71cad725.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-2490f715-d891-45b3-97ed-cf027f257c70",
+          "path": "/maps/0b9f2a5c-689e-464c-8e45-a3e9d12be79a.png",
+          "filename": "0b9f2a5c-689e-464c-8e45-a3e9d12be79a.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-9a9798cc-dccc-430f-8b3c-4424ae2f1e35",
+          "path": "/maps/4c7cb342-bc89-49bc-9222-1ae84a1a62b3.png",
+          "filename": "4c7cb342-bc89-49bc-9222-1ae84a1a62b3.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": [
+        {
+          "id": "flavor-6e474903-c85b-4378-8f07-5a295695c85f",
+          "path": "/maps/44b81a4e-0954-400c-a6db-5639529307f3.wav",
+          "filename": "44b81a4e-0954-400c-a6db-5639529307f3.wav",
+          "type": "sound"
+        },
+        {
+          "id": "flavor-75573bd8-6e24-4a69-b41d-35e5caf4f4e0",
+          "path": "/maps/907d3236-755d-4251-8a69-7db4d257bc03.wav",
+          "filename": "907d3236-755d-4251-8a69-7db4d257bc03.wav",
+          "type": "sound"
         }
       ]
     }

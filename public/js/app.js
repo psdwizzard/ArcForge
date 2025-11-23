@@ -922,11 +922,6 @@ async function loadEncounterState() {
         if (window.sessionState && window.sessionState.currentEncounter && typeof window.syncCombatantsToAtlas === 'function') {
             console.log('[loadEncounterState] Calling syncCombatantsToAtlas');
             window.syncCombatantsToAtlas();
-
-            // Trigger auto-save to persist the sync
-            if (typeof saveCurrentEncounter === 'function') {
-                await saveCurrentEncounter();
-            }
         } else {
             console.log('[loadEncounterState] Skipping sync - conditions not met');
         }
@@ -2759,6 +2754,13 @@ const atlasMapState = {
         dragMoved: false,
         dragStart: null,
         originalOffset: { x: 0, y: 0 },
+        // Token dragging state for direct repositioning on canvas
+        tokenDrag: {
+            active: false,
+            token: null,
+            startPos: null,
+            dragStartMap: null
+        },
         placing: false,
         startArea: null,
         areaZoom: 1,
@@ -3644,6 +3646,8 @@ function initAtlasEncounterModule() {
     elements.enemyFilterCustom?.addEventListener('click', () => setEncounterEnemyFilter('custom'));
     elements.enemyRefreshBtn?.addEventListener('click', () => loadEncounterEnemyLibrary(true));
     elements.stagingClearAll?.addEventListener('click', handleClearAllStagedEnemies);
+    // elements.enemyStagingList?.addEventListener('pointerdown', () => resetEncounterInteractionState('staging-focus'));
+    // elements.enemyStagingList?.addEventListener('pointerenter', () => resetEncounterInteractionState('staging-hover'));
 
     elements.placeStartAreaBtn?.addEventListener('click', () => {
         if (!atlasMapState.activeMapId) {
@@ -4476,6 +4480,10 @@ function renderStagedEnemiesList() {
         const row = document.createElement('div');
         row.className = 'atlas-staged-enemy-item';
         row.dataset.entryId = entry.id;
+        // Force row to handle events
+        row.style.pointerEvents = 'auto';
+        row.style.position = 'relative';
+        row.style.zIndex = '10';
 
         const nameSpan = document.createElement('span');
         nameSpan.className = 'atlas-staged-enemy-name';
@@ -4495,34 +4503,62 @@ function renderStagedEnemiesList() {
 
         const actions = document.createElement('div');
         actions.className = 'atlas-staged-enemy-actions';
+        // Fix for buttons becoming unclickable: ensure they receive pointer events and are above other elements
+        actions.style.pointerEvents = 'auto';
+        actions.style.position = 'relative';
+        actions.style.zIndex = '11'; // Higher than row
 
         const locationBtn = document.createElement('button');
         locationBtn.type = 'button';
         locationBtn.className = 'btn btn-secondary btn-small';
         locationBtn.textContent = entry.placed ? 'Reposition' : 'Location';
         locationBtn.title = entry.placed ? 'Change position on map' : 'Place on map';
-        locationBtn.addEventListener('click', () => handleStagedEnemyLocation(entry.id));
+        locationBtn.addEventListener('click', (e) => {
+            console.log('[Atlas] Location button clicked for', entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            handleStagedEnemyLocation(entry.id);
+        });
 
         const cloneBtn = document.createElement('button');
         cloneBtn.type = 'button';
         cloneBtn.className = 'btn btn-secondary btn-small';
         cloneBtn.textContent = 'Clone';
         cloneBtn.title = 'Duplicate this enemy';
-        cloneBtn.addEventListener('click', () => handleStagedEnemyClone(entry.id));
+        cloneBtn.addEventListener('click', (e) => {
+            console.log('[Atlas] Clone button clicked for', entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            handleStagedEnemyClone(entry.id);
+        });
 
         const editBtn = document.createElement('button');
         editBtn.type = 'button';
         editBtn.className = 'btn btn-secondary btn-small';
         editBtn.textContent = 'Edit';
         editBtn.title = 'Edit this enemy';
-        editBtn.addEventListener('click', () => handleStagedEnemyEdit(entry.id));
+        editBtn.addEventListener('click', (e) => {
+            console.log('[Atlas] Edit button clicked for', entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            handleStagedEnemyEdit(entry.id);
+        });
 
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'btn btn-danger btn-small';
         deleteBtn.textContent = 'Delete';
         deleteBtn.title = 'Remove from staging';
-        deleteBtn.addEventListener('click', () => handleStagedEnemyDelete(entry.id));
+        deleteBtn.addEventListener('click', (e) => {
+            console.log('[Atlas] Delete button clicked for', entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            handleStagedEnemyDelete(entry.id);
+        });
 
         actions.appendChild(locationBtn);
         actions.appendChild(cloneBtn);
@@ -4534,6 +4570,21 @@ function renderStagedEnemiesList() {
 
         elements.enemyStagingList.appendChild(row);
     });
+}
+
+function resetEncounterInteractionState(reason) {
+    atlasMapState.encounter.placementMode = false;
+    atlasMapState.encounter.placementEntry = null;
+    atlasMapState.encounter.dragging = false;
+    atlasMapState.encounter.dragMoved = false;
+    atlasMapState.encounter.tokenDrag.active = false;
+    atlasMapState.encounter.tokenDrag.token = null;
+    atlasMapState.encounter.tokenDrag.startPos = null;
+    atlasMapState.encounter.tokenDrag.dragStartMap = null;
+    atlasMapState.encounter.selectedToken = null;
+    if (reason) {
+        console.log('[Atlas] Interaction reset:', reason);
+    }
 }
 
 function handleStagedEnemyLocation(entryId) {
@@ -4549,6 +4600,7 @@ function handleStagedEnemyLocation(entryId) {
     }
 
     // Enter placement mode
+    resetEncounterInteractionState('start-placement');
     atlasMapState.encounter.placementMode = true;
     atlasMapState.encounter.placementEntry = entry;
     atlasMapState.encounter.placing = false; // Disable starting area placement
@@ -4593,41 +4645,56 @@ function snapToGridCenter(mapX, mapY) {
 }
 
 function placeEnemyToken(rawMapX, rawMapY) {
-    const entry = atlasMapState.encounter.placementEntry;
-    if (!entry) {
-        return;
-    }
+    try {
+        const entry = atlasMapState.encounter.placementEntry;
+        if (!entry) {
+            return;
+        }
 
-    // Snap to grid center
-    const snapped = snapToGridCenter(rawMapX, rawMapY);
+        // Snap to grid center
+        const snapped = snapToGridCenter(rawMapX, rawMapY);
 
-    // Update the entry with position data
-    entry.position = {
-        x: snapped.x,
-        y: snapped.y,
-        mapId: atlasMapState.activeMapId
-    };
-    entry.placed = true;
+        // Update the entry with position data
+        entry.position = {
+            x: snapped.x,
+            y: snapped.y,
+            mapId: atlasMapState.activeMapId
+        };
+        entry.placed = true;
 
-    // Exit placement mode
-    atlasMapState.encounter.placementMode = false;
-    atlasMapState.encounter.placementEntry = null;
-    atlasMapState.encounter.dirty = true;
+        // Exit placement mode immediately
+        resetEncounterInteractionState('placed-enemy');
+        atlasMapState.encounter.dirty = true;
 
-    // Update UI
-    updateEncounterSummary(null, entry.name + ' placed at (' + Math.round(snapped.x) + ', ' + Math.round(snapped.y) + ')');
-    renderStagedEnemiesList();
-    drawAtlasEncounter();
-    if (typeof updateSyncDebugHUD === 'function') {
-        updateSyncDebugHUD('placed');
-    }
+        // Force cursor update
+        const canvas = document.getElementById('atlas-encounter-canvas');
+        if (canvas) canvas.style.cursor = 'grab';
+        document.body.style.cursor = 'default';
+        
+        // Clear selection range which might happen during clicks
+        if (window.getSelection) {
+            window.getSelection().removeAllRanges();
+        }
 
-    // Add to Arena combat tracker
-    addPlacedEnemyToCombat(entry);
+        // Update UI
+        updateEncounterSummary(null, entry.name + ' placed at (' + Math.round(snapped.x) + ', ' + Math.round(snapped.y) + ')');
+        renderStagedEnemiesList();
+        drawAtlasEncounter();
+        if (typeof updateSyncDebugHUD === 'function') {
+            updateSyncDebugHUD('placed');
+        }
 
-    // Trigger encounter save
-    if (typeof saveCurrentEncounter === 'function') {
-        saveCurrentEncounter();
+        // Add to Arena combat tracker
+        addPlacedEnemyToCombat(entry);
+
+        // Trigger encounter save
+        if (typeof saveCurrentEncounter === 'function') {
+            saveCurrentEncounter();
+        }
+    } catch (error) {
+        console.error('[Atlas] Error in placeEnemyToken:', error);
+        // Ensure state is reset even if error occurs
+        resetEncounterInteractionState('error-during-placement');
     }
 }
 
@@ -4913,6 +4980,7 @@ function resolveEnemyImagePath(candidates, options = {}) {
 }
 
 function handleStagedEnemyClone(entryId) {
+    resetEncounterInteractionState('clone');
     const pending = atlasMapState.encounter.pending || [];
     const original = pending.find(e => e.id === entryId);
     if (!original) {
@@ -4962,6 +5030,7 @@ function handleStagedEnemyClone(entryId) {
 }
 
 function handleStagedEnemyDelete(entryId) {
+    resetEncounterInteractionState('delete');
     const pending = atlasMapState.encounter.pending || [];
     const index = pending.findIndex(e => e.id === entryId);
     if (index === -1) {
@@ -4984,6 +5053,7 @@ function handleStagedEnemyDelete(entryId) {
 }
 
 function handleStagedEnemyEdit(entryId) {
+    resetEncounterInteractionState('edit');
     const elements = getAtlasElements();
     const editor = document.getElementById('atlas-agent-editor');
     if (!editor) return;
@@ -5725,18 +5795,15 @@ function findTokenAtPosition(mapX, mapY) {
         return null;
     }
 
-    // Calculate cell size for hit detection
-    const settings = atlasMapState.settings;
-    if (!settings?.display?.grid) {
-        return null;
-    }
-
-    const grid = settings.display.grid;
-    const ppi = settings.display.physical?.ppi_override || settings.display.grid.pixels_per_inch || 52.45;
-    const cellPx = grid.inches_per_cell ? ppi * grid.inches_per_cell : grid.cell_px || 50;
-    const gridZoom = atlasMapState.settings?.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
-    const cellSize = cellPx * gridZoom;
-    const tokenRadius = cellSize * 0.4;
+    // Calculate cell size for hit detection (with safe defaults if grid not ready)
+    const settings = atlasMapState.settings || {};
+    const grid = settings.display?.grid || {};
+    const defaultCell = 50;
+    const ppi = settings.display?.physical?.ppi_override || grid.pixels_per_inch || 52.45;
+    const cellPx = grid.inches_per_cell ? (ppi * grid.inches_per_cell) : (grid.cell_px || defaultCell);
+    const gridZoom = settings.display?.viewport?.gridZoom || atlasMapState.preview.gridZoom || 1;
+    const cellSize = (cellPx || defaultCell) * gridZoom;
+    const tokenRadius = (cellSize || defaultCell) * 0.4;
 
     // Check each token from front to back
     for (let i = pending.length - 1; i >= 0; i--) {
@@ -6156,7 +6223,21 @@ function startEncounterDrag(event) {
     if (!atlasMapState.encounter.render) {
         return;
     }
-    console.log('[startEncounterDrag] Starting drag');
+    // If clicking on a token, start token drag instead of panning the map
+    const pointer = getEncounterPointer(event);
+    if (pointer) {
+        const token = findTokenAtPosition(pointer.mapX, pointer.mapY);
+        if (token) {
+            atlasMapState.encounter.tokenDrag.active = true;
+            atlasMapState.encounter.tokenDrag.token = token;
+            atlasMapState.encounter.tokenDrag.startPos = { x: token.position?.x || 0, y: token.position?.y || 0 };
+            atlasMapState.encounter.tokenDrag.dragStartMap = { x: pointer.mapX, y: pointer.mapY };
+            atlasMapState.encounter.selectedToken = token;
+            return;
+        }
+    }
+
+    console.log('[startEncounterDrag] Starting map pan drag');
     atlasMapState.encounter.dragging = true;
     atlasMapState.encounter.dragMoved = false;
     atlasMapState.encounter.dragStart = { x: event.clientX, y: event.clientY };
@@ -6164,6 +6245,28 @@ function startEncounterDrag(event) {
 }
 
 function handleEncounterDrag(event) {
+    // Token drag has priority
+    if (atlasMapState.encounter.tokenDrag.active) {
+        const pointer = getEncounterPointer(event);
+        if (!pointer) {
+            return;
+        }
+        const token = atlasMapState.encounter.tokenDrag.token;
+        if (!token) {
+            atlasMapState.encounter.tokenDrag.active = false;
+            return;
+        }
+        // Continuously snap to grid center while dragging
+        const snapped = snapToGridCenter(pointer.mapX, pointer.mapY);
+        token.position = token.position || { x: 0, y: 0, mapId: atlasMapState.activeMapId };
+        token.position.x = Number(snapped.x.toFixed(2));
+        token.position.y = Number(snapped.y.toFixed(2));
+        token.position.mapId = atlasMapState.activeMapId;
+        atlasMapState.encounter.dirty = true;
+        drawAtlasEncounter();
+        return;
+    }
+
     if (!atlasMapState.encounter.dragging) {
         return;
     }
@@ -6182,6 +6285,19 @@ function handleEncounterDrag(event) {
 
 function endEncounterDrag() {
     console.log('[endEncounterDrag] Ending drag');
+    // Finish token drag
+    if (atlasMapState.encounter.tokenDrag.active) {
+        atlasMapState.encounter.tokenDrag.active = false;
+        atlasMapState.encounter.tokenDrag.token = null;
+        atlasMapState.encounter.tokenDrag.startPos = null;
+        atlasMapState.encounter.tokenDrag.dragStartMap = null;
+        // Save after repositioning
+        if (typeof saveCurrentEncounter === 'function') {
+            saveCurrentEncounter();
+        }
+        renderStagedEnemiesList();
+        drawAtlasEncounter();
+    }
     atlasMapState.encounter.dragging = false;
 }
 
@@ -6193,6 +6309,8 @@ function handleEncounterCanvasClick(event) {
     if (!atlasMapState.activeMapId) {
         return;
     }
+
+    console.log('[Atlas] Map canvas clicked at', event.clientX, event.clientY);
 
     const pointer = getEncounterPointer(event);
     if (!pointer) {
@@ -6348,7 +6466,7 @@ function handleEncounterKeydown(event) {
     }
 
     // Check if this is an arrow key or escape - if so, prevent default first
-    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Escape'].includes(event.key);
+    const isArrowKey = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Escape', 'Delete'].includes(event.key);
     if (!isArrowKey) {
         return;
     }
@@ -6385,6 +6503,16 @@ function handleEncounterKeydown(event) {
             // Deselect token on Escape
             atlasMapState.encounter.selectedToken = null;
             drawAtlasEncounter();
+            return;
+        case 'Delete':
+            // Remove selected token from staging list
+            if (selectedToken && selectedToken.id) {
+                try {
+                    handleStagedEnemyDelete(selectedToken.id);
+                } catch (e) {
+                    console.error('[Atlas] Failed to delete selected token:', e);
+                }
+            }
             return;
     }
 

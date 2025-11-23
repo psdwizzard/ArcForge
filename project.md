@@ -30,6 +30,24 @@
 
 ## Active Focus & Current Work
 
+### Dev Handoff (2025-11-22)
+
+**Context:** Atlas Encounters staging controls become unclickable after placing the first enemy token unless the page is reloaded.
+
+**Recent changes:**
+- Added `resetEncounterInteractionState()` to clear placement mode, drag state, token drag state, and selection; invoked when entering placement, after placing, and before staging actions (clone/edit/delete) plus staging hover/focus. (public/js/app.js)
+- Added token drag safeguards and hit-testing defaults to avoid grid-null crashes. (public/js/app.js)
+- Raised z-index/stacking contexts for the enemy panel and staging list to keep them above the encounter canvas. (public/css/styles.css)
+
+**Current symptom:** After placing a staged enemy on the map, the staging buttons (Location/Reposition/Clone/Edit/Delete) stop responding until a full page reload.
+
+**Repro:** Atlas → select active map → stage an enemy → click "Location" and place on map → attempt staging buttons again (no effect).
+
+**Resolution (fixed):**
+- Removed the auto-save feedback loop triggered from `loadEncounterState()` and filtered `placedEnemies` saves to only valid entries, stopping runaway console spam/CPU churn.
+- Kept the canvas interactive after staging interactions (no pointer disabling), restoring map pan/zoom and placement immediately after placing an enemy.
+- Saved positions only for actually placed entries to avoid `{}` payloads and state thrash.
+
 ### Atlas Encounters - Enemy Placement & Combat Integration (COMPLETE)
 
 **Goal:** Seamlessly link the Arena combat tracker with Atlas map-based enemy placement so DMs can manage enemies in either view and see changes reflected everywhere.
