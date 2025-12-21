@@ -1955,6 +1955,7 @@ function createCombatantCard(combatant, isCurrentTurn) {
                 </div>
                 <div class="combatant-actions">
                     ${mapControlsHTML}
+                    <button class="btn btn-small ${getCombatantVisibility(combatant) ? 'btn-secondary' : 'btn-warning'} combatant-hide-inline" onclick="toggleCombatantVisibility('${combatant.id}')">${getCombatantVisibility(combatant) ? 'Hide' : 'Show'}</button>
                     <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
                 </div>
             </div>
@@ -2206,6 +2207,56 @@ async function removeCombatant(combatantId) {
     } catch (error) {
         console.error('Error removing combatant:', error);
     }
+}
+
+async function toggleCombatantVisibility(combatantId) {
+    try {
+        const combatant = (encounterState?.combatants || []).find(c => c.id === combatantId);
+        const currentVisible = getCombatantVisibility(combatant);
+        const nextVisible = !currentVisible;
+
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ visible: nextVisible })
+        });
+
+        if (response.ok) {
+            if (combatant) {
+                combatant.visible = nextVisible;
+            }
+
+            // Keep Atlas token visibility in sync
+            const atlasToken = combatant ? findAtlasTokenForCombatant(combatant) : null;
+            if (atlasToken) {
+                atlasToken.visible = nextVisible;
+                atlasMapState.encounter.dirty = true;
+                drawAtlasEncounter();
+                if (typeof saveCurrentEncounter === 'function') {
+                    saveCurrentEncounter();
+                }
+            }
+
+            renderCombatantsList();
+        }
+    } catch (error) {
+        console.error('Error toggling combatant visibility:', error);
+    }
+}
+
+function getCombatantVisibility(combatant) {
+    if (!combatant) {
+        return true;
+    }
+    // Prefer explicit combatant flag, else fall back to linked atlas token
+    if (combatant.visible === false) {
+        return false;
+    }
+    const linkedAtlasToken = findAtlasTokenForCombatant(combatant);
+    if (linkedAtlasToken && linkedAtlasToken.visible === false) {
+        return false;
+    }
+    return true;
 }
 
 // Render agents list
@@ -4521,6 +4572,20 @@ function renderStagedEnemiesList() {
             handleStagedEnemyLocation(entry.id);
         });
 
+        const visibilityBtn = document.createElement('button');
+        visibilityBtn.type = 'button';
+        visibilityBtn.className = 'btn btn-secondary btn-small';
+        const isHidden = entry.visible === false;
+        visibilityBtn.textContent = isHidden ? 'Show' : 'Hide';
+        visibilityBtn.title = isHidden ? 'Show on map' : 'Hide on map';
+        visibilityBtn.addEventListener('click', (e) => {
+            console.log('[Atlas] Visibility button clicked for', entry.id);
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            handleStagedEnemyVisibility(entry.id);
+        });
+
         const cloneBtn = document.createElement('button');
         cloneBtn.type = 'button';
         cloneBtn.className = 'btn btn-secondary btn-small';
@@ -4561,6 +4626,7 @@ function renderStagedEnemiesList() {
         });
 
         actions.appendChild(locationBtn);
+        actions.appendChild(visibilityBtn);
         actions.appendChild(cloneBtn);
         actions.appendChild(editBtn);
         actions.appendChild(deleteBtn);
@@ -5027,6 +5093,29 @@ function handleStagedEnemyClone(entryId) {
     atlasMapState.encounter.dirty = true;
     updateEncounterEnemyStagingCount(`Cloned ${original.name}`);
     renderStagedEnemiesList();
+}
+
+function handleStagedEnemyVisibility(entryId) {
+    resetEncounterInteractionState('visibility-toggle');
+    const pending = atlasMapState.encounter.pending || [];
+    const entry = pending.find(e => e.id === entryId);
+    if (!entry) {
+        return;
+    }
+
+    const nextVisible = entry.visible === false ? true : false;
+    entry.visible = nextVisible;
+    atlasMapState.encounter.dirty = true;
+
+    renderStagedEnemiesList();
+    drawAtlasEncounter();
+
+    if (typeof saveCurrentEncounter === 'function') {
+        saveCurrentEncounter();
+    }
+    if (typeof updateSyncDebugHUD === 'function') {
+        updateSyncDebugHUD('visibility');
+    }
 }
 
 function handleStagedEnemyDelete(entryId) {

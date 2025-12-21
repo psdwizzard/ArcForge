@@ -1,8 +1,8 @@
 {
   "display": {
     "resolution": {
-      "w": 1366,
-      "h": 768
+      "w": 721,
+      "h": 1280
     },
     "physical": {
       "diagonal_in": 8,
@@ -19,7 +19,7 @@
     "viewport": {
       "fit": "fit",
       "zoom": 1,
-      "gridZoom": 0.4,
+      "gridZoom": 0.2,
       "offset": {
         "x": 0,
         "y": 0
