@@ -19,7 +19,7 @@
     "viewport": {
       "fit": "fit",
       "zoom": 1,
-      "gridZoom": 0.2,
+      "gridZoom": 0.7,
       "offset": {
         "x": 0,
         "y": 0
@@ -27,9 +27,10 @@
     },
     "tokens": {
       "showEnemyHealthColors": true
-    }
+    },
+    "rotation": 180
   },
-  "active_map_id": "map-963e7647-9413-47d2-ab9f-d621960f4fcc",
+  "active_map_id": "map-546500d0-366d-4336-98d4-e2818a4267fa",
   "encounter": {
     "startingAreas": {
       "map-7e8d8d1d-a5f7-4889-bfd5-8882da5e10dc": {
@@ -41,500 +42,329 @@
         "x": 0,
         "y": 1293.1,
         "zoom": 1
+      },
+      "map-8d354e72-d4e1-43be-9b40-0a707e14a32f": {
+        "x": 0,
+        "y": 3.63,
+        "zoom": 1
       }
     },
     "placedEnemies": [
       {
-        "id": "enc-enemy-1763855428675-b8m1dc",
-        "name": "The Echo Architect - 01",
+        "id": "enc-enemy-1768148585773-wyeqw4",
+        "name": "Couatl Heart-Idol - 01",
         "source": "custom",
         "payload": {
-          "id": "char-1762093722121",
+          "id": "char-couatl-001",
           "agentType": "e",
-          "name": "The Echo Architect",
+          "name": "Couatl Heart-Idol",
           "race": "",
           "class": "",
-          "level": 1,
+          "level": 10,
           "abilities": {
-            "str": 12,
-            "dex": 18,
-            "con": 14,
-            "int": 16,
-            "wis": 12,
+            "str": 16,
+            "dex": 14,
+            "con": 18,
+            "int": 14,
+            "wis": 18,
             "cha": 18
           },
-          "hp": 110,
-          "ac": 10,
+          "hp": 210,
+          "ac": 18,
           "speed": 30,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762091440811",
-              "name": "Data Lance - 1",
-              "attackBonus": 7,
-              "damageDice": "2D8",
-              "damageType": "psychic"
+              "id": "attack-couatl-1",
+              "name": "Feathered Bite",
+              "attackBonus": 9,
+              "damageDice": "2d10+4",
+              "damageType": "piercing"
             },
             {
-              "id": "attack-1762091467406",
-              "name": "Data Lance - 2",
-              "attackBonus": 7,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            },
-            {
-              "id": "attack-1762091640826",
-              "name": "Corrupting Elegy - 20-ft cone CHA save 16",
-              "attackBonus": 0,
-              "damageDice": "6d8",
-              "damageType": "psychic"
-            },
-            {
-              "id": "attack-1762091685664",
-              "name": "Mirror Step (Bonus Action)",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            },
-            {
-              "id": "attack-1762091791137",
-              "name": "Echo of Stardust (Trait): At ½ HP, summons 2 Harvest Drones",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            }
-          ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762093718954-164912904.png"
-        },
-        "placed": true,
-        "visible": true,
-        "position": {
-          "x": 477.31,
-          "y": 1799.08,
-          "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
-        }
-      },
-      {
-        "id": "enc-enemy-1763855439556-443thf",
-        "name": "Firewall Seraphs - 01",
-        "source": "custom",
-        "payload": {
-          "id": "char-1762085515998",
-          "agentType": "e",
-          "name": "Firewall Seraphs",
-          "race": "",
-          "class": "",
-          "level": 1,
-          "abilities": {
-            "str": 14,
-            "dex": 14,
-            "con": 16,
-            "int": 10,
-            "wis": 14,
-            "cha": 16
-          },
-          "hp": 65,
-          "ac": 16,
-          "speed": 40,
-          "skills": [],
-          "attacks": [
-            {
-              "id": "attack-1762085566796",
-              "name": "Firewall Blade - 1",
-              "attackBonus": 6,
-              "damageDice": "2D8",
+              "id": "attack-couatl-2",
+              "name": "Solar Coils (grapple on hit, escape DC 16)",
+              "attackBonus": 9,
+              "damageDice": "2d8+4",
               "damageType": "radiant"
             },
             {
-              "id": "attack-1762085610532",
-              "name": "Firewall Blade - 2",
-              "attackBonus": 6,
-              "damageDice": "2D6",
-              "damageType": "fire"
+              "id": "attack-couatl-3",
+              "name": "Flood-Command (DEX save 16, half on success, pushes 15 ft toward water)",
+              "attackBonus": 0,
+              "damageDice": "8d6",
+              "damageType": "cold"
             },
             {
-              "id": "attack-1762085640989",
-              "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+              "id": "attack-couatl-4",
+              "name": "Venom Hymn (CON save 16, fail: 6d6 poison and poisoned 1 round, recharge 5-6)",
               "attackBonus": 0,
-              "damageDice": "3d10",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085702278",
-              "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
+              "damageDice": "6d6",
+              "damageType": "poison"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          "notes": "Boss-room gimmick that matches your map: the Heart-Idol is anchored to the temple floor sigils. Suggested traits (not in schema): resistance to nonmagical damage, immunity to poison. Each round on initiative 20, one torch-flame flares: creatures on the lower circular dais make DEX save 14 or slip 10 ft (water-slick stone). If you want phase 2: at 50% HP the idol 'wakes' and gains +10 speed and uses Flood-Command every other round.",
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png"
         },
         "placed": true,
-        "visible": true,
+        "visible": false,
         "position": {
-          "x": 771.04,
-          "y": 1872.52,
-          "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          "x": 1487,
+          "y": 899.54,
+          "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
         }
       },
       {
-        "id": "enc-enemy-1763855488164-nqwxbj",
-        "name": "Harvest Drones - 01",
+        "id": "enc-enemy-1768148591422-2fofjt",
+        "name": "Dart Idol Totem - 01",
         "source": "custom",
         "payload": {
-          "id": "char-1762085245967",
+          "id": "char-tot-004",
           "agentType": "e",
-          "name": "Harvest Drones",
+          "name": "Dart Idol Totem",
           "race": "",
           "class": "",
-          "level": 6,
+          "level": 8,
           "abilities": {
-            "str": 14,
-            "dex": 16,
-            "con": 14,
-            "int": 8,
+            "str": 16,
+            "dex": 12,
+            "con": 16,
+            "int": 3,
             "wis": 12,
-            "cha": 6
+            "cha": 3
           },
-          "hp": 45,
-          "ac": 14,
-          "speed": 40,
+          "hp": 70,
+          "ac": 15,
+          "speed": 0,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762085168628",
-              "name": "Harvest Claw - 1",
-              "attackBonus": 5,
-              "damageDice": "1D10",
-              "damageType": "slashing"
+              "id": "attack-tot-1",
+              "name": "Poison Dart Volley (range 80 ft)",
+              "attackBonus": 8,
+              "damageDice": "2d10",
+              "damageType": "piercing"
             },
             {
-              "id": "attack-1762085377738",
-              "name": "Harvest Claw - 2",
-              "attackBonus": 5,
-              "damageDice": "1D6",
-              "damageType": "necrotic"
-            },
-            {
-              "id": "attack-1762085415028",
-              "name": "Harvest Claw - 3 - con save 14 - loose spel",
+              "id": "attack-tot-2",
+              "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
               "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
+              "damageDice": "4d6",
+              "damageType": "poison"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png"
+          "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
         },
         "placed": true,
-        "visible": true,
+        "visible": false,
         "position": {
-          "x": 1064.76,
-          "y": 1652.22,
-          "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          "x": 1193.27,
+          "y": 1450.28,
+          "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
         }
       },
       {
-        "id": "enc-enemy-1763855488651-bimsu8",
-        "name": "Harvest Drones - 02",
+        "id": "enc-enemy-1768148593938-ztl9mw",
+        "name": "Dart Idol Totem - 02",
         "source": "custom",
         "payload": {
-          "id": "char-1762085245967",
+          "id": "char-tot-004",
           "agentType": "e",
-          "name": "Harvest Drones",
+          "name": "Dart Idol Totem",
           "race": "",
           "class": "",
-          "level": 6,
+          "level": 8,
           "abilities": {
-            "str": 14,
-            "dex": 16,
-            "con": 14,
-            "int": 8,
+            "str": 16,
+            "dex": 12,
+            "con": 16,
+            "int": 3,
             "wis": 12,
-            "cha": 6
+            "cha": 3
           },
-          "hp": 45,
-          "ac": 14,
-          "speed": 40,
+          "hp": 70,
+          "ac": 15,
+          "speed": 0,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762085168628",
-              "name": "Harvest Claw - 1",
-              "attackBonus": 5,
-              "damageDice": "1D10",
-              "damageType": "slashing"
+              "id": "attack-tot-1",
+              "name": "Poison Dart Volley (range 80 ft)",
+              "attackBonus": 8,
+              "damageDice": "2d10",
+              "damageType": "piercing"
             },
             {
-              "id": "attack-1762085377738",
-              "name": "Harvest Claw - 2",
-              "attackBonus": 5,
-              "damageDice": "1D6",
-              "damageType": "necrotic"
-            },
-            {
-              "id": "attack-1762085415028",
-              "name": "Harvest Claw - 3 - con save 14 - loose spel",
+              "id": "attack-tot-2",
+              "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
               "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
+              "damageDice": "4d6",
+              "damageType": "poison"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png"
+          "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
         },
         "placed": true,
-        "visible": true,
+        "visible": false,
         "position": {
-          "x": 257.01,
-          "y": 2019.38,
-          "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          "x": 642.53,
+          "y": 1450.28,
+          "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
         }
       },
       {
-        "id": "enc-enemy-1763855580035-3e8ofz",
-        "name": "Firewall Seraphs",
+        "id": "enc-enemy-1768148609428-txdz3f",
+        "name": "Sunstone Jaguar Sentinel - 01",
         "source": "custom",
         "payload": {
-          "id": "char-1762085515998",
+          "id": "char-jag-002",
           "agentType": "e",
-          "name": "Firewall Seraphs",
+          "name": "Sunstone Jaguar Sentinel",
           "race": "",
           "class": "",
-          "level": 1,
+          "level": 9,
           "abilities": {
-            "str": 14,
-            "dex": 14,
+            "str": 18,
+            "dex": 16,
             "con": 16,
-            "int": 10,
+            "int": 6,
             "wis": 14,
-            "cha": 16
+            "cha": 8
           },
-          "hp": 65,
-          "ac": 16,
-          "speed": 40,
+          "hp": 140,
+          "ac": 17,
+          "speed": 50,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762085566796",
-              "name": "Firewall Blade - 1",
-              "attackBonus": 6,
-              "damageDice": "2D8",
-              "damageType": "radiant"
-            },
-            {
-              "id": "attack-1762085610532",
-              "name": "Firewall Blade - 2",
-              "attackBonus": 6,
-              "damageDice": "2D6",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085640989",
-              "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
-              "attackBonus": 0,
-              "damageDice": "3d10",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085702278",
-              "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
-              "attackBonus": 0,
-              "damageDice": "1d6",
+              "id": "attack-jag-1",
+              "name": "Sunstone Claws",
+              "attackBonus": 9,
+              "damageDice": "2d8+4",
               "damageType": "slashing"
+            },
+            {
+              "id": "attack-jag-2",
+              "name": "Pounce (if moved 20 ft straight, target STR save 16 or prone)",
+              "attackBonus": 9,
+              "damageDice": "2d10+4",
+              "damageType": "bludgeoning"
+            },
+            {
+              "id": "attack-jag-3",
+              "name": "Glare-Flash (CON save 15, fail: blinded until end of next turn, recharge 5-6)",
+              "attackBonus": 0,
+              "damageDice": "3d6",
+              "damageType": "radiant"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
-        },
-        "placed": false,
-        "visible": true,
-        "position": null
-      },
-      {
-        "id": "enc-enemy-1763856043100-j56a7o",
-        "name": "Firewall Seraphs - 02",
-        "source": "custom",
-        "payload": {
-          "id": "char-1762085515998",
-          "agentType": "e",
-          "name": "Firewall Seraphs",
-          "race": "",
-          "class": "",
-          "level": 1,
-          "abilities": {
-            "str": 14,
-            "dex": 14,
-            "con": 16,
-            "int": 10,
-            "wis": 14,
-            "cha": 16
-          },
-          "hp": 65,
-          "ac": 16,
-          "speed": 40,
-          "skills": [],
-          "attacks": [
-            {
-              "id": "attack-1762085566796",
-              "name": "Firewall Blade - 1",
-              "attackBonus": 6,
-              "damageDice": "2D8",
-              "damageType": "radiant"
-            },
-            {
-              "id": "attack-1762085610532",
-              "name": "Firewall Blade - 2",
-              "attackBonus": 6,
-              "damageDice": "2D6",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085640989",
-              "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
-              "attackBonus": 0,
-              "damageDice": "3d10",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085702278",
-              "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
-            }
-          ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          "notes": "Perfect for Floor 3 big rooms and long corridors. Visual: carved jaguar statue with gold-inlaid joints that flare bright when it charges. Tactics: it tries to knock someone into traps, spikes, or poison tiles.",
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png"
         },
         "placed": true,
-        "visible": true,
+        "visible": false,
         "position": {
-          "x": 183.58,
-          "y": 1872.52,
-          "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          "x": 201.94,
+          "y": 642.53,
+          "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
         }
       },
       {
-        "id": "enc-enemy-1763856044144-v3h4wj",
-        "name": "Firewall Seraphs",
+        "id": "enc-enemy-1768148706303-evsqfz",
+        "name": "Dart Idol Totem - 03",
         "source": "custom",
         "payload": {
-          "id": "char-1762085515998",
+          "id": "char-tot-004",
           "agentType": "e",
-          "name": "Firewall Seraphs",
+          "name": "Dart Idol Totem",
           "race": "",
           "class": "",
-          "level": 1,
+          "level": 8,
           "abilities": {
-            "str": 14,
-            "dex": 14,
+            "str": 16,
+            "dex": 12,
             "con": 16,
-            "int": 10,
-            "wis": 14,
-            "cha": 16
+            "int": 3,
+            "wis": 12,
+            "cha": 3
           },
-          "hp": 65,
-          "ac": 16,
-          "speed": 40,
+          "hp": 70,
+          "ac": 15,
+          "speed": 0,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762085566796",
-              "name": "Firewall Blade - 1",
-              "attackBonus": 6,
-              "damageDice": "2D8",
-              "damageType": "radiant"
+              "id": "attack-tot-1",
+              "name": "Poison Dart Volley (range 80 ft)",
+              "attackBonus": 8,
+              "damageDice": "2d10",
+              "damageType": "piercing"
             },
             {
-              "id": "attack-1762085610532",
-              "name": "Firewall Blade - 2",
-              "attackBonus": 6,
-              "damageDice": "2D6",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085640989",
-              "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+              "id": "attack-tot-2",
+              "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
               "attackBonus": 0,
-              "damageDice": "3d10",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085702278",
-              "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
+              "damageDice": "4d6",
+              "damageType": "poison"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
         },
-        "placed": false,
-        "visible": true,
-        "position": null
+        "placed": true,
+        "visible": false,
+        "position": {
+          "x": 1376.85,
+          "y": 238.65,
+          "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+        }
       },
       {
-        "id": "enc-enemy-1763856745246-las06v",
-        "name": "Firewall Seraphs",
+        "id": "enc-enemy-1768148716245-afo4py",
+        "name": "Dart Idol Totem - 03",
         "source": "custom",
         "payload": {
-          "id": "char-1762085515998",
+          "id": "char-tot-004",
           "agentType": "e",
-          "name": "Firewall Seraphs",
+          "name": "Dart Idol Totem",
           "race": "",
           "class": "",
-          "level": 1,
+          "level": 8,
           "abilities": {
-            "str": 14,
-            "dex": 14,
+            "str": 16,
+            "dex": 12,
             "con": 16,
-            "int": 10,
-            "wis": 14,
-            "cha": 16
+            "int": 3,
+            "wis": 12,
+            "cha": 3
           },
-          "hp": 65,
-          "ac": 16,
-          "speed": 40,
+          "hp": 70,
+          "ac": 15,
+          "speed": 0,
           "skills": [],
           "attacks": [
             {
-              "id": "attack-1762085566796",
-              "name": "Firewall Blade - 1",
-              "attackBonus": 6,
-              "damageDice": "2D8",
-              "damageType": "radiant"
+              "id": "attack-tot-1",
+              "name": "Poison Dart Volley (range 80 ft)",
+              "attackBonus": 8,
+              "damageDice": "2d10",
+              "damageType": "piercing"
             },
             {
-              "id": "attack-1762085610532",
-              "name": "Firewall Blade - 2",
-              "attackBonus": 6,
-              "damageDice": "2D6",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085640989",
-              "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+              "id": "attack-tot-2",
+              "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
               "attackBonus": 0,
-              "damageDice": "3d10",
-              "damageType": "fire"
-            },
-            {
-              "id": "attack-1762085702278",
-              "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
-              "attackBonus": 0,
-              "damageDice": "1d6",
-              "damageType": "slashing"
+              "damageDice": "4d6",
+              "damageType": "poison"
             }
           ],
-          "notes": "",
-          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
         },
         "placed": false,
-        "visible": true,
+        "visible": false,
         "position": null
       }
     ]

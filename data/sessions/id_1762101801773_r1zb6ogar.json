@@ -1,0 +1,132 @@
+{
+  "id": "id_1762101801773_r1zb6ogar",
+  "name": "ddddwwdd",
+  "description": "",
+  "createdAt": "2025-11-02T16:43:21.773Z",
+  "encounters": [
+    {
+      "id": "id_1762101809407_bja876ba5",
+      "name": "kasf;jsald",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-11-02T16:43:29.407Z",
+      "combatants": [
+        {
+          "id": "combatant-1762101871609-bjpa98c7z",
+          "name": "synco",
+          "type": "p",
+          "initiative": 0,
+          "dexModifier": 3,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762101872659-k02etv22k",
+          "name": "synco",
+          "type": "p",
+          "initiative": 0,
+          "dexModifier": 3,
+          "imagePath": null,
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1762101828858-icu66g",
+          "name": "Firewall Seraphs",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1762101828858-icu66g",
+          "combatantId": null
+        }
+      ]
+    }
+  ]
+}

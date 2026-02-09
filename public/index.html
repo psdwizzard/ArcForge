@@ -57,6 +57,17 @@
                             <option value="n">NPCs</option>
                             <option value="e">Enemies</option>
                         </select>
+                        <div class="agents-mini-map" id="agents-mini-map">
+                            <div class="mini-map-title">
+                                <span>Battle Map</span>
+                                <span class="mini-map-meta" id="agents-mini-map-meta">No active map</span>
+                            </div>
+                            <div class="mini-map-frame" id="agents-mini-map-frame">
+                                <img id="agents-mini-map-image" alt="Active battle map preview" loading="lazy">
+                                <div class="mini-map-tokens" id="agents-mini-map-tokens"></div>
+                                <div class="mini-map-empty" id="agents-mini-map-empty">No active map</div>
+                            </div>
+                        </div>
                     </div>
                     <button id="create-new-agent-btn" class="btn btn-primary" style="width: 100%; margin-bottom: 1rem;">+ Create New Agent</button>
                     <div id="agents-list" class="agents-list">
@@ -591,6 +602,10 @@
                                 <label class="atlas-checkbox">
                                     <input type="checkbox" id="atlas-token-health-rings" checked>
                                     <span>Show enemy health ring colors</span>
+                                </label>
+                                <label class="atlas-checkbox">
+                                    <input type="checkbox" id="atlas-display-rotate-180">
+                                    <span>Rotate player display 180°</span>
                                 </label>
                             </div>
 
@@ -1137,7 +1152,7 @@
     </div>
 
     <script src="js/session-manager.js?v=2"></script>
-    <script src="js/app.js?v=26"></script>
+    <script src="js/app.js?v=27"></script>
     <script src="js/character-builder.js?v=3"></script>
     <script src="js/effects-builder.js?v=2"></script>
     <script src="js/loot-manager.js?v=2"></script>

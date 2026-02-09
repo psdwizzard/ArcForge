@@ -1,0 +1,974 @@
+{
+  "id": "id_1762096768239_8ebj1w50g",
+  "name": "dfewf",
+  "description": "",
+  "createdAt": "2025-11-02T15:19:28.239Z",
+  "encounters": [
+    {
+      "id": "id_1762096783866_6uxhgg1at",
+      "name": "pukc",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-11-02T15:19:43.866Z",
+      "combatants": [
+        {
+          "id": "combatant-1762100546580-48s4zv1ay",
+          "name": "Firewall Seraphs - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762100546581-py3yjpia3",
+          "name": "Firewall Seraphs - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762100546581-4h3nfj4gl",
+          "name": "Harvest Drones - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1762096793150-s1znah",
+          "name": "Firewall Seraphs - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 468.13,
+            "y": 1900.05,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "combatantId": "combatant-1762096861843-8h3lewzhu"
+        },
+        {
+          "id": "enc-enemy-1762096814034-ldbm0k",
+          "name": "Firewall Seraphs - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 963.8,
+            "y": 1624.68,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "combatantId": "combatant-1762096865191-pzijv80tl"
+        },
+        {
+          "id": "enc-enemy-1762097050776-vd41uh",
+          "name": "Harvest Drones - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085245967",
+            "agentType": "e",
+            "name": "Harvest Drones",
+            "race": "",
+            "class": "",
+            "level": 6,
+            "abilities": {
+              "str": 14,
+              "dex": 16,
+              "con": 14,
+              "int": 8,
+              "wis": 12,
+              "cha": 6
+            },
+            "hp": 45,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085168628",
+                "name": "Harvest Claw - 1",
+                "attackBonus": 5,
+                "damageDice": "1D10",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-1762085377738",
+                "name": "Harvest Claw - 2",
+                "attackBonus": 5,
+                "damageDice": "1D6",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-1762085415028",
+                "name": "Harvest Claw - 3 - con save 14 - loose spel",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 266.19,
+            "y": 1789.91,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "combatantId": "combatant-1762097054844-kq9uslix3"
+        }
+      ]
+    },
+    {
+      "id": "id_1762100519187_b09fuu7d9",
+      "name": "dsfasdfas",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-11-02T16:21:59.187Z",
+      "combatants": [
+        {
+          "id": "combatant-1762096992156-yn8lc5fq2",
+          "name": "Firewall Seraphs - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762097054855-jqetcn06e",
+          "name": "Harvest Drones - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762100507872-3i3c2nwi4",
+          "name": "Firewall Seraphs - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1762096814034-ldbm0k",
+          "name": "Firewall Seraphs - 02",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "combatantId": null
+        },
+        {
+          "id": "enc-enemy-1762097050776-vd41uh",
+          "name": "Harvest Drones - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "combatantId": null
+        }
+      ]
+    },
+    {
+      "id": "id_1762100551374_ob1o98c83",
+      "name": "qwerqwe",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-11-02T16:22:31.374Z",
+      "combatants": [
+        {
+          "id": "combatant-1762100849972-ypib8uvo8",
+          "name": "Firewall Seraphs - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762100849972-01huik3nv",
+          "name": "Firewall Seraphs - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762100849972-hz4xugl3d",
+          "name": "Harvest Drones - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1762096793150-s1znah",
+          "name": "Firewall Seraphs - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 468.13,
+            "y": 1900.05,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "combatantId": "combatant-1762096861843-8h3lewzhu"
+        },
+        {
+          "id": "enc-enemy-1762096814034-ldbm0k",
+          "name": "Firewall Seraphs - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 963.8,
+            "y": 1624.68,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "combatantId": "combatant-1762096865191-pzijv80tl"
+        },
+        {
+          "id": "enc-enemy-1762097050776-vd41uh",
+          "name": "Harvest Drones - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085245967",
+            "agentType": "e",
+            "name": "Harvest Drones",
+            "race": "",
+            "class": "",
+            "level": 6,
+            "abilities": {
+              "str": 14,
+              "dex": 16,
+              "con": 14,
+              "int": 8,
+              "wis": 12,
+              "cha": 6
+            },
+            "hp": 45,
+            "ac": 14,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085168628",
+                "name": "Harvest Claw - 1",
+                "attackBonus": 5,
+                "damageDice": "1D10",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-1762085377738",
+                "name": "Harvest Claw - 2",
+                "attackBonus": 5,
+                "damageDice": "1D6",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-1762085415028",
+                "name": "Harvest Claw - 3 - con save 14 - loose spel",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 266.19,
+            "y": 1789.91,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "combatantId": "combatant-1762097054844-kq9uslix3"
+        },
+        {
+          "id": "enc-enemy-1762096793150-s1znah",
+          "name": "Firewall Seraphs - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": null,
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "combatantId": null
+        }
+      ]
+    },
+    {
+      "id": "id_1762100854810_9ptagp6ez",
+      "name": "ffffffff",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2025-11-02T16:27:34.810Z",
+      "combatants": [
+        {
+          "id": "combatant-1762101352641-7bgeaxtgx",
+          "name": "Firewall Seraphs - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762101422706-tlvw7uvor",
+          "name": "Firewall Seraphs - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762101652511-w4gmjwyln",
+          "name": "Firewall Seraphs - 03",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762100890569-q1oifx",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1762101654903-rbnyhpi53",
+          "name": "Harvest Drones - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 0,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "hp": {
+            "current": 10,
+            "max": 10,
+            "temp": 0
+          },
+          "ac": 10,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1762096793150-s1znah",
+          "name": "Firewall Seraphs - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 697.6,
+            "y": 1872.52,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096793150-s1znah",
+          "combatantId": "combatant-1762101422706-tlvw7uvor"
+        },
+        {
+          "id": "enc-enemy-1762096814034-ldbm0k",
+          "name": "Firewall Seraphs - 02",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 257.01,
+            "y": 1945.95,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762096814034-ldbm0k",
+          "combatantId": "combatant-1762101352633-24anvd164"
+        },
+        {
+          "id": "enc-enemy-1762097050776-vd41uh",
+          "name": "Harvest Drones - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1762085005511-724601469.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 477.31,
+            "y": 1945.95,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762097050776-vd41uh",
+          "combatantId": "combatant-1762101081987-tyftgnsex"
+        },
+        {
+          "id": "enc-enemy-1762100890569-q1oifx",
+          "name": "Firewall Seraphs - 03",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 183.58,
+            "y": 1799.08,
+            "mapId": "map-963e7647-9413-47d2-ab9f-d621960f4fcc"
+          },
+          "atlasTokenId": "enc-enemy-1762100890569-q1oifx",
+          "combatantId": "combatant-1762101456676-452734gfi"
+        },
+        {
+          "id": "enc-enemy-1762101453341-h1g065",
+          "name": "Firewall Seraphs",
+          "source": "custom",
+          "payload": {
+            "id": "char-1762085515998",
+            "agentType": "e",
+            "name": "Firewall Seraphs",
+            "race": "",
+            "class": "",
+            "level": 1,
+            "abilities": {
+              "str": 14,
+              "dex": 14,
+              "con": 16,
+              "int": 10,
+              "wis": 14,
+              "cha": 16
+            },
+            "hp": 65,
+            "ac": 16,
+            "speed": 40,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-1762085566796",
+                "name": "Firewall Blade - 1",
+                "attackBonus": 6,
+                "damageDice": "2D8",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-1762085610532",
+                "name": "Firewall Blade - 2",
+                "attackBonus": 6,
+                "damageDice": "2D6",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085640989",
+                "name": "Firewall Pulse - DEX save 15 - fail ignite (1d6 per round)",
+                "attackBonus": 0,
+                "damageDice": "3d10",
+                "damageType": "fire"
+              },
+              {
+                "id": "attack-1762085702278",
+                "name": "Burning Runes - passive within 10 ft take 2 fire damage p turn",
+                "attackBonus": 0,
+                "damageDice": "1d6",
+                "damageType": "slashing"
+              }
+            ],
+            "notes": "",
+            "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1762085484159-198693412.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1762101453341-h1g065",
+          "combatantId": null
+        }
+      ]
+    }
+  ]
+}

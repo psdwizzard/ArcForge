@@ -34,5 +34,59 @@
     "height_px": null,
     "created_at": "2025-11-02T14:35:06.456Z",
     "meta": {}
+  },
+  {
+    "id": "map-653e520a-89bf-4c55-b45b-8d53cc146b2c",
+    "name": "GL_CouatlInterior_Floor1",
+    "file": "/maps/f9cf2a82-dd26-46b4-b804-23ab1945ffe9.jpg",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:04.919Z",
+    "meta": {}
+  },
+  {
+    "id": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f",
+    "name": "Temple F2",
+    "file": "/maps/700af159-9fed-4966-8c91-791ec19d24d7.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:05.006Z",
+    "meta": {}
+  },
+  {
+    "id": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2",
+    "name": "GL_CouatlInterior_Floor3",
+    "file": "/maps/0e00731d-59aa-4cea-99b6-e1981cb26082.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:05.079Z",
+    "meta": {}
+  },
+  {
+    "id": "map-e8be2198-af9e-4669-9656-3e8abdcccf79",
+    "name": "land",
+    "file": "/maps/c6e34e3e-f7fb-41c0-b166-977edd379912.jpg",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:05.121Z",
+    "meta": {}
+  },
+  {
+    "id": "map-a26a2cb6-4d3f-432e-8a2d-ae6800a5a28b",
+    "name": "GL_CouatlInterior_Floor4",
+    "file": "/maps/2f287e93-19ac-4911-9377-f49b6137bf4a.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:05.150Z",
+    "meta": {}
+  },
+  {
+    "id": "map-546500d0-366d-4336-98d4-e2818a4267fa",
+    "name": "Temple Room",
+    "file": "/maps/fe302fde-0259-4ed4-805a-189915981dea.png",
+    "width_px": null,
+    "height_px": null,
+    "created_at": "2026-01-11T16:20:05.231Z",
+    "meta": {}
   }
 ]

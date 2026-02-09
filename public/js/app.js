@@ -32,6 +32,11 @@ let savedAgents = [];
 window.savedAgents = savedAgents;
 let draggedElement = null;
 let currentAgentFilter = 'all';
+const MINI_MAP_REFRESH_MS = 5000;
+const MINI_MAP_MIN_HEIGHT = 180;
+let agentsMiniMapTimer = null;
+let agentsMiniMapLastMapId = null;
+const agentsMiniMapSizeCache = new Map();
 
 // Track the most recent attack rolls per combatant card
 const combatantAttackState = {};
@@ -641,6 +646,7 @@ async function init() {
     attachAtlasEventListeners();
     initAtlasMapModule();
     initSettings(); // Initialize settings
+    initAgentsMiniMap();
 
     // Display viewport panning controls (for port 3001 display)
     const panUpBtn = document.getElementById('display-pan-up');
@@ -769,8 +775,10 @@ function panDisplayViewport(direction) {
         atlasMapState.settings = settings;
         console.log('[panDisplayViewport] Display viewport panned', direction, '- new offset:', settings.display.viewport.offset);
 
-        // Also pan the local encounter canvas to match
-        panLocalEncounterCanvas(direction, panFactor);
+        // Keep DM encounter view static unless explicitly following display
+        if (atlasMapState.encounter?.followDisplay) {
+            panLocalEncounterCanvas(direction, panFactor);
+        }
     })
     .catch(error => {
         console.error('[panDisplayViewport] Failed to pan display viewport:', error);
@@ -968,6 +976,219 @@ function isEnemyType(type) {
 
     const normalized = type.toLowerCase();
     return normalized === 'enemy' || normalized === 'monster' || normalized === 'e';
+}
+
+function getAgentsMiniMapElements() {
+    const container = document.getElementById('agents-mini-map');
+    if (!container) {
+        return null;
+    }
+
+    return {
+        container,
+        image: document.getElementById('agents-mini-map-image'),
+        frame: document.getElementById('agents-mini-map-frame'),
+        tokens: document.getElementById('agents-mini-map-tokens'),
+        empty: document.getElementById('agents-mini-map-empty'),
+        meta: document.getElementById('agents-mini-map-meta')
+    };
+}
+
+function setAgentsMiniMapEmpty(elements, message, options = {}) {
+    if (!elements) return;
+    const { clearImage = false } = options;
+    elements.empty.textContent = message;
+    elements.empty.style.display = 'flex';
+    elements.tokens.innerHTML = '';
+    if (clearImage) {
+        elements.image.removeAttribute('src');
+        elements.image.dataset.mapWidth = '';
+        elements.image.dataset.mapHeight = '';
+    }
+    if (elements.meta) {
+        elements.meta.textContent = message;
+    }
+}
+
+function setAgentsMiniMapMeta(elements, text) {
+    if (elements?.meta) {
+        elements.meta.textContent = text;
+    }
+}
+
+function setAgentsMiniMapHeight(elements, mapWidth, mapHeight) {
+    if (!elements?.frame || !mapWidth || !mapHeight) {
+        return;
+    }
+
+    const frameWidth = elements.frame.clientWidth || elements.container.clientWidth || elements.frame.offsetWidth;
+    if (!frameWidth) {
+        return;
+    }
+
+    const computedHeight = Math.round(frameWidth * (mapHeight / mapWidth));
+    elements.frame.style.height = `${Math.max(MINI_MAP_MIN_HEIGHT, computedHeight)}px`;
+    elements.frame.style.aspectRatio = `${mapWidth} / ${mapHeight}`;
+}
+
+async function updateAgentsMiniMap() {
+    const elements = getAgentsMiniMapElements();
+    if (!elements) {
+        return;
+    }
+
+    try {
+        let settings = window.atlasMapState?.settings || null;
+        let maps = window.atlasMapState?.maps || null;
+
+        if (!settings || !Array.isArray(maps)) {
+            const [settingsRes, mapsRes] = await Promise.all([
+                fetch(`${API_BASE}/atlas/settings`),
+                fetch(`${API_BASE}/maps`)
+            ]);
+
+            if (!settingsRes.ok || !mapsRes.ok) {
+                throw new Error('Failed to fetch atlas data');
+            }
+
+            settings = await settingsRes.json();
+            maps = await mapsRes.json();
+        }
+
+        const activeMapId = settings?.active_map_id;
+        if (!activeMapId) {
+            setAgentsMiniMapEmpty(elements, 'No active map', { clearImage: true });
+            return;
+        }
+
+        const activeMap = (maps || []).find((entry) => entry.id === activeMapId);
+        if (!activeMap || !activeMap.file) {
+            setAgentsMiniMapEmpty(elements, 'Active map missing', { clearImage: true });
+            return;
+        }
+
+        if (elements.image.src !== activeMap.file) {
+            elements.image.src = activeMap.file;
+        }
+        if (activeMap.width_px && activeMap.height_px) {
+            elements.image.dataset.mapWidth = activeMap.width_px;
+            elements.image.dataset.mapHeight = activeMap.height_px;
+        }
+
+        let mapWidth = Number(activeMap.width_px) || Number(elements.image.dataset.mapWidth) || 0;
+        let mapHeight = Number(activeMap.height_px) || Number(elements.image.dataset.mapHeight) || 0;
+        if (!mapWidth || !mapHeight) {
+            const cached = agentsMiniMapSizeCache.get(activeMapId);
+            if (cached) {
+                mapWidth = cached.width;
+                mapHeight = cached.height;
+            }
+        }
+        if ((!mapWidth || !mapHeight) && elements.image.complete && elements.image.naturalWidth) {
+            mapWidth = elements.image.naturalWidth;
+            mapHeight = elements.image.naturalHeight;
+            elements.image.dataset.mapWidth = mapWidth;
+            elements.image.dataset.mapHeight = mapHeight;
+            agentsMiniMapSizeCache.set(activeMapId, { width: mapWidth, height: mapHeight });
+        } else if (!mapWidth || !mapHeight) {
+            if (!agentsMiniMapSizeCache.has(`${activeMapId}:loading`)) {
+                agentsMiniMapSizeCache.set(`${activeMapId}:loading`, true);
+                const probe = new Image();
+                probe.onload = () => {
+                    agentsMiniMapSizeCache.delete(`${activeMapId}:loading`);
+                    agentsMiniMapSizeCache.set(activeMapId, { width: probe.naturalWidth, height: probe.naturalHeight });
+                    updateAgentsMiniMap();
+                };
+                probe.onerror = () => {
+                    agentsMiniMapSizeCache.delete(`${activeMapId}:loading`);
+                };
+                probe.src = activeMap.file;
+            }
+        }
+        setAgentsMiniMapHeight(elements, mapWidth, mapHeight);
+
+        const livePlacedEnemies = window.atlasMapState?.encounter?.pending;
+        const enemySource = Array.isArray(livePlacedEnemies) ? livePlacedEnemies : (settings?.encounter?.placedEnemies || []);
+        const placedEnemies = enemySource
+            .filter((enemy) => enemy?.placed && enemy?.position && enemy.position.mapId === activeMapId);
+
+        elements.tokens.innerHTML = '';
+
+        if (!mapWidth || !mapHeight) {
+            elements.empty.textContent = 'Loading map...';
+            elements.empty.style.display = 'flex';
+            setAgentsMiniMapMeta(elements, activeMap.name || 'Active map');
+            return;
+        }
+
+        if (placedEnemies.length === 0) {
+            elements.empty.textContent = 'No enemies placed';
+            elements.empty.style.display = 'flex';
+        } else {
+            elements.empty.style.display = 'none';
+            const bounds = elements.tokens.getBoundingClientRect();
+            if (!bounds.width || !bounds.height) {
+                requestAnimationFrame(updateAgentsMiniMap);
+                return;
+            }
+            const scale = Math.min(bounds.width / mapWidth, bounds.height / mapHeight);
+            const drawWidth = mapWidth * scale;
+            const drawHeight = mapHeight * scale;
+            const offsetX = (bounds.width - drawWidth) / 2;
+            const offsetY = (bounds.height - drawHeight) / 2;
+
+            placedEnemies.forEach((enemy) => {
+                const rawX = (enemy.position.x / mapWidth) * drawWidth;
+                const rawY = (enemy.position.y / mapHeight) * drawHeight;
+                const x = offsetX + Math.min(drawWidth, Math.max(0, rawX));
+                const y = offsetY + Math.min(drawHeight, Math.max(0, rawY));
+
+                const token = document.createElement('div');
+                const isHidden = enemy.visible === false;
+                token.className = `mini-map-token enemy${isHidden ? ' hidden' : ''}`;
+                token.style.left = `${x}px`;
+                token.style.top = `${y}px`;
+                token.title = enemy.name || 'Enemy';
+                const label = document.createElement('div');
+                label.className = 'mini-map-token-label';
+                label.textContent = isHidden ? `${enemy.name || 'Enemy'} (Hidden)` : (enemy.name || 'Enemy');
+                token.appendChild(label);
+                elements.tokens.appendChild(token);
+            });
+        }
+
+        setAgentsMiniMapMeta(elements, activeMap.name || 'Active map');
+        agentsMiniMapLastMapId = activeMapId;
+    } catch (error) {
+        console.warn('[MiniMap] Failed to update agents mini map:', error);
+        setAgentsMiniMapEmpty(elements, 'Map unavailable', { clearImage: false });
+    }
+}
+
+function initAgentsMiniMap() {
+    const elements = getAgentsMiniMapElements();
+    if (!elements) {
+        return;
+    }
+
+    if (elements.image) {
+        elements.image.addEventListener('load', () => {
+            const mapWidth = Number(elements.image.dataset.mapWidth) || elements.image.naturalWidth;
+            const mapHeight = Number(elements.image.dataset.mapHeight) || elements.image.naturalHeight;
+            setAgentsMiniMapHeight(elements, mapWidth, mapHeight);
+            updateAgentsMiniMap();
+        });
+    }
+    window.addEventListener('resize', () => updateAgentsMiniMap());
+    if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(() => updateAgentsMiniMap());
+    }
+    updateAgentsMiniMap();
+    if (agentsMiniMapTimer) {
+        clearInterval(agentsMiniMapTimer);
+    }
+    agentsMiniMapTimer = setInterval(updateAgentsMiniMap, MINI_MAP_REFRESH_MS);
+    window.updateAgentsMiniMap = updateAgentsMiniMap;
 }
 
 async function reloadEffectsData() {
@@ -1917,6 +2138,8 @@ function createCombatantCard(combatant, isCurrentTurn) {
 
     // Header display helpers
     const displayName = combatant.name || 'Unknown';
+    const isHiddenCombatant = !getCombatantVisibility(combatant);
+    const hiddenBadgeHTML = isHiddenCombatant ? '<span class="combatant-hidden-badge">Hidden</span>' : '';
     const nameHTML = `<div class="combatant-name">${displayName}</div>`;
     const sanitizedName = displayName.trim();
     const avatarInitial = sanitizedName ? sanitizedName.charAt(0).toUpperCase() : '?';
@@ -1951,11 +2174,12 @@ function createCombatantCard(combatant, isCurrentTurn) {
                     <div class="combatant-name-row">
                         ${nameHTML}
                         <div class="combatant-type">${typeLabel}</div>
+                        ${hiddenBadgeHTML}
                     </div>
                 </div>
                 <div class="combatant-actions">
                     ${mapControlsHTML}
-                    <button class="btn btn-small ${getCombatantVisibility(combatant) ? 'btn-secondary' : 'btn-warning'} combatant-hide-inline" onclick="toggleCombatantVisibility('${combatant.id}')">${getCombatantVisibility(combatant) ? 'Hide' : 'Show'}</button>
+                    <button class="btn btn-small ${isHiddenCombatant ? 'btn-warning' : 'btn-secondary'} combatant-hide-inline" onclick="toggleCombatantVisibility('${combatant.id}')">${isHiddenCombatant ? 'Unhide' : 'Hide'}</button>
                     <button class="btn btn-small btn-danger combatant-remove-inline" onclick="removeCombatant('${combatant.id}')">Remove</button>
                 </div>
             </div>
@@ -2797,6 +3021,7 @@ const atlasMapState = {
         end: { x: 240, y: 120 }
     },
     encounter: {
+        followDisplay: false,
         zoom: 1,
         minZoom: 0.2,
         maxZoom: 6,
@@ -2894,6 +3119,7 @@ function getAtlasElements() {
         gridColor: document.getElementById('atlas-grid-color'),
         gridEnabled: document.getElementById('atlas-grid-enabled'),
         tokenHealthRings: document.getElementById('atlas-token-health-rings'),
+        displayRotate180: document.getElementById('atlas-display-rotate-180'),
         saveSettingsBtn: document.getElementById('atlas-save-settings-btn'),
         pushDisplayBtn: document.getElementById('atlas-push-display-btn'),
         previewCanvas: document.getElementById('atlas-preview-canvas'),
@@ -3180,6 +3406,14 @@ function bindAtlasMapEvents() {
         updateTokenSettingsOnServer({ showEnemyHealthColors: enabled });
     });
 
+    elements.displayRotate180?.addEventListener('change', (event) => {
+        const rotation = event.target.checked ? 180 : 0;
+        atlasMapState.settings = atlasMapState.settings || {};
+        atlasMapState.settings.display = atlasMapState.settings.display || {};
+        atlasMapState.settings.display.rotation = rotation;
+        updateDisplayRotationOnServer(rotation);
+    });
+
     elements.autoCalibrateBtn?.addEventListener('click', handleAtlasAutoCalibrate);
     elements.manualCalibrateBtn?.addEventListener('click', toggleAtlasManualCalibration);
     window.addEventListener('resize', handleAtlasResize);
@@ -3451,6 +3685,9 @@ function populateSettingsForm() {
     if (elements.tokenHealthRings) {
         elements.tokenHealthRings.checked = settings.display?.tokens?.showEnemyHealthColors !== false;
     }
+    if (elements.displayRotate180) {
+        elements.displayRotate180.checked = Number(settings.display?.rotation) === 180;
+    }
     atlasMapState.preview.showGrid = elements.previewGridToggle.checked = settings.display?.grid?.enabled ?? true;
     atlasMapState.preview.fit = settings.display?.viewport?.fit || 'fit';
     atlasMapState.preview.zoom = settings.display?.viewport?.zoom || 1;
@@ -3493,6 +3730,7 @@ function gatherSettingsPayload() {
             tokens: {
                 showEnemyHealthColors: elements.tokenHealthRings ? elements.tokenHealthRings.checked : true
             },
+            rotation: elements.displayRotate180?.checked ? 180 : 0,
             viewport: {
                 fit: atlasMapState.preview.fit,
                 zoom: atlasMapState.preview.zoom,
@@ -5840,6 +6078,60 @@ function computeEncounterStartRect(mapWidth, mapHeight) {
     return { x, y, width: dims.width, height: dims.height };
 }
 
+function computeViewportRect(mapWidth, mapHeight) {
+    const display = atlasMapState.settings?.display;
+    if (!display || !mapWidth || !mapHeight) {
+        return null;
+    }
+
+    const resolution = display.resolution || { w: 1920, h: 1080 };
+    const width = Number(resolution.w) || 1920;
+    const height = Number(resolution.h) || 1080;
+    if (width <= 0 || height <= 0) {
+        return null;
+    }
+
+    const viewport = display.viewport || {};
+    const fit = viewport.fit || 'fit';
+    const zoom = Number(viewport.zoom) || 1;
+    const offset = viewport.offset || { x: 0, y: 0 };
+
+    let scaleX = 1;
+    let scaleY = 1;
+    if (fit === 'stretch') {
+        scaleX = (width / mapWidth) * zoom;
+        scaleY = (height / mapHeight) * zoom;
+    } else if (fit === 'fill') {
+        const scale = Math.max(width / mapWidth, height / mapHeight) * zoom;
+        scaleX = scale;
+        scaleY = scale;
+    } else if (fit === 'pixel') {
+        scaleX = zoom;
+        scaleY = zoom;
+    } else {
+        const scale = Math.min(width / mapWidth, height / mapHeight) * zoom;
+        scaleX = scale;
+        scaleY = scale;
+    }
+
+    const drawWidth = mapWidth * scaleX;
+    const drawHeight = mapHeight * scaleY;
+    const offsetX = (width - drawWidth) / 2 + (offset.x || 0);
+    const offsetY = (height - drawHeight) / 2 + (offset.y || 0);
+
+    const viewWidth = width / scaleX;
+    const viewHeight = height / scaleY;
+    const viewX = (0 - offsetX) / scaleX;
+    const viewY = (0 - offsetY) / scaleY;
+
+    const clampedWidth = Math.min(viewWidth, mapWidth);
+    const clampedHeight = Math.min(viewHeight, mapHeight);
+    const x = clamp(viewX, 0, Math.max(0, mapWidth - clampedWidth));
+    const y = clamp(viewY, 0, Math.max(0, mapHeight - clampedHeight));
+
+    return { x, y, width: clampedWidth, height: clampedHeight };
+}
+
 function positionEncounterStartArea(mapX, mapY) {
     const render = atlasMapState.encounter.render;
     if (!render) {
@@ -6151,27 +6443,61 @@ function drawAtlasEncounter() {
             return;
         }
 
-        const baseScale = Math.min(width / image.width, height / image.height) || 1;
-        const zoom = atlasMapState.encounter.zoom;
-        const scale = baseScale * zoom;
+        let baseScale = Math.min(width / image.width, height / image.height) || 1;
+        let scale = baseScale * (atlasMapState.encounter.zoom || 1);
+        let drawWidth = image.width * scale;
+        let drawHeight = image.height * scale;
+        let actualX = (width - drawWidth) / 2 + atlasMapState.encounter.offset.x;
+        let actualY = (height - drawHeight) / 2 + atlasMapState.encounter.offset.y;
 
-        const drawWidth = image.width * scale;
-        const drawHeight = image.height * scale;
+        if (atlasMapState.encounter.followDisplay && atlasMapState.settings?.display?.viewport) {
+            const display = atlasMapState.settings.display;
+            const resolution = display.resolution || { w: width, h: height };
+            const dispW = Number(resolution.w) || width;
+            const dispH = Number(resolution.h) || height;
+            const viewport = display.viewport || {};
+            const fit = viewport.fit || 'fit';
+            const zoom = Number(viewport.zoom) || 1;
+            const offset = viewport.offset || { x: 0, y: 0 };
 
-        const centerX = (width - drawWidth) / 2;
-        const centerY = (height - drawHeight) / 2;
+            let displayScale = 1;
+            if (fit === 'fill') {
+                displayScale = Math.max(dispW / image.width, dispH / image.height) * zoom;
+            } else if (fit === 'stretch') {
+                const scaleX = (dispW / image.width) * zoom;
+                const scaleY = (dispH / image.height) * zoom;
+                displayScale = Math.min(scaleX, scaleY);
+            } else if (fit === 'pixel') {
+                displayScale = zoom;
+            } else {
+                displayScale = Math.min(dispW / image.width, dispH / image.height) * zoom;
+            }
 
-        const margin = 200;
-        let actualX = centerX + atlasMapState.encounter.offset.x;
-        let actualY = centerY + atlasMapState.encounter.offset.y;
+            const displayDrawWidth = image.width * displayScale;
+            const displayDrawHeight = image.height * displayScale;
+            const displayOffsetX = (dispW - displayDrawWidth) / 2 + (offset.x || 0);
+            const displayOffsetY = (dispH - displayDrawHeight) / 2 + (offset.y || 0);
 
-        const minActualX = Math.min(0, width - drawWidth) - margin;
-        const maxActualX = Math.max(0, width - drawWidth) + margin;
-        const minActualY = Math.min(0, height - drawHeight) - margin;
-        const maxActualY = Math.max(0, height - drawHeight) + margin;
+            const screenScale = Math.min(width / dispW, height / dispH);
+            const screenOffsetX = (width - dispW * screenScale) / 2;
+            const screenOffsetY = (height - dispH * screenScale) / 2;
 
-        actualX = clamp(actualX, minActualX, maxActualX);
-        actualY = clamp(actualY, minActualY, maxActualY);
+            baseScale = displayScale * screenScale;
+            scale = baseScale;
+            drawWidth = image.width * scale;
+            drawHeight = image.height * scale;
+            actualX = screenOffsetX + displayOffsetX * screenScale;
+            actualY = screenOffsetY + displayOffsetY * screenScale;
+        } else {
+            const margin = 200;
+            const minActualX = Math.min(0, width - drawWidth) - margin;
+            const maxActualX = Math.max(0, width - drawWidth) + margin;
+            const minActualY = Math.min(0, height - drawHeight) - margin;
+            const maxActualY = Math.max(0, height - drawHeight) + margin;
+
+            actualX = clamp(actualX, minActualX, maxActualX);
+            actualY = clamp(actualY, minActualY, maxActualY);
+        }
 
         // Don't modify state in the draw function - this causes infinite redraws!
         // Just use the clamped actualX/actualY values for rendering
@@ -6193,7 +6519,8 @@ function drawAtlasEncounter() {
             }
         }
 
-        const rect = computeEncounterStartRect(image.width, image.height);
+        const startRect = computeEncounterStartRect(image.width, image.height);
+        const viewportRect = computeViewportRect(image.width, image.height);
         const renderGridMetrics = getEncounterGridMetrics();
         atlasMapState.encounter.render = {
             baseScale,
@@ -6204,12 +6531,15 @@ function drawAtlasEncounter() {
             canvasHeight: height,
             mapWidth: image.width,
             mapHeight: image.height,
-            startRect: rect,
+            startRect: startRect,
+            viewportRect: viewportRect,
             gridCellPx: renderGridMetrics ? renderGridMetrics.zoomed : null
         };
 
-        if (rect) {
-            drawStartAreaOverlay(ctx, rect);
+        const showStartArea = atlasMapState.encounter.placing || atlasMapState.encounter.placementMode;
+        const overlayRect = showStartArea ? startRect : (viewportRect || startRect);
+        if (overlayRect) {
+            drawStartAreaOverlay(ctx, overlayRect);
         }
 
         // Draw placed enemy tokens
@@ -6271,7 +6601,7 @@ function drawAtlasEncounter() {
             } else if (atlasMapState.encounter.placing) {
                 startAreaHint.textContent = 'Click on the map to set the starting area.';
                 startAreaHint.style.color = ''; // Reset color
-            } else if (rect) {
+            } else if (startRect) {
                 startAreaHint.textContent = 'Drag to pan or place a new starting area when needed.';
                 startAreaHint.style.color = ''; // Reset color
             } else {
@@ -6280,7 +6610,7 @@ function drawAtlasEncounter() {
             }
         }
 
-        updateEncounterSummary(rect);
+        updateEncounterSummary(startRect);
     }).catch((error) => {
         console.error('[Atlas] Failed to load encounter map:', error);
         if (encounterEmpty) {
@@ -6297,6 +6627,9 @@ function drawAtlasEncounter() {
 
 function handleEncounterWheel(event) {
     if (!atlasMapState.encounter) {
+        return;
+    }
+    if (atlasMapState.encounter.followDisplay) {
         return;
     }
     event.preventDefault();
@@ -6743,6 +7076,22 @@ function setEncounterFrameZoom(nextZoom) {
 
 // Update viewport zoom on server and broadcast to display (port 3001)
 function updateViewportZoomOnServer(zoom) {
+    const mapId = atlasMapState.activeMapId;
+    const startArea = atlasMapState.encounter?.startArea;
+    const encounterPayload = (mapId && startArea)
+        ? {
+            encounter: {
+                startingAreas: {
+                    [mapId]: {
+                        x: Number((startArea.x ?? 0).toFixed(2)),
+                        y: Number((startArea.y ?? 0).toFixed(2)),
+                        zoom: Number((startArea.zoom ?? zoom ?? 1).toFixed(2))
+                    }
+                }
+            }
+        }
+        : {};
+
     fetch(`${API_BASE}/atlas/settings`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -6752,11 +7101,14 @@ function updateViewportZoomOnServer(zoom) {
                     zoom: zoom,
                     fit: 'pixel'
                 }
-            }
+            },
+            ...encounterPayload
         })
     })
     .then(res => res.json())
     .then(settings => {
+        atlasMapState.settings = settings;
+        atlasMapState.preview.zoom = Number(settings?.display?.viewport?.zoom) || atlasMapState.preview.zoom;
         console.log('[updateViewportZoomOnServer] Viewport zoom updated to', zoom);
     })
     .catch(error => {
@@ -6873,6 +7225,30 @@ function updateTokenSettingsOnServer(tokenSettings) {
     })
     .catch(error => {
         console.error('[updateTokenSettingsOnServer] Failed to update token settings:', error);
+    });
+}
+
+function updateDisplayRotationOnServer(rotation) {
+    fetch(`${API_BASE}/atlas/settings`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            display: {
+                rotation: Number(rotation) === 180 ? 180 : 0
+            }
+        })
+    })
+    .then(res => res.json())
+    .then(settings => {
+        atlasMapState.settings = settings;
+        const elements = getAtlasElements();
+        if (elements.displayRotate180) {
+            elements.displayRotate180.checked = Number(settings?.display?.rotation) === 180;
+        }
+        console.log('[updateDisplayRotationOnServer] Display rotation updated:', settings?.display?.rotation);
+    })
+    .catch(error => {
+        console.error('[updateDisplayRotationOnServer] Failed to update display rotation:', error);
     });
 }
 
@@ -7280,7 +7656,29 @@ function updateAtlasStateFromSocket(payload) {
         applyDisplayGrid(payload.grid);
     }
     if (payload?.viewport) {
+        atlasMapState.settings = atlasMapState.settings || {};
+        atlasMapState.settings.display = atlasMapState.settings.display || {};
+        atlasMapState.settings.display.resolution = {
+            w: payload.viewport.w,
+            h: payload.viewport.h
+        };
+        atlasMapState.settings.display.viewport = {
+            ...(atlasMapState.settings.display.viewport || {}),
+            fit: payload.viewport.fit,
+            zoom: payload.viewport.zoom,
+            offset: payload.viewport.offset || { x: 0, y: 0 }
+        };
         applyDisplayResolution(payload.viewport);
+        drawAtlasEncounter();
+    }
+    if (Number.isFinite(Number(payload?.rotation))) {
+        atlasMapState.settings = atlasMapState.settings || {};
+        atlasMapState.settings.display = atlasMapState.settings.display || {};
+        atlasMapState.settings.display.rotation = Number(payload.rotation) === 180 ? 180 : 0;
+        const elements = getAtlasElements();
+        if (elements.displayRotate180) {
+            elements.displayRotate180.checked = atlasMapState.settings.display.rotation === 180;
+        }
     }
     if (typeof payload?.connected === 'boolean') {
         atlasMapState.displayConnected = payload.connected;

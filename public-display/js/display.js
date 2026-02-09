@@ -11,8 +11,119 @@ document.addEventListener('DOMContentLoaded', () => {
     image: null,
     connected: false,
     tokenImages: {},
-    flavorMediaImage: null
+    flavorMediaImage: null,
+    lastTokenHpByKey: {},
+    combatTextEffects: [],
+    combatTextAnimationFrame: null,
+    tokenShakeByKey: {}
   };
+
+  function getTokenKey(token) {
+    if (!token || typeof token !== 'object') {
+      return null;
+    }
+    return token.id || token.atlasTokenId || token.combatantId || null;
+  }
+
+  function queueDamageTextEffects(payload) {
+    const tokens = Array.isArray(payload?.tokens) ? payload.tokens : [];
+    const nextHpByKey = {};
+    const hadPrevious = Object.keys(state.lastTokenHpByKey || {}).length > 0;
+
+    tokens.forEach((token) => {
+      const key = getTokenKey(token);
+      const hpCurrent = Number(token?.hpCurrent);
+      if (!key || !Number.isFinite(hpCurrent)) {
+        return;
+      }
+
+      const previousHp = Number(state.lastTokenHpByKey[key]);
+      if (hadPrevious && Number.isFinite(previousHp) && hpCurrent !== previousHp) {
+        const now = performance.now();
+        const delta = Math.round(hpCurrent - previousHp);
+
+        if (delta < 0) {
+          const damage = Math.max(0, Math.abs(delta));
+          if (damage > 0) {
+            const hpMax = Number(token?.hpMax);
+            const critThreshold = Number.isFinite(hpMax) && hpMax > 0
+              ? Math.max(10, Math.ceil(hpMax * 0.2))
+              : 10;
+            const isCrit = damage >= critThreshold;
+
+            state.combatTextEffects.push({
+              id: `dmg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+              tokenKey: key,
+              text: isCrit ? `CRIT! -${damage}` : `-${damage}`,
+              kind: 'damage',
+              isCrit,
+              createdAt: now,
+              durationMs: isCrit ? 1100 : 900,
+              driftX: (Math.random() - 0.5) * 20
+            });
+
+            state.tokenShakeByKey[key] = {
+              createdAt: now,
+              durationMs: isCrit ? 420 : 300,
+              strength: isCrit ? 8 : 5
+            };
+          }
+        } else if (delta > 0) {
+          const heal = Math.max(0, delta);
+          state.combatTextEffects.push({
+            id: `heal-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            tokenKey: key,
+            text: `+${heal}`,
+            kind: 'heal',
+            isCrit: false,
+            createdAt: now,
+            durationMs: 900,
+            driftX: (Math.random() - 0.5) * 16
+          });
+        }
+      }
+
+      nextHpByKey[key] = hpCurrent;
+    });
+
+    state.lastTokenHpByKey = nextHpByKey;
+
+    if (state.combatTextEffects.length > 0 || Object.keys(state.tokenShakeByKey).length > 0) {
+      startCombatTextAnimationLoop();
+    }
+  }
+
+  function startCombatTextAnimationLoop() {
+    if (state.combatTextAnimationFrame) {
+      return;
+    }
+
+    const tick = () => {
+      state.combatTextAnimationFrame = null;
+      const now = performance.now();
+      state.combatTextEffects = state.combatTextEffects.filter((effect) => {
+        const age = now - effect.createdAt;
+        return age < effect.durationMs;
+      });
+      const nextShakeByKey = {};
+      Object.keys(state.tokenShakeByKey).forEach((key) => {
+        const shake = state.tokenShakeByKey[key];
+        if (!shake) return;
+        if ((now - shake.createdAt) < shake.durationMs) {
+          nextShakeByKey[key] = shake;
+        }
+      });
+      state.tokenShakeByKey = nextShakeByKey;
+
+      draw();
+
+      if (state.combatTextEffects.length > 0 || Object.keys(state.tokenShakeByKey).length > 0) {
+        state.combatTextAnimationFrame = requestAnimationFrame(tick);
+      }
+    };
+
+    state.combatTextAnimationFrame = requestAnimationFrame(tick);
+  }
 
   function setStatus(text, isConnected) {
     if (statusTextEl) {
@@ -121,6 +232,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initiativeRail.setAttribute('aria-hidden', 'false');
     initiativeRail.classList.remove('hidden');
     initiativeRail.replaceChildren(fragment);
+  }
+
+  function applyDisplayRotation(payload) {
+    const rotation = Number(payload?.rotation) === 180 ? 180 : 0;
+    document.body.classList.toggle('display-rotated', rotation === 180);
   }
 
   function draw() {
@@ -297,11 +413,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const showHealthRings = state.payload?.tokenSettings?.showEnemyHealthColors !== false;
 
     tokens.forEach(token => {
-      const screenX = mapTransform.offsetX + (token.x * mapTransform.scale);
-      const screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
+      let screenX = mapTransform.offsetX + (token.x * mapTransform.scale);
+      let screenY = mapTransform.offsetY + (token.y * mapTransform.scale);
 
       let tokenRadius = (cellSize * mapTransform.scale) / 2;
       tokenRadius = Math.max(tokenRadius, 25);
+      const tokenKey = getTokenKey(token);
+      const shake = tokenKey ? state.tokenShakeByKey[tokenKey] : null;
+      if (shake) {
+        const now = performance.now();
+        const age = now - shake.createdAt;
+        const progress = Math.max(0, Math.min(1, age / shake.durationMs));
+        const envelope = 1 - progress;
+        const jitterX = (Math.random() - 0.5) * shake.strength * 2 * envelope;
+        const jitterY = (Math.random() - 0.5) * shake.strength * 2 * envelope;
+        screenX += jitterX;
+        screenY += jitterY;
+      }
 
       const basePercent = Number.isFinite(token.hpPercent)
         ? token.hpPercent
@@ -400,6 +528,50 @@ document.addEventListener('DOMContentLoaded', () => {
       ctx.fillText(token.name, screenX, textY);
       ctx.restore();
     });
+
+    drawFloatingCombatText(mapTransform, tokens);
+  }
+
+  function drawFloatingCombatText(mapTransform, tokens) {
+    if (!state.combatTextEffects.length) {
+      return;
+    }
+
+    const tokenByKey = {};
+    tokens.forEach((token) => {
+      const key = getTokenKey(token);
+      if (key) {
+        tokenByKey[key] = token;
+      }
+    });
+
+    const now = performance.now();
+    state.combatTextEffects.forEach((effect) => {
+      const token = tokenByKey[effect.tokenKey];
+      if (!token) {
+        return;
+      }
+
+      const age = now - effect.createdAt;
+      const progress = Math.max(0, Math.min(1, age / effect.durationMs));
+      const alpha = 1 - progress;
+      const rise = 16 + (progress * 52);
+
+      const x = mapTransform.offsetX + (token.x * mapTransform.scale) + effect.driftX;
+      const y = mapTransform.offsetY + (token.y * mapTransform.scale) - rise;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.font = effect.isCrit ? 'bold 46px "Courier New", monospace' : 'bold 42px "Courier New", monospace';
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.95)';
+      ctx.lineWidth = 8;
+      ctx.strokeText(effect.text, x, y);
+      ctx.fillStyle = effect.kind === 'heal' ? '#34d399' : (effect.isCrit ? '#facc15' : '#ff3b30');
+      ctx.fillText(effect.text, x, y);
+      ctx.restore();
+    });
   }
 
   function drawFlavorMediaOverlay(width, height) {
@@ -476,7 +648,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function handleDisplayState(payload) {
     const previousMapUrl = state.payload?.map?.url;
+    const mapChanged = previousMapUrl !== payload?.map?.url;
     state.payload = payload;
+    applyDisplayRotation(payload);
+    if (mapChanged) {
+      state.lastTokenHpByKey = {};
+      state.combatTextEffects = [];
+      state.tokenShakeByKey = {};
+    }
+    queueDamageTextEffects(payload);
 
     console.log('[Display] Received state update, flavorMedia:', payload?.flavorMedia);
 

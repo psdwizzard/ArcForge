@@ -1,0 +1,3394 @@
+{
+  "id": "id_1768144553162_ly21v4psd",
+  "name": "templeofDoom",
+  "description": "",
+  "createdAt": "2026-01-11T15:15:53.162Z",
+  "encounters": [
+    {
+      "id": "id_1768144566438_nj87xp9y2",
+      "name": "temple1",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2026-01-11T15:16:06.438Z",
+      "combatants": [
+        {
+          "id": "combatant-1768156259078-l6p5pra1c",
+          "name": "Rootbound Constrictor - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768153158948-qf7e4e",
+          "hp": {
+            "current": 110,
+            "max": 110,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1768156259078-k6jt45sco",
+          "name": "Rootbound Constrictor - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768153163058-ook0at",
+          "hp": {
+            "current": 110,
+            "max": 110,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1768153158948-qf7e4e",
+          "name": "Rootbound Constrictor - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-roo-005",
+            "agentType": "e",
+            "name": "Rootbound Constrictor",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 18,
+              "dex": 12,
+              "con": 16,
+              "int": 4,
+              "wis": 14,
+              "cha": 6
+            },
+            "hp": 110,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-roo-1",
+                "name": "Vine Lash",
+                "attackBonus": 8,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-roo-2",
+                "name": "Constrict (grapple on hit, escape DC 16)",
+                "attackBonus": 8,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-roo-3",
+                "name": "Drag to the Dark (STR save 15, fail: pulled 15 ft into adjacent corridor)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "necrotic"
+              }
+            ],
+            "notes": "Visual: an anaconda made of wet roots and moss. Tactics: it tries to yank someone into spikes, into the ooze room, or away from healers.",
+            "imagePath": "/uploads/characterImage/grappler.png"
+          },
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 596.63,
+            "y": 780.22,
+            "mapId": "map-e8be2198-af9e-4669-9656-3e8abdcccf79"
+          },
+          "atlasTokenId": "enc-enemy-1768153158948-qf7e4e",
+          "combatantId": "combatant-1768153224590-nrxfp290g",
+          "stats": {
+            "hp": 0,
+            "ac": 16,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 12,
+            "con": 16,
+            "int": 4,
+            "wis": 14,
+            "cha": 6
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 110,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768153163058-ook0at",
+          "name": "Rootbound Constrictor - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-roo-005",
+            "agentType": "e",
+            "name": "Rootbound Constrictor",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 18,
+              "dex": 12,
+              "con": 16,
+              "int": 4,
+              "wis": 14,
+              "cha": 6
+            },
+            "hp": 110,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-roo-1",
+                "name": "Vine Lash",
+                "attackBonus": 8,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-roo-2",
+                "name": "Constrict (grapple on hit, escape DC 16)",
+                "attackBonus": 8,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-roo-3",
+                "name": "Drag to the Dark (STR save 15, fail: pulled 15 ft into adjacent corridor)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "necrotic"
+              }
+            ],
+            "notes": "Visual: an anaconda made of wet roots and moss. Tactics: it tries to yank someone into spikes, into the ooze room, or away from healers.",
+            "imagePath": "/uploads/characterImage/grappler.png"
+          },
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 1606.33,
+            "y": 780.22,
+            "mapId": "map-e8be2198-af9e-4669-9656-3e8abdcccf79"
+          },
+          "atlasTokenId": "enc-enemy-1768153163058-ook0at",
+          "combatantId": "combatant-1768153248943-ariashfwb",
+          "stats": {
+            "hp": 3,
+            "ac": 16,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 12,
+            "con": 16,
+            "int": 4,
+            "wis": 14,
+            "cha": 6
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 110,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768148591422-2fofjt",
+          "name": "Dart Idol Totem - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1768148591422-2fofjt",
+          "combatantId": null,
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": null,
+          "inventory": [],
+          "gold": null,
+          "hp": null,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768148585773-wyeqw4",
+          "name": "Couatl Heart-Idol - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1768148585773-wyeqw4",
+          "combatantId": null,
+          "stats": {
+            "hp": 210,
+            "ac": 18,
+            "dexModifier": 2
+          },
+          "abilities": null,
+          "inventory": [],
+          "gold": null,
+          "hp": null,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768148593938-ztl9mw",
+          "name": "Dart Idol Totem - 02",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1768148593938-ztl9mw",
+          "combatantId": null,
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": null,
+          "inventory": [],
+          "gold": null,
+          "hp": null,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768148609428-txdz3f",
+          "name": "Sunstone Jaguar Sentinel - 01",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1768148609428-txdz3f",
+          "combatantId": null,
+          "stats": {
+            "hp": 140,
+            "ac": 17,
+            "dexModifier": 3
+          },
+          "abilities": null,
+          "inventory": [],
+          "gold": null,
+          "hp": null,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768148706303-evsqfz",
+          "name": "Dart Idol Totem - 03",
+          "source": "custom",
+          "payload": null,
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1768148706303-evsqfz",
+          "combatantId": null,
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": null,
+          "inventory": [],
+          "gold": null,
+          "hp": null,
+          "ac": null
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-4c3f3820-53bd-4a13-9298-8472b1e1c956",
+          "path": "/maps/3774dbec-c982-4729-99f0-fac384e95ea1.jpg",
+          "filename": "3774dbec-c982-4729-99f0-fac384e95ea1.jpg",
+          "type": "image"
+        },
+        {
+          "id": "flavor-dc2ba46b-7095-4b12-b45c-af62b6b2dcd7",
+          "path": "/maps/b4c95344-3895-40ba-b0aa-281366fee7f9.png",
+          "filename": "b4c95344-3895-40ba-b0aa-281366fee7f9.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-36fb5be3-7a78-4fe3-a899-45ccdc081608",
+          "path": "/maps/7c15e792-603e-470f-9cdb-59c37b33b190.png",
+          "filename": "7c15e792-603e-470f-9cdb-59c37b33b190.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-4062a82c-e9f0-4577-9b1d-ce04bee83652",
+          "path": "/maps/9a0b27d3-7954-462e-805d-bbb6f227fea5.jpg",
+          "filename": "9a0b27d3-7954-462e-805d-bbb6f227fea5.jpg",
+          "type": "image"
+        },
+        {
+          "id": "flavor-8049fea5-99ee-4bd5-a458-9454ba49c813",
+          "path": "/maps/a3ddde3a-c4fb-4df3-94c2-58d6c5f8771d.png",
+          "filename": "a3ddde3a-c4fb-4df3-94c2-58d6c5f8771d.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-a7dbd41b-cca9-482b-8918-9d4546f5d510",
+          "path": "/maps/dce98416-d873-4cc4-92c6-18aa6449099a.png",
+          "filename": "dce98416-d873-4cc4-92c6-18aa6449099a.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-7c782b78-8849-40ac-88f3-5b125c689005",
+          "path": "/maps/6539b1cd-cd85-4f30-a7a7-6f2b3b7a7af7.png",
+          "filename": "6539b1cd-cd85-4f30-a7a7-6f2b3b7a7af7.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-2ed4f59a-0f38-44f2-9922-316fc9ebb4d6",
+          "path": "/maps/fb29478f-339c-4206-84b6-a3d078a1d336.png",
+          "filename": "fb29478f-339c-4206-84b6-a3d078a1d336.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-4ac8c8d6-a15b-4857-9fc4-9deda87880c7",
+          "path": "/maps/a620411c-7b82-4d17-874d-1a6a77c61705.png",
+          "filename": "a620411c-7b82-4d17-874d-1a6a77c61705.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-580c0bc9-8181-4597-bcc2-bc069d293316",
+          "path": "/maps/10797b01-34aa-4af0-8b00-5200e6612b2b.png",
+          "filename": "10797b01-34aa-4af0-8b00-5200e6612b2b.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-3990d07a-ccab-4018-8ad6-c1c434babcd5",
+          "path": "/maps/75831ae6-4b7f-4dbd-8f0c-bb9917538a7f.png",
+          "filename": "75831ae6-4b7f-4dbd-8f0c-bb9917538a7f.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-c03c3718-f720-4dfc-b67f-df6e8de534e1",
+          "path": "/maps/2273e60a-0e23-4caf-813a-701f88aff74f.png",
+          "filename": "2273e60a-0e23-4caf-813a-701f88aff74f.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-4dbf752a-68e6-43ef-b354-59a11181705e",
+          "path": "/maps/07719851-15a0-4243-b3d7-6183c74981d1.png",
+          "filename": "07719851-15a0-4243-b3d7-6183c74981d1.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-551ac24d-3b11-4333-869d-cca5b5c33256",
+          "path": "/maps/0aa8b4f2-b7f8-4e7d-b516-a0adedd2e87e.png",
+          "filename": "0aa8b4f2-b7f8-4e7d-b516-a0adedd2e87e.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-64f12b9e-9354-4bb9-a58e-f7a35bb63696",
+          "path": "/maps/1d50415c-976e-48c4-912a-6c24f51e326c.png",
+          "filename": "1d50415c-976e-48c4-912a-6c24f51e326c.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-652a58f3-2dc3-4dc5-99a8-4a197a165ccf",
+          "path": "/maps/8a25a6c4-1fd6-4225-b755-164c049aa104.png",
+          "filename": "8a25a6c4-1fd6-4225-b755-164c049aa104.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": []
+    },
+    {
+      "id": "id_1768156266310_202he3zks",
+      "name": "t3",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2026-01-11T18:31:06.310Z",
+      "combatants": [
+        {
+          "id": "combatant-1770567931695-4ipoe5nxh",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "type": "enemy",
+          "initiative": 22,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156527691-vgyjul",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1768157308542-pwl229co3",
+          "name": "synco",
+          "type": "p",
+          "initiative": 15,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1763904527007-695803936.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1768159517863-3rgflbohc",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "type": "enemy",
+          "initiative": 14,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156446311-eobz5x",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1768156558094-ujs0vfzdm",
+          "name": "Sunstone Jaguar Sentinel - 01",
+          "type": "enemy",
+          "initiative": 12,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156441525-1oes7p",
+          "hp": {
+            "current": 140,
+            "max": 140,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1768157307226-crav4tpxg",
+          "name": "draven",
+          "type": "p",
+          "initiative": 11,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1763904436417-989872509.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 42,
+            "max": 59,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1768157309965-o26gdjs76",
+          "name": "SmolderingEyeBalls",
+          "type": "p",
+          "initiative": 9,
+          "dexModifier": 4,
+          "imagePath": "/uploads/characterImage/characterImage-1763904398643-423550034.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 50,
+            "max": 50,
+            "temp": 6
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1768157311300-9nq9cr93p",
+          "name": "Birtie",
+          "type": "p",
+          "initiative": 8,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1763904510082-223258989.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 48,
+            "max": 48,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770567402578-ngwp3wym3",
+          "name": "Rootbound Constrictor - 01",
+          "type": "enemy",
+          "initiative": 4,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156584132-m0fbtc",
+          "hp": {
+            "current": 110,
+            "max": 110,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1768156503798-vweqagu3m",
+          "name": "River-Step Revenant - 02",
+          "type": "enemy",
+          "initiative": 3,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/undead.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156458704-rb4cs5",
+          "hp": {
+            "current": 105,
+            "max": 105,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": true
+        },
+        {
+          "id": "combatant-1770569911655-9vtinkw5k",
+          "name": "River-Step Revenant - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/undead.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1768156459334-s41gtb",
+          "hp": {
+            "current": 105,
+            "max": 105,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1768156441525-1oes7p",
+          "name": "Sunstone Jaguar Sentinel - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-jag-002",
+            "agentType": "e",
+            "name": "Sunstone Jaguar Sentinel",
+            "race": "",
+            "class": "",
+            "level": 9,
+            "abilities": {
+              "str": 18,
+              "dex": 16,
+              "con": 16,
+              "int": 6,
+              "wis": 14,
+              "cha": 8
+            },
+            "hp": 140,
+            "ac": 17,
+            "speed": 50,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-jag-1",
+                "name": "Sunstone Claws",
+                "attackBonus": 9,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-jag-2",
+                "name": "Pounce (if moved 20 ft straight, target STR save 16 or prone)",
+                "attackBonus": 9,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-jag-3",
+                "name": "Glare-Flash (CON save 15, fail: blinded until end of next turn, recharge 5-6)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "radiant"
+              }
+            ],
+            "notes": "Perfect for Floor 3 big rooms and long corridors. Visual: carved jaguar statue with gold-inlaid joints that flare bright when it charges. Tactics: it tries to knock someone into traps, spikes, or poison tiles.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1184.09,
+            "y": 1514.54,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156441525-1oes7p",
+          "combatantId": "combatant-1768156558081-f1npssgzm",
+          "stats": {
+            "hp": 140,
+            "ac": 17,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 16,
+            "con": 16,
+            "int": 6,
+            "wis": 14,
+            "cha": 8
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 140,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768156446311-eobz5x",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1239.17,
+            "y": 247.85,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156446311-eobz5x",
+          "combatantId": "combatant-1768156518737-nq5mi4vrx",
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768156458704-rb4cs5",
+          "name": "River-Step Revenant - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-rev-008",
+            "agentType": "e",
+            "name": "River-Step Revenant",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 16,
+              "int": 8,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 105,
+            "ac": 16,
+            "speed": 30,
+            "skills": [
+              "Athletics +7",
+              "Perception +5",
+              "Stealth +6"
+            ],
+            "attacks": [
+              {
+                "id": "attack-rev-1",
+                "name": "Drowned Blade",
+                "attackBonus": 8,
+                "damageDice": "2d8+3",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-rev-2",
+                "name": "Undertow Shove (STR save 15, fail: pushed 15 ft and prone)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-rev-3",
+                "name": "Waterlogged Curse (WIS save 14, fail: disadvantage on attacks until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              }
+            ],
+            "notes": "Visual: skeletal warrior with algae-caked armor and water dripping out of its ribcage. Put one on the narrow bridge to the circular dais (boss room) and it becomes a real positional problem.",
+            "imagePath": "/uploads/characterImage/undead.png"
+          },
+          "imagePath": "/uploads/characterImage/undead.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 633.36,
+            "y": 1514.5,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156458704-rb4cs5",
+          "combatantId": "combatant-1768156503791-1sljc4npe",
+          "stats": {
+            "hp": 105,
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 16,
+            "int": 8,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 105,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768156459334-s41gtb",
+          "name": "River-Step Revenant - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-rev-008",
+            "agentType": "e",
+            "name": "River-Step Revenant",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 16,
+              "int": 8,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 105,
+            "ac": 16,
+            "speed": 30,
+            "skills": [
+              "Athletics +7",
+              "Perception +5",
+              "Stealth +6"
+            ],
+            "attacks": [
+              {
+                "id": "attack-rev-1",
+                "name": "Drowned Blade",
+                "attackBonus": 8,
+                "damageDice": "2d8+3",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-rev-2",
+                "name": "Undertow Shove (STR save 15, fail: pushed 15 ft and prone)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-rev-3",
+                "name": "Waterlogged Curse (WIS save 14, fail: disadvantage on attacks until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              }
+            ],
+            "notes": "Visual: skeletal warrior with algae-caked armor and water dripping out of its ribcage. Put one on the narrow bridge to the circular dais (boss room) and it becomes a real positional problem.",
+            "imagePath": "/uploads/characterImage/undead.png"
+          },
+          "imagePath": "/uploads/characterImage/undead.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 633.36,
+            "y": 1514.54,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156459334-s41gtb",
+          "combatantId": "combatant-1768156485348-3amek5lmt",
+          "stats": {
+            "hp": 100,
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 16,
+            "int": 8,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 105,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768156527691-vgyjul",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1018.91,
+            "y": 468.14,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156527691-vgyjul",
+          "combatantId": "combatant-1768156539176-xlabs8g9c",
+          "stats": {
+            "hp": 0,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1768156584132-m0fbtc",
+          "name": "Rootbound Constrictor - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-roo-005",
+            "agentType": "e",
+            "name": "Rootbound Constrictor",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 18,
+              "dex": 12,
+              "con": 16,
+              "int": 4,
+              "wis": 14,
+              "cha": 6
+            },
+            "hp": 110,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-roo-1",
+                "name": "Vine Lash",
+                "attackBonus": 8,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-roo-2",
+                "name": "Constrict (grapple on hit, escape DC 16)",
+                "attackBonus": 8,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-roo-3",
+                "name": "Drag to the Dark (STR save 15, fail: pulled 15 ft into adjacent corridor)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "necrotic"
+              }
+            ],
+            "notes": "Visual: an anaconda made of wet roots and moss. Tactics: it tries to yank someone into spikes, into the ooze room, or away from healers.",
+            "imagePath": "/uploads/characterImage/grappler.png"
+          },
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1073.93,
+            "y": 523.2,
+            "mapId": "map-8d354e72-d4e1-43be-9b40-0a707e14a32f"
+          },
+          "atlasTokenId": "enc-enemy-1768156584132-m0fbtc",
+          "combatantId": "combatant-1768156598361-ejwhd2h3o",
+          "stats": {
+            "hp": 110,
+            "ac": 16,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 12,
+            "con": 16,
+            "int": 4,
+            "wis": 14,
+            "cha": 6
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 110,
+          "ac": null
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-f976ca1f-1eb4-48df-830d-94770ed9be7e",
+          "path": "/maps/2815b95a-a3c2-4132-ba67-97bf6fc59fcf.jpg",
+          "filename": "2815b95a-a3c2-4132-ba67-97bf6fc59fcf.jpg",
+          "type": "image"
+        },
+        {
+          "id": "flavor-30829b63-66ae-4b7b-ba1c-b48eba347888",
+          "path": "/maps/caebb68c-728e-4705-9248-9816e58153ec.png",
+          "filename": "caebb68c-728e-4705-9248-9816e58153ec.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-4c2b8c71-c6ca-4100-b212-e13af0fb142e",
+          "path": "/maps/1d71b199-de18-488e-8501-36373ea55625.png",
+          "filename": "1d71b199-de18-488e-8501-36373ea55625.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-39de6cf0-37e9-4ed2-a723-5dc70efe1da5",
+          "path": "/maps/44a23e84-7520-45dd-8923-cde6531fa926.png",
+          "filename": "44a23e84-7520-45dd-8923-cde6531fa926.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-faa930be-1fa5-400a-bfe5-e667bc969e7b",
+          "path": "/maps/4d3e9a5c-db9e-4aea-b71d-a06e8ab2ce26.png",
+          "filename": "4d3e9a5c-db9e-4aea-b71d-a06e8ab2ce26.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-d3aef600-be5b-4eb1-85f4-b5fa77b42fc0",
+          "path": "/maps/774ffa5a-7e4c-4d26-abdc-56e477428818.png",
+          "filename": "774ffa5a-7e4c-4d26-abdc-56e477428818.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-03507cc3-9a12-42db-9e9e-02bf72936d17",
+          "path": "/maps/b46271dd-a413-43f8-8378-887dd927e99c.png",
+          "filename": "b46271dd-a413-43f8-8378-887dd927e99c.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-c5f070f8-cb5a-409a-b222-e2028bea0555",
+          "path": "/maps/16bd95ea-96d6-40b4-93d8-48c6833415ec.png",
+          "filename": "16bd95ea-96d6-40b4-93d8-48c6833415ec.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-b9b4f8a8-7f69-4d21-b82f-5428813cdd5d",
+          "path": "/maps/2e00f69e-0477-46c9-81eb-95cd38aad319.png",
+          "filename": "2e00f69e-0477-46c9-81eb-95cd38aad319.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-bcdde7a7-e1c7-42b3-acf5-8944d7583364",
+          "path": "/maps/1d6fa38c-4f97-43d6-bd37-961a014cc919.png",
+          "filename": "1d6fa38c-4f97-43d6-bd37-961a014cc919.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-925c8b25-8d81-44f9-9769-2b5e4028648a",
+          "path": "/maps/a94a7530-6dbd-43e8-9cb9-c474235aa219.png",
+          "filename": "a94a7530-6dbd-43e8-9cb9-c474235aa219.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-221cf102-3844-41f6-9f3e-5a30a057d15d",
+          "path": "/maps/07373e9c-bf02-4229-8824-6208cd922ee5.png",
+          "filename": "07373e9c-bf02-4229-8824-6208cd922ee5.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": []
+    },
+    {
+      "id": "id_1770570520078_s8h7ke79a",
+      "name": "level3",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2026-02-08T17:08:40.078Z",
+      "combatants": [
+        {
+          "id": "combatant-1770578593081-xagzubb2n",
+          "name": "Lily-Pad Mire Slime - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": -1,
+          "imagePath": "/uploads/characterImage/ooze.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570540857-endhb6",
+          "hp": {
+            "current": 95,
+            "max": 95,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593081-b3tspw4pu",
+          "name": "Lily-Pad Mire Slime - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": -1,
+          "imagePath": "/uploads/characterImage/ooze.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570542049-a6k0xp",
+          "hp": {
+            "current": 95,
+            "max": 95,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593081-4ss728ycq",
+          "name": "Rootbound Constrictor - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570548792-1a9qtc",
+          "hp": {
+            "current": 110,
+            "max": 110,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593082-md2ysvtpa",
+          "name": "Rootbound Constrictor - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570549095-zegsos",
+          "hp": {
+            "current": 110,
+            "max": 110,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593082-i2xij63a0",
+          "name": "Sunstone Jaguar Sentinel - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570553063-cvdggh",
+          "hp": {
+            "current": 140,
+            "max": 140,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593082-uet2gtken",
+          "name": "Sunstone Jaguar Sentinel - 02",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570553319-xucw0s",
+          "hp": {
+            "current": 140,
+            "max": 140,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593082-j1dtf3zrr",
+          "name": "Serpent-Mask Hierophant - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1768144696333-308591580.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570639159-tthqpe",
+          "hp": {
+            "current": 95,
+            "max": 95,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578593082-yjr2rebkj",
+          "name": "River-Step Revenant - 01",
+          "type": "enemy",
+          "initiative": 0,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/undead.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770570662096-uhe2wh",
+          "hp": {
+            "current": 105,
+            "max": 105,
+            "temp": 0
+          },
+          "ac": 16,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1770570540857-endhb6",
+          "name": "Lily-Pad Mire Slime - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-sli-006",
+            "agentType": "e",
+            "name": "Lily-Pad Mire Slime",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 14,
+              "dex": 8,
+              "con": 18,
+              "int": 2,
+              "wis": 10,
+              "cha": 2
+            },
+            "hp": 95,
+            "ac": 14,
+            "speed": 20,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-sli-1",
+                "name": "Engulfing Slap",
+                "attackBonus": 7,
+                "damageDice": "3d8+3",
+                "damageType": "acid"
+              },
+              {
+                "id": "attack-sli-2",
+                "name": "Stinking Bloom (CON save 14, fail: 4d6 poison and poisoned 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Visual: a green slime with lily pads and tiny flowers floating on top. It looks pretty until it moves. Great for the lily-pad water area (land.jpg) or the green pools on Floor 3-4.",
+            "imagePath": "/uploads/characterImage/ooze.png"
+          },
+          "imagePath": "/uploads/characterImage/ooze.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 247.83,
+            "y": 302.91,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570540857-endhb6",
+          "combatantId": "combatant-1770570586993-f7276zq7w",
+          "stats": {
+            "hp": 95,
+            "ac": 14,
+            "dexModifier": -1
+          },
+          "abilities": {
+            "str": 14,
+            "dex": 8,
+            "con": 18,
+            "int": 2,
+            "wis": 10,
+            "cha": 2
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 95,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570542049-a6k0xp",
+          "name": "Lily-Pad Mire Slime - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-sli-006",
+            "agentType": "e",
+            "name": "Lily-Pad Mire Slime",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 14,
+              "dex": 8,
+              "con": 18,
+              "int": 2,
+              "wis": 10,
+              "cha": 2
+            },
+            "hp": 95,
+            "ac": 14,
+            "speed": 20,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-sli-1",
+                "name": "Engulfing Slap",
+                "attackBonus": 7,
+                "damageDice": "3d8+3",
+                "damageType": "acid"
+              },
+              {
+                "id": "attack-sli-2",
+                "name": "Stinking Bloom (CON save 14, fail: 4d6 poison and poisoned 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Visual: a green slime with lily pads and tiny flowers floating on top. It looks pretty until it moves. Great for the lily-pad water area (land.jpg) or the green pools on Floor 3-4.",
+            "imagePath": "/uploads/characterImage/ooze.png"
+          },
+          "imagePath": "/uploads/characterImage/ooze.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1073.94,
+            "y": 302.91,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570542049-a6k0xp",
+          "combatantId": "combatant-1770570598921-xh95ml6z2",
+          "stats": {
+            "hp": 95,
+            "ac": 14,
+            "dexModifier": -1
+          },
+          "abilities": {
+            "str": 14,
+            "dex": 8,
+            "con": 18,
+            "int": 2,
+            "wis": 10,
+            "cha": 2
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 95,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570548792-1a9qtc",
+          "name": "Rootbound Constrictor - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-roo-005",
+            "agentType": "e",
+            "name": "Rootbound Constrictor",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 18,
+              "dex": 12,
+              "con": 16,
+              "int": 4,
+              "wis": 14,
+              "cha": 6
+            },
+            "hp": 110,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-roo-1",
+                "name": "Vine Lash",
+                "attackBonus": 8,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-roo-2",
+                "name": "Constrict (grapple on hit, escape DC 16)",
+                "attackBonus": 8,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-roo-3",
+                "name": "Drag to the Dark (STR save 15, fail: pulled 15 ft into adjacent corridor)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "necrotic"
+              }
+            ],
+            "notes": "Visual: an anaconda made of wet roots and moss. Tactics: it tries to yank someone into spikes, into the ooze room, or away from healers.",
+            "imagePath": "/uploads/characterImage/grappler.png"
+          },
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1844.98,
+            "y": 413.06,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570548792-1a9qtc",
+          "combatantId": "combatant-1770570603567-tvkvstww1",
+          "stats": {
+            "hp": 0,
+            "ac": 16,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 12,
+            "con": 16,
+            "int": 4,
+            "wis": 14,
+            "cha": 6
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 110,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570549095-zegsos",
+          "name": "Rootbound Constrictor - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-roo-005",
+            "agentType": "e",
+            "name": "Rootbound Constrictor",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 18,
+              "dex": 12,
+              "con": 16,
+              "int": 4,
+              "wis": 14,
+              "cha": 6
+            },
+            "hp": 110,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-roo-1",
+                "name": "Vine Lash",
+                "attackBonus": 8,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-roo-2",
+                "name": "Constrict (grapple on hit, escape DC 16)",
+                "attackBonus": 8,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-roo-3",
+                "name": "Drag to the Dark (STR save 15, fail: pulled 15 ft into adjacent corridor)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "necrotic"
+              }
+            ],
+            "notes": "Visual: an anaconda made of wet roots and moss. Tactics: it tries to yank someone into spikes, into the ooze room, or away from healers.",
+            "imagePath": "/uploads/characterImage/grappler.png"
+          },
+          "imagePath": "/uploads/characterImage/grappler.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1129.08,
+            "y": 1037.22,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570549095-zegsos",
+          "combatantId": "combatant-1770570607756-j0wpfw2jz",
+          "stats": {
+            "hp": 0,
+            "ac": 16,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 12,
+            "con": 16,
+            "int": 4,
+            "wis": 14,
+            "cha": 6
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 110,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570553063-cvdggh",
+          "name": "Sunstone Jaguar Sentinel - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-jag-002",
+            "agentType": "e",
+            "name": "Sunstone Jaguar Sentinel",
+            "race": "",
+            "class": "",
+            "level": 9,
+            "abilities": {
+              "str": 18,
+              "dex": 16,
+              "con": 16,
+              "int": 6,
+              "wis": 14,
+              "cha": 8
+            },
+            "hp": 140,
+            "ac": 17,
+            "speed": 50,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-jag-1",
+                "name": "Sunstone Claws",
+                "attackBonus": 9,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-jag-2",
+                "name": "Pounce (if moved 20 ft straight, target STR save 16 or prone)",
+                "attackBonus": 9,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-jag-3",
+                "name": "Glare-Flash (CON save 15, fail: blinded until end of next turn, recharge 5-6)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "radiant"
+              }
+            ],
+            "notes": "Perfect for Floor 3 big rooms and long corridors. Visual: carved jaguar statue with gold-inlaid joints that flare bright when it charges. Tactics: it tries to knock someone into traps, spikes, or poison tiles.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1055.59,
+            "y": 1220.81,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570553063-cvdggh",
+          "combatantId": "combatant-1770570611356-46ebuwn6c",
+          "stats": {
+            "hp": 0,
+            "ac": 17,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 16,
+            "con": 16,
+            "int": 6,
+            "wis": 14,
+            "cha": 8
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 140,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570553319-xucw0s",
+          "name": "Sunstone Jaguar Sentinel - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-jag-002",
+            "agentType": "e",
+            "name": "Sunstone Jaguar Sentinel",
+            "race": "",
+            "class": "",
+            "level": 9,
+            "abilities": {
+              "str": 18,
+              "dex": 16,
+              "con": 16,
+              "int": 6,
+              "wis": 14,
+              "cha": 8
+            },
+            "hp": 140,
+            "ac": 17,
+            "speed": 50,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-jag-1",
+                "name": "Sunstone Claws",
+                "attackBonus": 9,
+                "damageDice": "2d8+4",
+                "damageType": "slashing"
+              },
+              {
+                "id": "attack-jag-2",
+                "name": "Pounce (if moved 20 ft straight, target STR save 16 or prone)",
+                "attackBonus": 9,
+                "damageDice": "2d10+4",
+                "damageType": "bludgeoning"
+              },
+              {
+                "id": "attack-jag-3",
+                "name": "Glare-Flash (CON save 15, fail: blinded until end of next turn, recharge 5-6)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "radiant"
+              }
+            ],
+            "notes": "Perfect for Floor 3 big rooms and long corridors. Visual: carved jaguar statue with gold-inlaid joints that flare bright when it charges. Tactics: it tries to knock someone into traps, spikes, or poison tiles.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144725505-19375490.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1147.38,
+            "y": 1569.61,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570553319-xucw0s",
+          "combatantId": "combatant-1770570618832-ho39fr03t",
+          "stats": {
+            "hp": 0,
+            "ac": 17,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 18,
+            "dex": 16,
+            "con": 16,
+            "int": 6,
+            "wis": 14,
+            "cha": 8
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 140,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570639159-tthqpe",
+          "name": "Serpent-Mask Hierophant - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-hie-003",
+            "agentType": "e",
+            "name": "Serpent-Mask Hierophant",
+            "race": "",
+            "class": "",
+            "level": 9,
+            "abilities": {
+              "str": 10,
+              "dex": 14,
+              "con": 14,
+              "int": 16,
+              "wis": 18,
+              "cha": 14
+            },
+            "hp": 95,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-hie-1",
+                "name": "Obsidian Dagger",
+                "attackBonus": 8,
+                "damageDice": "2d6+3",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-hie-2",
+                "name": "Poison Mist (CON save 16, fail: 6d6 poison and can't regain HP until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "6d6",
+                "damageType": "poison"
+              },
+              {
+                "id": "attack-hie-3",
+                "name": "Glyph Snare (WIS save 15, fail: restrained 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              },
+              {
+                "id": "attack-hie-4",
+                "name": "Sun-Blessing (heals ally 4d8, recharge 6)",
+                "attackBonus": 0,
+                "damageDice": "4d8",
+                "damageType": "healing"
+              }
+            ],
+            "notes": "This is your 'priest behind the lines' that makes the dungeon feel alive. Put them near the green pools or in the star-glyph room. If the party rushes them, they retreat behind a Jaguar Sentinel or into a narrow trap hallway.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144696333-308591580.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144696333-308591580.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1239.17,
+            "y": 1643.07,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570639159-tthqpe",
+          "combatantId": "combatant-1770570648622-olivlfth3",
+          "stats": {
+            "hp": 95,
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 10,
+            "dex": 14,
+            "con": 14,
+            "int": 16,
+            "wis": 18,
+            "cha": 14
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 95,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570662096-uhe2wh",
+          "name": "River-Step Revenant - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-rev-008",
+            "agentType": "e",
+            "name": "River-Step Revenant",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 16,
+              "int": 8,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 105,
+            "ac": 16,
+            "speed": 30,
+            "skills": [
+              "Athletics +7",
+              "Perception +5",
+              "Stealth +6"
+            ],
+            "attacks": [
+              {
+                "id": "attack-rev-1",
+                "name": "Drowned Blade",
+                "attackBonus": 8,
+                "damageDice": "2d8+3",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-rev-2",
+                "name": "Undertow Shove (STR save 15, fail: pushed 15 ft and prone)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-rev-3",
+                "name": "Waterlogged Curse (WIS save 14, fail: disadvantage on attacks until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              }
+            ],
+            "notes": "Visual: skeletal warrior with algae-caked armor and water dripping out of its ribcage. Put one on the narrow bridge to the circular dais (boss room) and it becomes a real positional problem.",
+            "imagePath": "/uploads/characterImage/undead.png"
+          },
+          "imagePath": "/uploads/characterImage/undead.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1349.35,
+            "y": 1569.61,
+            "mapId": "map-3034c444-9e66-4758-92ce-0ff6b8c96bf2"
+          },
+          "atlasTokenId": "enc-enemy-1770570662096-uhe2wh",
+          "combatantId": "combatant-1770570680507-ta634s3ke",
+          "stats": {
+            "hp": 0,
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 16,
+            "int": 8,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 105,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570673441-gwcf4q",
+          "name": "River-Step Revenant",
+          "source": "custom",
+          "payload": {
+            "id": "char-rev-008",
+            "agentType": "e",
+            "name": "River-Step Revenant",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 16,
+              "int": 8,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 105,
+            "ac": 16,
+            "speed": 30,
+            "skills": [
+              "Athletics +7",
+              "Perception +5",
+              "Stealth +6"
+            ],
+            "attacks": [
+              {
+                "id": "attack-rev-1",
+                "name": "Drowned Blade",
+                "attackBonus": 8,
+                "damageDice": "2d8+3",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-rev-2",
+                "name": "Undertow Shove (STR save 15, fail: pushed 15 ft and prone)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-rev-3",
+                "name": "Waterlogged Curse (WIS save 14, fail: disadvantage on attacks until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              }
+            ],
+            "notes": "Visual: skeletal warrior with algae-caked armor and water dripping out of its ribcage. Put one on the narrow bridge to the circular dais (boss room) and it becomes a real positional problem.",
+            "imagePath": "/uploads/characterImage/undead.png"
+          },
+          "imagePath": "/uploads/characterImage/undead.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770570673441-gwcf4q",
+          "combatantId": null,
+          "stats": {
+            "hp": {
+              "current": 105,
+              "max": 105,
+              "temp": 0
+            },
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 16,
+            "int": 8,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 105,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770570674375-dm6e5l",
+          "name": "River-Step Revenant",
+          "source": "custom",
+          "payload": {
+            "id": "char-rev-008",
+            "agentType": "e",
+            "name": "River-Step Revenant",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 16,
+              "int": 8,
+              "wis": 14,
+              "cha": 12
+            },
+            "hp": 105,
+            "ac": 16,
+            "speed": 30,
+            "skills": [
+              "Athletics +7",
+              "Perception +5",
+              "Stealth +6"
+            ],
+            "attacks": [
+              {
+                "id": "attack-rev-1",
+                "name": "Drowned Blade",
+                "attackBonus": 8,
+                "damageDice": "2d8+3",
+                "damageType": "necrotic"
+              },
+              {
+                "id": "attack-rev-2",
+                "name": "Undertow Shove (STR save 15, fail: pushed 15 ft and prone)",
+                "attackBonus": 0,
+                "damageDice": "3d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-rev-3",
+                "name": "Waterlogged Curse (WIS save 14, fail: disadvantage on attacks until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              }
+            ],
+            "notes": "Visual: skeletal warrior with algae-caked armor and water dripping out of its ribcage. Put one on the narrow bridge to the circular dais (boss room) and it becomes a real positional problem.",
+            "imagePath": "/uploads/characterImage/undead.png"
+          },
+          "imagePath": "/uploads/characterImage/undead.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770570674375-dm6e5l",
+          "combatantId": null,
+          "stats": {
+            "hp": {
+              "current": 105,
+              "max": 105,
+              "temp": 0
+            },
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 16,
+            "int": 8,
+            "wis": 14,
+            "cha": 12
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 105,
+          "ac": null
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-dcb2b775-f274-45c1-b41b-1650c231d6a9",
+          "path": "/maps/71c3173d-6efa-4e97-a89c-ef483004ebf5.png",
+          "filename": "71c3173d-6efa-4e97-a89c-ef483004ebf5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-375241f0-9f2c-45ea-923e-5ffab82e2aa0",
+          "path": "/maps/0195332e-ceaa-4783-afe2-a8dc75df121c.png",
+          "filename": "0195332e-ceaa-4783-afe2-a8dc75df121c.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-6babdd24-9fed-49ca-8267-747386cc5b44",
+          "path": "/maps/bed6cc19-392f-4b0a-befa-d1e4dc78611a.png",
+          "filename": "bed6cc19-392f-4b0a-befa-d1e4dc78611a.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-e607a02d-a264-4b5a-9341-2b19f5e0e0e4",
+          "path": "/maps/ae403c96-a48c-4d2a-b6fd-b8ec43e95a84.png",
+          "filename": "ae403c96-a48c-4d2a-b6fd-b8ec43e95a84.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-4b928bc7-80f1-466b-90ce-6696704881d8",
+          "path": "/maps/8d482f50-38df-4ac6-9fa7-00d5d632c552.png",
+          "filename": "8d482f50-38df-4ac6-9fa7-00d5d632c552.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-9f310471-9e8e-4d7e-96d4-5efeee329024",
+          "path": "/maps/9ecfe9f0-d61a-4f9e-9769-56e570ee971a.png",
+          "filename": "9ecfe9f0-d61a-4f9e-9769-56e570ee971a.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-04d0273e-30e7-4dc5-8fee-d4c282f135a9",
+          "path": "/maps/9cc2a833-7072-4d5e-ab14-aeae7f12faf9.png",
+          "filename": "9cc2a833-7072-4d5e-ab14-aeae7f12faf9.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-2700c4df-f4a3-4ea2-b4af-e38f3124d023",
+          "path": "/maps/5603e950-c8f2-46e5-8a16-3d47b162bcc5.png",
+          "filename": "5603e950-c8f2-46e5-8a16-3d47b162bcc5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-a8291f9f-9db5-4ae2-a22f-dc2f7925c968",
+          "path": "/maps/893213d8-165e-47f4-b3b1-9e20da6a060d.png",
+          "filename": "893213d8-165e-47f4-b3b1-9e20da6a060d.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-ee96a71f-ffe6-4276-acad-0b86a7a94c08",
+          "path": "/maps/10215197-64bf-4332-885d-c54a0f2d5578.png",
+          "filename": "10215197-64bf-4332-885d-c54a0f2d5578.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": []
+    },
+    {
+      "id": "id_1770578598135_2bfn2d9jj",
+      "name": "floor4",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2026-02-08T19:23:18.135Z",
+      "combatants": [
+        {
+          "id": "combatant-1770579535103-d2xgz7o5m",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "type": "enemy",
+          "initiative": 21,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770579517835-23gecp",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578814450-ibbrexhwe",
+          "name": "Dart Idol Totem - 01",
+          "type": "enemy",
+          "initiative": 21,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770578726022-9cyf83",
+          "hp": {
+            "current": 47,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578924992-1vp4l41ww",
+          "name": "Birtie",
+          "type": "p",
+          "initiative": 19,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1763904510082-223258989.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 40,
+            "max": 48,
+            "temp": 0
+          },
+          "ac": 14,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770579787150-srcdq3dxq",
+          "name": "SmolderingEyeBalls",
+          "type": "p",
+          "initiative": 17,
+          "dexModifier": 4,
+          "imagePath": "/uploads/characterImage/characterImage-1763904398643-423550034.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 26,
+            "max": 50,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770578835130-qshe788hb",
+          "name": "Dart Idol Totem - 02",
+          "type": "enemy",
+          "initiative": 15,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770578726795-x7ja0h",
+          "hp": {
+            "current": 51,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578787524-dvjo9co5p",
+          "name": "Couatl Heart-Idol - 01",
+          "type": "enemy",
+          "initiative": 14,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770578653981-c9l1bl",
+          "hp": {
+            "current": 145,
+            "max": 210,
+            "temp": 0
+          },
+          "ac": 18,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578879372-1df06gn4z",
+          "name": "Web-Crypt Spiderling Swarm - 01",
+          "type": "enemy",
+          "initiative": 12,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770578816459-i9f0ea",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578914633-a3jifkzwo",
+          "name": "synco",
+          "type": "p",
+          "initiative": 11,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1763904527007-695803936.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770579564764-rp9nxbrbb",
+          "name": "Web-Crypt Spiderling Swarm - 04",
+          "type": "enemy",
+          "initiative": 9,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770579554539-6cz0ab",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770579551628-wog4ly0ie",
+          "name": "Web-Crypt Spiderling Swarm - 03",
+          "type": "enemy",
+          "initiative": 8,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770579547076-b7sz6i",
+          "hp": {
+            "current": 70,
+            "max": 70,
+            "temp": 0
+          },
+          "ac": 15,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": [],
+          "visible": false
+        },
+        {
+          "id": "combatant-1770578915371-315o8adse",
+          "name": "draven",
+          "type": "p",
+          "initiative": 7,
+          "dexModifier": 1,
+          "imagePath": "/uploads/characterImage/characterImage-1763904436417-989872509.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 59,
+            "max": 59,
+            "temp": 0
+          },
+          "ac": 17,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 2,
+      "currentTurnIndex": 7,
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1770578653981-c9l1bl",
+          "name": "Couatl Heart-Idol - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-couatl-001",
+            "agentType": "e",
+            "name": "Couatl Heart-Idol",
+            "race": "",
+            "class": "",
+            "level": 10,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 18,
+              "int": 14,
+              "wis": 18,
+              "cha": 18
+            },
+            "hp": 210,
+            "ac": 18,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-couatl-1",
+                "name": "Feathered Bite",
+                "attackBonus": 9,
+                "damageDice": "2d10+4",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-couatl-2",
+                "name": "Solar Coils (grapple on hit, escape DC 16)",
+                "attackBonus": 9,
+                "damageDice": "2d8+4",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-couatl-3",
+                "name": "Flood-Command (DEX save 16, half on success, pushes 15 ft toward water)",
+                "attackBonus": 0,
+                "damageDice": "8d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-couatl-4",
+                "name": "Venom Hymn (CON save 16, fail: 6d6 poison and poisoned 1 round, recharge 5-6)",
+                "attackBonus": 0,
+                "damageDice": "6d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Boss-room gimmick that matches your map: the Heart-Idol is anchored to the temple floor sigils. Suggested traits (not in schema): resistance to nonmagical damage, immunity to poison. Each round on initiative 20, one torch-flame flares: creatures on the lower circular dais make DEX save 14 or slip 10 ft (water-slick stone). If you want phase 2: at 50% HP the idol 'wakes' and gains +10 speed and uses Flood-Command every other round.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1991.84,
+            "y": 2120.33,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770578653981-c9l1bl",
+          "combatantId": "combatant-1770578787518-1yyvidfww",
+          "stats": {
+            "hp": 145,
+            "ac": 18,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 18,
+            "int": 14,
+            "wis": 18,
+            "cha": 18
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 210,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578680204-11qu4h",
+          "name": "Web-Crypt Spiderling Swarm",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770578680204-11qu4h",
+          "combatantId": null,
+          "stats": {
+            "hp": {
+              "current": 70,
+              "max": 70,
+              "temp": 0
+            },
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578726022-9cyf83",
+          "name": "Dart Idol Totem - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-tot-004",
+            "agentType": "e",
+            "name": "Dart Idol Totem",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 12,
+              "con": 16,
+              "int": 3,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 0,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-tot-1",
+                "name": "Poison Dart Volley (range 80 ft)",
+                "attackBonus": 8,
+                "damageDice": "2d10",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-tot-2",
+                "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+            "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1092.3,
+            "y": 1220.81,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770578726022-9cyf83",
+          "combatantId": "combatant-1770578814445-48k2j4d7p",
+          "stats": {
+            "hp": 47,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 12,
+            "con": 16,
+            "int": 3,
+            "wis": 12,
+            "cha": 3
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578726795-x7ja0h",
+          "name": "Dart Idol Totem - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-tot-004",
+            "agentType": "e",
+            "name": "Dart Idol Totem",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 12,
+              "con": 16,
+              "int": 3,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 0,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-tot-1",
+                "name": "Poison Dart Volley (range 80 ft)",
+                "attackBonus": 8,
+                "damageDice": "2d10",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-tot-2",
+                "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+            "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 2891.39,
+            "y": 1220.81,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770578726795-x7ja0h",
+          "combatantId": "combatant-1770578835124-ieelm8jhh",
+          "stats": {
+            "hp": 51,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 12,
+            "con": 16,
+            "int": 3,
+            "wis": 12,
+            "cha": 3
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578737549-j37boi",
+          "name": "Serpent-Mask Hierophant",
+          "source": "custom",
+          "payload": {
+            "id": "char-hie-003",
+            "agentType": "e",
+            "name": "Serpent-Mask Hierophant",
+            "race": "",
+            "class": "",
+            "level": 9,
+            "abilities": {
+              "str": 10,
+              "dex": 14,
+              "con": 14,
+              "int": 16,
+              "wis": 18,
+              "cha": 14
+            },
+            "hp": 95,
+            "ac": 16,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-hie-1",
+                "name": "Obsidian Dagger",
+                "attackBonus": 8,
+                "damageDice": "2d6+3",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-hie-2",
+                "name": "Poison Mist (CON save 16, fail: 6d6 poison and can't regain HP until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "6d6",
+                "damageType": "poison"
+              },
+              {
+                "id": "attack-hie-3",
+                "name": "Glyph Snare (WIS save 15, fail: restrained 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "psychic"
+              },
+              {
+                "id": "attack-hie-4",
+                "name": "Sun-Blessing (heals ally 4d8, recharge 6)",
+                "attackBonus": 0,
+                "damageDice": "4d8",
+                "damageType": "healing"
+              }
+            ],
+            "notes": "This is your 'priest behind the lines' that makes the dungeon feel alive. Put them near the green pools or in the star-glyph room. If the party rushes them, they retreat behind a Jaguar Sentinel or into a narrow trap hallway.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144696333-308591580.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144696333-308591580.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770578737549-j37boi",
+          "combatantId": null,
+          "stats": {
+            "hp": {
+              "current": 95,
+              "max": 95,
+              "temp": 0
+            },
+            "ac": 16,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 10,
+            "dex": 14,
+            "con": 14,
+            "int": 16,
+            "wis": 18,
+            "cha": 14
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 95,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578816459-i9f0ea",
+          "name": "Web-Crypt Spiderling Swarm - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1863.33,
+            "y": 1863.3,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770578816459-i9f0ea",
+          "combatantId": "combatant-1770578879365-e51mhuqbd",
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770578821356-ctgr9i",
+          "name": "Dart Idol Totem - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-tot-004",
+            "agentType": "e",
+            "name": "Dart Idol Totem",
+            "race": "",
+            "class": "",
+            "level": 8,
+            "abilities": {
+              "str": 16,
+              "dex": 12,
+              "con": 16,
+              "int": 3,
+              "wis": 12,
+              "cha": 3
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 0,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-tot-1",
+                "name": "Poison Dart Volley (range 80 ft)",
+                "attackBonus": 8,
+                "damageDice": "2d10",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-tot-2",
+                "name": "Venom Reservoir (CON save 15, fail: 4d6 poison and poisoned 1 round)",
+                "attackBonus": 0,
+                "damageDice": "4d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use as a 'living trap.' Put it on Floor 2 where your maze corridors and spikes are. If you want it meaner: give it advantage if the target is in water (slippery footing).",
+            "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
+          "placed": false,
+          "visible": true,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770578821356-ctgr9i",
+          "combatantId": null,
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 1
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 12,
+            "con": 16,
+            "int": 3,
+            "wis": 12,
+            "cha": 3
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770579517835-23gecp",
+          "name": "Web-Crypt Spiderling Swarm - 02",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 2377.37,
+            "y": 1863.32,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770579517835-23gecp",
+          "combatantId": "combatant-1770579535095-pelajxks7",
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770579547076-b7sz6i",
+          "name": "Web-Crypt Spiderling Swarm - 03",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 2634.38,
+            "y": 1606.29,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770579547076-b7sz6i",
+          "combatantId": "combatant-1770579551621-fj5omsc2x",
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770579554539-6cz0ab",
+          "name": "Web-Crypt Spiderling Swarm - 04",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": true,
+          "visible": false,
+          "position": {
+            "x": 1349.31,
+            "y": 1606.29,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770579554539-6cz0ab",
+          "combatantId": "combatant-1770579564764-rp9nxbrbb",
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        },
+        {
+          "id": "enc-enemy-1770579557517-0a109x",
+          "name": "Web-Crypt Spiderling Swarm - 03",
+          "source": "custom",
+          "payload": {
+            "id": "char-web-007",
+            "agentType": "e",
+            "name": "Web-Crypt Spiderling Swarm",
+            "race": "",
+            "class": "",
+            "level": 7,
+            "abilities": {
+              "str": 8,
+              "dex": 16,
+              "con": 14,
+              "int": 2,
+              "wis": 12,
+              "cha": 4
+            },
+            "hp": 70,
+            "ac": 15,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-web-1",
+                "name": "Swarm Bites",
+                "attackBonus": 7,
+                "damageDice": "4d6",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-web-2",
+                "name": "Silk Tangle (DEX save 14, fail: restrained until end of next turn)",
+                "attackBonus": 0,
+                "damageDice": "2d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Use 1 swarm as pressure, or 2 swarms if the room is big. Their job is to pin someone in place so your bruisers can do the real damage.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
+          "placed": false,
+          "visible": false,
+          "position": null,
+          "atlasTokenId": "enc-enemy-1770579557517-0a109x",
+          "combatantId": null,
+          "stats": {
+            "hp": 70,
+            "ac": 15,
+            "dexModifier": 3
+          },
+          "abilities": {
+            "str": 8,
+            "dex": 16,
+            "con": 14,
+            "int": 2,
+            "wis": 12,
+            "cha": 4
+          },
+          "inventory": null,
+          "gold": null,
+          "hp": 70,
+          "ac": null
+        }
+      ],
+      "flavorImages": [
+        {
+          "id": "flavor-4330b568-cb1a-4a56-a6c2-728ba475cfbf",
+          "path": "/maps/b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+          "filename": "b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-ee57b407-7ab8-4dd3-899a-2dbf89fa1939",
+          "path": "/maps/bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+          "filename": "bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-0921f084-e956-4252-a407-c9aea6075c17",
+          "path": "/maps/01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+          "filename": "01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-c9c5c637-2ef1-421e-8c73-e9992daebe77",
+          "path": "/maps/5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+          "filename": "5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-3d51fb52-c0e4-4937-b510-fe55168a23d0",
+          "path": "/maps/43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+          "filename": "43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-83c02f0a-922d-4bf2-bda3-5a5713d7d942",
+          "path": "/maps/4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+          "filename": "4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-434624e7-a1bc-4625-be72-f17cabad0abd",
+          "path": "/maps/8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+          "filename": "8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-2a249758-ff87-4801-9fb1-10231c62363a",
+          "path": "/maps/2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+          "filename": "2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-63a0afbf-f849-4f76-8172-158d43f8f5a7",
+          "path": "/maps/c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+          "filename": "c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": []
+    }
+  ]
+}
