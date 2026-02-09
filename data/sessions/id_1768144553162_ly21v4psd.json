@@ -3401,7 +3401,7 @@
           "id": "combatant-1770605073773-qbs4bgovd",
           "name": "synco",
           "type": "p",
-          "initiative": 0,
+          "initiative": 18,
           "dexModifier": 3,
           "imagePath": "/uploads/characterImage/characterImage-1763904527007-695803936.png",
           "sourceId": null,
@@ -3412,6 +3412,30 @@
             "temp": 0
           },
           "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        },
+        {
+          "id": "combatant-1770642361990-zabri9m82",
+          "name": "Couatl Heart-Idol - 01",
+          "type": "enemy",
+          "initiative": 15,
+          "dexModifier": 2,
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png",
+          "sourceId": null,
+          "atlasTokenId": "enc-enemy-1770640739723-1bqivv",
+          "hp": {
+            "current": 210,
+            "max": 210,
+            "temp": 0
+          },
+          "ac": 18,
           "statusEffects": [],
           "deathSaves": {
             "successes": 0,
@@ -3481,7 +3505,92 @@
         }
       ],
       "flavorSounds": [],
-      "placedEnemies": []
+      "placedEnemies": [
+        {
+          "id": "enc-enemy-1770640739723-1bqivv",
+          "name": "Couatl Heart-Idol - 01",
+          "source": "custom",
+          "payload": {
+            "id": "char-couatl-001",
+            "agentType": "e",
+            "name": "Couatl Heart-Idol",
+            "race": "",
+            "class": "",
+            "level": 10,
+            "abilities": {
+              "str": 16,
+              "dex": 14,
+              "con": 18,
+              "int": 14,
+              "wis": 18,
+              "cha": 18
+            },
+            "hp": 210,
+            "ac": 18,
+            "speed": 30,
+            "skills": [],
+            "attacks": [
+              {
+                "id": "attack-couatl-1",
+                "name": "Feathered Bite",
+                "attackBonus": 9,
+                "damageDice": "2d10+4",
+                "damageType": "piercing"
+              },
+              {
+                "id": "attack-couatl-2",
+                "name": "Solar Coils (grapple on hit, escape DC 16)",
+                "attackBonus": 9,
+                "damageDice": "2d8+4",
+                "damageType": "radiant"
+              },
+              {
+                "id": "attack-couatl-3",
+                "name": "Flood-Command (DEX save 16, half on success, pushes 15 ft toward water)",
+                "attackBonus": 0,
+                "damageDice": "8d6",
+                "damageType": "cold"
+              },
+              {
+                "id": "attack-couatl-4",
+                "name": "Venom Hymn (CON save 16, fail: 6d6 poison and poisoned 1 round, recharge 5-6)",
+                "attackBonus": 0,
+                "damageDice": "6d6",
+                "damageType": "poison"
+              }
+            ],
+            "notes": "Boss-room gimmick that matches your map: the Heart-Idol is anchored to the temple floor sigils. Suggested traits (not in schema): resistance to nonmagical damage, immunity to poison. Each round on initiative 20, one torch-flame flares: creatures on the lower circular dais make DEX save 14 or slip 10 ft (water-slick stone). If you want phase 2: at 50% HP the idol 'wakes' and gains +10 speed and uses Flood-Command every other round.",
+            "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png"
+          },
+          "imagePath": "/uploads/characterImage/characterImage-1768144672137-182776800.png",
+          "placed": true,
+          "visible": true,
+          "position": {
+            "x": 2377.37,
+            "y": 2634.37,
+            "mapId": "map-546500d0-366d-4336-98d4-e2818a4267fa"
+          },
+          "atlasTokenId": "enc-enemy-1770640739723-1bqivv",
+          "combatantId": "combatant-1770642361982-pk32mhir1",
+          "stats": {
+            "hp": 210,
+            "ac": 18,
+            "dexModifier": 2
+          },
+          "abilities": {
+            "str": 16,
+            "dex": 14,
+            "con": 18,
+            "int": 14,
+            "wis": 18,
+            "cha": 18
+          },
+          "inventory": [],
+          "gold": null,
+          "hp": 210,
+          "ac": null
+        }
+      ]
     }
   ],
   "flavorImages": [
