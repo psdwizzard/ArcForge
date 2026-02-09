@@ -978,6 +978,14 @@ function isEnemyType(type) {
     return normalized === 'enemy' || normalized === 'monster' || normalized === 'e';
 }
 
+function isDefeatedEnemy(combatant) {
+    if (!combatant || !isEnemyType(combatant.type)) {
+        return false;
+    }
+    const hpCurrent = Number(combatant?.hp?.current);
+    return Number.isFinite(hpCurrent) && hpCurrent <= 0;
+}
+
 function getAgentsMiniMapElements() {
     const container = document.getElementById('agents-mini-map');
     if (!container) {
@@ -1623,9 +1631,21 @@ function renderCombatantsList() {
 
     updateCombatButtons();
 
-    const activeCombatantId = encounterState.combatActive && encounterState.combatants.length > 0
-        ? encounterState.combatants[encounterState.currentTurnIndex].id
+    const initiativeCombatants = (encounterState.combatants || []).filter((combatant) => !isDefeatedEnemy(combatant));
+
+    if (initiativeCombatants.length === 0) {
+        container.innerHTML = '<div class="empty-state">No active combatants in initiative order.</div>';
+        updateCombatButtons();
+        clearAllCombatantMovementTrackers();
+        return;
+    }
+
+    const currentTurnCombatant = encounterState.combatActive && encounterState.combatants.length > 0
+        ? encounterState.combatants[encounterState.currentTurnIndex]
         : null;
+    const activeCombatantId = (currentTurnCombatant && !isDefeatedEnemy(currentTurnCombatant))
+        ? currentTurnCombatant.id
+        : (encounterState.combatActive ? initiativeCombatants[0]?.id : null);
 
     if (activeCombatantId && activeCombatantId !== lastActiveCombatantId) {
         resetCombatantMovementTracker(activeCombatantId);
@@ -1638,18 +1658,19 @@ function renderCombatantsList() {
     }
 
     // If combat is active, reorder display so current turn is first
-    let displayOrder = [...encounterState.combatants];
-    if (encounterState.combatActive && encounterState.currentTurnIndex > 0) {
-        const currentTurnIndex = encounterState.currentTurnIndex;
+    let displayOrder = [...initiativeCombatants];
+    if (encounterState.combatActive && activeCombatantId) {
+        const currentTurnIndex = displayOrder.findIndex((combatant) => combatant.id === activeCombatantId);
+        if (currentTurnIndex > 0) {
         displayOrder = [
-            ...encounterState.combatants.slice(currentTurnIndex),
-            ...encounterState.combatants.slice(0, currentTurnIndex)
+            ...displayOrder.slice(currentTurnIndex),
+            ...displayOrder.slice(0, currentTurnIndex)
         ];
+        }
     }
 
     displayOrder.forEach((combatant, displayIndex) => {
-        // Check if this is the current turn (always first in display order when combat is active)
-        const isCurrentTurn = encounterState.combatActive && displayIndex === 0;
+        const isCurrentTurn = encounterState.combatActive && combatant.id === activeCombatantId;
         const card = createCombatantCard(combatant, isCurrentTurn);
         container.appendChild(card);
         syncAttackUIWithState(combatant.id);
@@ -2139,7 +2160,6 @@ function createCombatantCard(combatant, isCurrentTurn) {
     // Header display helpers
     const displayName = combatant.name || 'Unknown';
     const isHiddenCombatant = !getCombatantVisibility(combatant);
-    const hiddenBadgeHTML = isHiddenCombatant ? '<span class="combatant-hidden-badge">Hidden</span>' : '';
     const nameHTML = `<div class="combatant-name">${displayName}</div>`;
     const sanitizedName = displayName.trim();
     const avatarInitial = sanitizedName ? sanitizedName.charAt(0).toUpperCase() : '?';
@@ -2174,7 +2194,6 @@ function createCombatantCard(combatant, isCurrentTurn) {
                     <div class="combatant-name-row">
                         ${nameHTML}
                         <div class="combatant-type">${typeLabel}</div>
-                        ${hiddenBadgeHTML}
                     </div>
                 </div>
                 <div class="combatant-actions">
@@ -2419,11 +2438,29 @@ async function rollDeathSave(combatantId) {
 // Remove combatant
 async function removeCombatant(combatantId) {
     try {
+        const combatant = (encounterState?.combatants || []).find(c => c.id === combatantId);
+        const linkedToken = combatant ? findAtlasTokenForCombatant(combatant) : null;
+        const linkedTokenId = linkedToken?.id || linkedToken?.atlasTokenId || combatant?.atlasTokenId || null;
         const response = await fetch(`${API_BASE}/combatants/${combatantId}`, {
             method: 'DELETE'
         });
 
         if (response.ok) {
+            if (linkedTokenId && atlasMapState?.encounter) {
+                const pending = atlasMapState.encounter.pending || [];
+                atlasMapState.encounter.pending = pending.filter((entry) => {
+                    const entryId = entry?.id || entry?.atlasTokenId;
+                    return entryId !== linkedTokenId && entry?.combatantId !== combatantId;
+                });
+                atlasMapState.encounter.dirty = true;
+                drawAtlasEncounter();
+                if (typeof saveCurrentEncounter === 'function') {
+                    await saveCurrentEncounter();
+                }
+                if (typeof updateAgentsMiniMap === 'function') {
+                    updateAgentsMiniMap();
+                }
+            }
             delete combatantMovementTracker[combatantId];
             await loadEncounterState();
             renderCombatantsList();
