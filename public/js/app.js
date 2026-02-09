@@ -9,7 +9,7 @@ function toggleAgentDetails(agentId) {
 
     const toggleButton = card.querySelector('.agent-toggle');
     if (toggleButton) {
-        toggleButton.textContent = isCollapsed ? '▸' : '▾';
+        toggleButton.textContent = isCollapsed ? '>' : 'v';
     }
 }
 
@@ -56,6 +56,15 @@ window.combatantMovementTracker = combatantMovementTracker;
 // Track collapsed state for sidebar agent cards
 const agentCollapseState = {};
 window.agentCollapseState = agentCollapseState;
+const agentGroupCollapseState = {};
+window.agentGroupCollapseState = agentGroupCollapseState;
+
+function toggleAgentGroup(groupKey) {
+    const currentlyCollapsed = agentGroupCollapseState[groupKey] === true;
+    agentGroupCollapseState[groupKey] = !currentlyCollapsed;
+    renderAgentsList();
+}
+window.toggleAgentGroup = toggleAgentGroup;
 
 // Codex state
 const codexState = {
@@ -610,6 +619,42 @@ function getTypeDisplayName(type) {
         'monster': 'Monster'
     };
     return typeMap[type] || type || 'Unknown';
+}
+
+function normalizeAgentType(type) {
+    const normalized = String(type || 'p').toLowerCase();
+    if (normalized === 'p' || normalized === 'player') {
+        return 'player';
+    }
+    if (normalized === 'n' || normalized === 'npc') {
+        return 'npc';
+    }
+    if (normalized === 'e' || normalized === 'enemy' || normalized === 'monster') {
+        return 'enemy';
+    }
+    return 'player';
+}
+
+function doesAgentMatchFilter(agent, filter) {
+    if (filter === 'all') {
+        return true;
+    }
+    return normalizeAgentType(agent?.agentType) === normalizeAgentType(filter);
+}
+
+function getAgentSortTimestamp(agent) {
+    const createdAt = Number(agent?.createdAt);
+    if (Number.isFinite(createdAt) && createdAt > 0) {
+        return createdAt;
+    }
+    const idMatch = String(agent?.id || '').match(/\d+/);
+    return idMatch ? parseInt(idMatch[0], 10) : 0;
+}
+
+function formatAbilityModifier(score) {
+    const parsedScore = Number(score);
+    const mod = Number.isFinite(parsedScore) ? modifierFromScore(parsedScore) : 0;
+    return `${mod >= 0 ? '+' : ''}${mod}`;
 }
 
 // Initialize the application
@@ -2530,75 +2575,113 @@ function renderAgentsList() {
         return;
     }
 
-    // Filter agents by type
-    let filteredAgents = savedAgents;
-    if (currentAgentFilter !== 'all') {
-        filteredAgents = savedAgents.filter(agent => agent.agentType === currentAgentFilter);
-    }
-
-    // Sort by ID (newest first - IDs are timestamps)
-    filteredAgents.sort((a, b) => {
-        // Extract timestamp from ID (format: char-{timestamp})
-        const getTimestamp = (id) => {
-            const match = id.match(/\d+/);
-            return match ? parseInt(match[0]) : 0;
-        };
-        return getTimestamp(b.id) - getTimestamp(a.id);
-    });
-
+    const filteredAgents = savedAgents.filter((agent) => doesAgentMatchFilter(agent, currentAgentFilter));
     if (filteredAgents.length === 0) {
         container.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 2rem;">No agents of this type</div>';
         return;
     }
 
+    const groups = [
+        { key: 'player', title: 'Players', colorClass: 'player' },
+        { key: 'npc', title: 'NPCs', colorClass: 'npc' },
+        { key: 'enemy', title: 'Enemies', colorClass: 'enemy' }
+    ];
+    const groupedAgents = {
+        player: [],
+        npc: [],
+        enemy: []
+    };
+
+    filteredAgents.forEach((agent) => {
+        groupedAgents[normalizeAgentType(agent.agentType)].push(agent);
+    });
+    groups.forEach(({ key }) => {
+        groupedAgents[key].sort((a, b) => getAgentSortTimestamp(b) - getAgentSortTimestamp(a));
+    });
+
     container.innerHTML = '';
 
-    filteredAgents.forEach(agent => {
-        const card = document.createElement('div');
-        card.className = 'agent-card';
-        card.dataset.agentId = agent.id;
-
-        const agentType = agent.agentType || 'p';
-        const typeLabel = getTypeDisplayName(agentType);
-        const colorClass = agentType === 'p' || agentType === 'player' ? 'player'
-            : (agentType === 'n' || agentType === 'npc' ? 'npc' : 'enemy');
-
-        card.classList.add(`agent-type-${colorClass}`);
-
-        const storedCollapsed = agentCollapseState[agent.id];
-        const isCollapsed = storedCollapsed !== false;
-
-        if (isCollapsed) {
-            card.classList.add('collapsed');
+    groups.forEach((group) => {
+        const agents = groupedAgents[group.key];
+        if (agents.length === 0) {
+            return;
         }
+        const section = document.createElement('section');
+        section.className = 'agent-group-section';
+        const isGroupCollapsed = agentGroupCollapseState[group.key] === true;
+        if (isGroupCollapsed) {
+            section.classList.add('collapsed');
+        }
+        section.innerHTML = `
+            <div class="agent-group-heading">
+                <button class="agent-group-toggle" type="button" onclick="toggleAgentGroup('${group.key}')">
+                    <span class="agent-group-caret">${isGroupCollapsed ? '>' : 'v'}</span>
+                    <span>${group.title}</span>
+                </button>
+                <span class="agent-group-count">${agents.length}</span>
+            </div>
+        `;
 
-        const detailsHTML = `
-            <div class="agent-details">
-                ${agent.imagePath ? `<img class="agent-list-portrait" src="${agent.imagePath}" alt="${agent.name} portrait">` : ''}
-                <div class="agent-info-text">
-                    <div class="agent-info-line">${agent.race || ''}</div>
-                    <div class="agent-info-line">HP: ${agent.hp} | AC: ${agent.ac}</div>
-                    <div class="agent-info-line">Type: ${typeLabel}</div>
+        const list = document.createElement('div');
+        list.className = 'agent-group-list';
+
+        agents.forEach((agent) => {
+            const card = document.createElement('div');
+            card.className = 'agent-card';
+            card.dataset.agentId = agent.id;
+            card.classList.add(`agent-type-${group.colorClass}`);
+
+            const storedCollapsed = agentCollapseState[agent.id];
+            const isCollapsed = storedCollapsed !== false;
+            if (isCollapsed) {
+                card.classList.add('collapsed');
+            }
+
+            const abilities = agent.abilities || {};
+            const abilityMods = [
+                ['STR', abilities.str],
+                ['DEX', abilities.dex],
+                ['CON', abilities.con],
+                ['INT', abilities.int],
+                ['WIS', abilities.wis],
+                ['CHA', abilities.cha]
+            ].map(([label, score]) => `
+                <span class="agent-ability-mod">
+                    <span class="agent-ability-label">${label}</span>
+                    <strong>${formatAbilityModifier(score)}</strong>
+                </span>
+            `).join('');
+            const detailsHTML = `
+                <div class="agent-details">
+                    ${agent.imagePath ? `<img class="agent-list-portrait" src="${agent.imagePath}" alt="${agent.name} portrait">` : ''}
+                    <div class="agent-info-text">
+                        <div class="agent-detail-name">${agent.name}</div>
+                        <div class="agent-info-line">${agent.race || 'No race set'}</div>
+                        <div class="agent-info-line">Type: ${getTypeDisplayName(agent.agentType || group.key)}</div>
+                        <div class="agent-core-stats">HP: ${agent.hp ?? '�'} | AC: ${agent.ac ?? '�'}</div>
+                        <div class="agent-ability-mods">${abilityMods}</div>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
 
-        card.innerHTML = `
-            <div class="agent-header">
-                <button class="agent-toggle" type="button" onclick="toggleAgentDetails('${agent.id}')">${isCollapsed ? '▸' : '▾'}</button>
-            <div class="agent-name">${agent.name}</div>
-                <div class="agent-actions-inline">
-                    <button class="btn btn-small btn-${colorClass}" onclick="addAgentToCombatFromList('${agent.id}')">Add</button>
-                <button class="btn btn-small btn-secondary" onclick="editAgentFromList('${agent.id}')">Edit</button>
-            </div>
-            </div>
-            ${detailsHTML}
-        `;
+            card.innerHTML = `
+                <div class="agent-header">
+                    <button class="agent-toggle" type="button" onclick="toggleAgentDetails('${agent.id}')">${isCollapsed ? '>' : 'v'}</button>
+                    <div class="agent-name">${agent.name}</div>
+                    <div class="agent-actions-inline">
+                        <button class="btn btn-small btn-${group.colorClass}" onclick="addAgentToCombatFromList('${agent.id}')">Add</button>
+                    </div>
+                </div>
+                ${detailsHTML}
+            `;
 
-        container.appendChild(card);
+            list.appendChild(card);
+        });
+
+        section.appendChild(list);
+        container.appendChild(section);
     });
 }
-
 // Handle create new agent button
 function handleCreateNewAgent() {
     // Switch to character builder view and clear form
@@ -7850,9 +7933,9 @@ function uploadFlavorMedia(formData, type) {
             console.log('[FlavorMedia] Created mediaItem:', mediaItem);
 
             if (type === 'image') {
-                atlasMapState.encounter.flavorImages.push(mediaItem);
+                getFlavorImages().push(mediaItem);
             } else {
-                atlasMapState.encounter.flavorSounds.push(mediaItem);
+                getFlavorSounds().push(mediaItem);
             }
 
             renderFlavorMediaLists();
@@ -7875,7 +7958,7 @@ function renderFlavorImagesList() {
         return;
     }
 
-    const images = atlasMapState.encounter.flavorImages || [];
+    const images = getFlavorImages();
 
     if (images.length === 0) {
         container.innerHTML = '<div class="atlas-empty-state">No images uploaded yet</div>';
@@ -7940,7 +8023,7 @@ function renderFlavorSoundsList() {
         return;
     }
 
-    const sounds = atlasMapState.encounter.flavorSounds || [];
+    const sounds = getFlavorSounds();
 
     if (sounds.length === 0) {
         container.innerHTML = '<div class="atlas-empty-state">No sounds uploaded yet</div>';
@@ -8009,9 +8092,9 @@ function renderFlavorSoundsList() {
 
 function removeFlavorMedia(type, index) {
     if (type === 'image') {
-        atlasMapState.encounter.flavorImages.splice(index, 1);
+        getFlavorImages().splice(index, 1);
     } else {
-        atlasMapState.encounter.flavorSounds.splice(index, 1);
+        getFlavorSounds().splice(index, 1);
     }
 
     renderFlavorMediaLists();
@@ -8084,12 +8167,63 @@ function hideFlavorMediaFromPlayers() {
     });
 }
 
+function getSessionFlavorMediaStore() {
+    const session = window.sessionState && window.sessionState.currentSession;
+    if (!session) {
+        return null;
+    }
+
+    if (!Array.isArray(session.flavorImages)) {
+        session.flavorImages = [];
+    }
+    if (!Array.isArray(session.flavorSounds)) {
+        session.flavorSounds = [];
+    }
+
+    return session;
+}
+
+function getFlavorImages() {
+    const sessionStore = getSessionFlavorMediaStore();
+    if (sessionStore) {
+        return sessionStore.flavorImages;
+    }
+    if (!Array.isArray(atlasMapState.encounter.flavorImages)) {
+        atlasMapState.encounter.flavorImages = [];
+    }
+    return atlasMapState.encounter.flavorImages;
+}
+
+function getFlavorSounds() {
+    const sessionStore = getSessionFlavorMediaStore();
+    if (sessionStore) {
+        return sessionStore.flavorSounds;
+    }
+    if (!Array.isArray(atlasMapState.encounter.flavorSounds)) {
+        atlasMapState.encounter.flavorSounds = [];
+    }
+    return atlasMapState.encounter.flavorSounds;
+}
+
 function saveFlavorMediaToEncounter() {
     if (typeof saveCurrentEncounter === 'function') {
+        const sessionStore = getSessionFlavorMediaStore();
         const currentEncounter = window.sessionState && window.sessionState.currentEncounter;
+
         if (currentEncounter) {
-            currentEncounter.flavorImages = atlasMapState.encounter.flavorImages;
-            currentEncounter.flavorSounds = atlasMapState.encounter.flavorSounds;
+            const flavorImages = getFlavorImages();
+            const flavorSounds = getFlavorSounds();
+
+            // Keep encounter-level fields for backward compatibility with older data.
+            currentEncounter.flavorImages = flavorImages;
+            currentEncounter.flavorSounds = flavorSounds;
+
+            // Session-level media library is authoritative across encounters.
+            if (sessionStore) {
+                sessionStore.flavorImages = flavorImages;
+                sessionStore.flavorSounds = flavorSounds;
+            }
+
             saveCurrentEncounter();
         }
     }
@@ -8097,14 +8231,42 @@ function saveFlavorMediaToEncounter() {
 
 function loadFlavorMediaFromEncounter() {
     const currentEncounter = window.sessionState && window.sessionState.currentEncounter;
-    if (currentEncounter) {
-        atlasMapState.encounter.flavorImages = currentEncounter.flavorImages || [];
-        atlasMapState.encounter.flavorSounds = currentEncounter.flavorSounds || [];
+    const sessionStore = getSessionFlavorMediaStore();
+
+    if (!currentEncounter) {
         renderFlavorMediaLists();
+        return;
     }
+
+    const encounterImages = Array.isArray(currentEncounter.flavorImages) ? currentEncounter.flavorImages : [];
+    const encounterSounds = Array.isArray(currentEncounter.flavorSounds) ? currentEncounter.flavorSounds : [];
+
+    // Migration path: if session-level media is empty but encounter has media, lift it.
+    if (sessionStore && sessionStore.flavorImages.length === 0 && sessionStore.flavorSounds.length === 0
+        && (encounterImages.length > 0 || encounterSounds.length > 0)) {
+        sessionStore.flavorImages = [...encounterImages];
+        sessionStore.flavorSounds = [...encounterSounds];
+    }
+
+    const flavorImages = sessionStore
+        ? sessionStore.flavorImages
+        : (Array.isArray(currentEncounter.flavorImages) ? currentEncounter.flavorImages : []);
+    const flavorSounds = sessionStore
+        ? sessionStore.flavorSounds
+        : (Array.isArray(currentEncounter.flavorSounds) ? currentEncounter.flavorSounds : []);
+
+    atlasMapState.encounter.flavorImages = flavorImages;
+    atlasMapState.encounter.flavorSounds = flavorSounds;
+
+    // Keep encounter-level fields aligned for backward compatibility.
+    currentEncounter.flavorImages = flavorImages;
+    currentEncounter.flavorSounds = flavorSounds;
+
+    renderFlavorMediaLists();
 }
 
 if (document.getElementById('flavor-image-upload')) {
     bindFlavorMediaEvents();
     loadFlavorMediaFromEncounter();
 }
+

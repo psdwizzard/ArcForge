@@ -450,7 +450,7 @@ header {
 main {
     flex: 1;
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 533px 1fr;
     gap: 0;
     overflow: hidden;
 }
@@ -955,6 +955,61 @@ h2 {
     gap: 0.5rem;
 }
 
+.agent-group-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.agent-group-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.25rem;
+}
+
+.agent-group-section.collapsed .agent-group-list {
+    display: none;
+}
+
+.agent-group-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: none;
+    border: none;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    font-size: inherit;
+    padding: 0;
+    cursor: pointer;
+}
+
+.agent-group-caret {
+    width: 0.8rem;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+.agent-group-count {
+    font-size: 0.72rem;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 0.05rem 0.45rem;
+}
+
+.agent-group-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
 .agent-card {
     background-color: var(--bg-tertiary);
     border: 1px solid var(--border-color);
@@ -1006,6 +1061,40 @@ h2 {
     display: flex;
     flex-direction: column;
     gap: 0.2rem;
+}
+
+.agent-quick-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.agent-core-stats {
+    font-weight: 600;
+}
+
+.agent-ability-mods {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.25rem 0.4rem;
+}
+
+.agent-ability-mod {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+}
+
+.agent-ability-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
 }
 
 .btn-player {
@@ -2384,7 +2473,7 @@ h2 {
     display: grid;
     grid-template-columns: 90px 1fr;
     gap: 0.8rem;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .agent-list-portrait {
@@ -2401,6 +2490,16 @@ h2 {
     gap: 0.3rem;
     font-size: 0.9rem;
     color: var(--text-secondary);
+}
+
+.agent-detail-name {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.agent-info-text .agent-core-stats {
+    margin-top: 0.2rem;
 }
 
 .monsters-container {

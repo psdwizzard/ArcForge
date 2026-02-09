@@ -67,6 +67,12 @@ function createOrUpdateSession(session) {
   if (!nextSession.encounters) {
     nextSession.encounters = [];
   }
+  if (!Array.isArray(nextSession.flavorImages)) {
+    nextSession.flavorImages = [];
+  }
+  if (!Array.isArray(nextSession.flavorSounds)) {
+    nextSession.flavorSounds = [];
+  }
 
   saveSession(nextSession);
   return nextSession;
@@ -89,6 +95,12 @@ function createEncounter(sessionId, encounter) {
   if (!session.encounters) {
     session.encounters = [];
   }
+  if (!Array.isArray(session.flavorImages)) {
+    session.flavorImages = [];
+  }
+  if (!Array.isArray(session.flavorSounds)) {
+    session.flavorSounds = [];
+  }
 
   session.encounters.push(nextEncounter);
   saveSession(session);
@@ -100,6 +112,13 @@ function getEncounter(sessionId, encounterId) {
   const session = loadSession(sessionId);
   if (!session) {
     return { error: 'session-not-found' };
+  }
+
+  if (!Array.isArray(session.flavorImages)) {
+    session.flavorImages = [];
+  }
+  if (!Array.isArray(session.flavorSounds)) {
+    session.flavorSounds = [];
   }
 
   const encounter = session.encounters?.find((entry) => entry.id === encounterId) || null;
@@ -116,6 +135,13 @@ function updateEncounter(sessionId, encounterId, payload) {
     return { error: 'session-not-found' };
   }
 
+  if (!Array.isArray(session.flavorImages)) {
+    session.flavorImages = [];
+  }
+  if (!Array.isArray(session.flavorSounds)) {
+    session.flavorSounds = [];
+  }
+
   const encounterIndex = session.encounters?.findIndex((entry) => entry.id === encounterId);
   if (encounterIndex === -1 || encounterIndex === undefined) {
     return { error: 'encounter-not-found', session };
@@ -125,6 +151,15 @@ function updateEncounter(sessionId, encounterId, payload) {
     ...session.encounters[encounterIndex],
     ...payload
   };
+
+  if (Array.isArray(payload?.sessionFlavorImages)) {
+    session.flavorImages = payload.sessionFlavorImages;
+    delete mergedEncounter.sessionFlavorImages;
+  }
+  if (Array.isArray(payload?.sessionFlavorSounds)) {
+    session.flavorSounds = payload.sessionFlavorSounds;
+    delete mergedEncounter.sessionFlavorSounds;
+  }
 
   mergedEncounter.combatants = Array.isArray(mergedEncounter.combatants) ? mergedEncounter.combatants : [];
 
@@ -259,6 +294,8 @@ function createDefaultSessionIfMissing() {
       name: 'Welcome to ArcForge!',
       description: 'This is your first session. Create an encounter to get started.',
       createdAt: new Date().toISOString(),
+      flavorImages: [],
+      flavorSounds: [],
       encounters: []
     };
     saveSession(defaultSession);

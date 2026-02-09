@@ -80,6 +80,8 @@ async function handleCreateSession(e) {
         name: nameInput.value,
         description: descInput.value || '',
         createdAt: new Date().toISOString(),
+        flavorImages: [],
+        flavorSounds: [],
         encounters: []
     };
 
@@ -169,6 +171,12 @@ async function loadSession(sessionId, isAutoLoad = false) {
         if (response.ok) {
             const session = await response.json();
             sessionState.currentSession = session;
+            if (!Array.isArray(sessionState.currentSession.flavorImages)) {
+                sessionState.currentSession.flavorImages = [];
+            }
+            if (!Array.isArray(sessionState.currentSession.flavorSounds)) {
+                sessionState.currentSession.flavorSounds = [];
+            }
             sessionState.encounters = session.encounters || [];
 
             // Save to localStorage for auto-load next time
@@ -756,6 +764,17 @@ async function saveCurrentEncounter() {
     // This ensures enemies added in Arena also appear in Atlas
     if (window.encounterState && window.atlasMapState) {
         syncCombatantsToAtlas();
+    }
+
+    if (sessionState.currentSession) {
+        if (!Array.isArray(sessionState.currentSession.flavorImages)) {
+            sessionState.currentSession.flavorImages = [];
+        }
+        if (!Array.isArray(sessionState.currentSession.flavorSounds)) {
+            sessionState.currentSession.flavorSounds = [];
+        }
+        sessionState.currentEncounter.sessionFlavorImages = sessionState.currentSession.flavorImages;
+        sessionState.currentEncounter.sessionFlavorSounds = sessionState.currentSession.flavorSounds;
     }
 
     try {
