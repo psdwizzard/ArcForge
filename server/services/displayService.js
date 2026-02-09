@@ -199,6 +199,11 @@ function buildDisplayState() {
       const hpPercent = (hpCurrent !== null && hpMax !== null && hpMax > 0)
         ? Math.max(0, Math.min(100, Math.round((hpCurrent / hpMax) * 100)))
         : null;
+      const isDead = hpCurrent !== null ? hpCurrent <= 0 : false;
+
+      if (isEnemy && isDead) {
+        return;
+      }
 
       initiativeOrder.push({
         id: combatant.id,
@@ -211,7 +216,7 @@ function buildDisplayState() {
         atlasTokenId: combatant.atlasTokenId || linkedEnemy?.atlasTokenId || linkedEnemy?.id || tokenMatch?.atlasTokenId || null,
         tokenId: linkedEnemy?.id || linkedEnemy?.atlasTokenId || tokenMatch?.id || combatant.atlasTokenId || null,
         hpPercent,
-        isDead: hpCurrent !== null ? hpCurrent <= 0 : false,
+        isDead,
         order: index
       });
     });

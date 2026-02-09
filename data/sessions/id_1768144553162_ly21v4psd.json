@@ -2289,7 +2289,7 @@
           "loot": [],
           "attacks": [],
           "specialAbilities": [],
-          "visible": false
+          "visible": true
         },
         {
           "id": "combatant-1770578814450-ibbrexhwe",
@@ -2314,7 +2314,7 @@
           "loot": [],
           "attacks": [],
           "specialAbilities": [],
-          "visible": false
+          "visible": true
         },
         {
           "id": "combatant-1770578924992-1vp4l41ww",
@@ -2387,7 +2387,7 @@
           "loot": [],
           "attacks": [],
           "specialAbilities": [],
-          "visible": false
+          "visible": true
         },
         {
           "id": "combatant-1770578787524-dvjo9co5p",
@@ -2538,8 +2538,8 @@
           "specialAbilities": []
         }
       ],
-      "roundNumber": 2,
-      "currentTurnIndex": 7,
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
       "placedEnemies": [
         {
           "id": "enc-enemy-1770578653981-c9l1bl",
@@ -2739,7 +2739,7 @@
           },
           "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
           "placed": true,
-          "visible": false,
+          "visible": true,
           "position": {
             "x": 1092.3,
             "y": 1220.81,
@@ -2809,7 +2809,7 @@
           },
           "imagePath": "/uploads/characterImage/characterImage-1768144378782-665553023.png",
           "placed": true,
-          "visible": false,
+          "visible": true,
           "position": {
             "x": 2891.39,
             "y": 1220.81,
@@ -3099,7 +3099,7 @@
           },
           "imagePath": "/uploads/characterImage/characterImage-1768144772151-806469011.png",
           "placed": true,
-          "visible": false,
+          "visible": true,
           "position": {
             "x": 2377.37,
             "y": 1863.32,
@@ -3389,6 +3389,156 @@
         }
       ],
       "flavorSounds": []
+    },
+    {
+      "id": "id_1770604707631_1qqhq67ve",
+      "name": "t4456",
+      "mapId": null,
+      "description": "",
+      "createdAt": "2026-02-09T02:38:27.631Z",
+      "combatants": [
+        {
+          "id": "combatant-1770605073773-qbs4bgovd",
+          "name": "synco",
+          "type": "p",
+          "initiative": 0,
+          "dexModifier": 3,
+          "imagePath": "/uploads/characterImage/characterImage-1763904527007-695803936.png",
+          "sourceId": null,
+          "atlasTokenId": null,
+          "hp": {
+            "current": 34,
+            "max": 34,
+            "temp": 0
+          },
+          "ac": 13,
+          "statusEffects": [],
+          "deathSaves": {
+            "successes": 0,
+            "failures": 0
+          },
+          "loot": [],
+          "attacks": [],
+          "specialAbilities": []
+        }
+      ],
+      "roundNumber": 1,
+      "currentTurnIndex": 0,
+      "flavorImages": [
+        {
+          "id": "flavor-4330b568-cb1a-4a56-a6c2-728ba475cfbf",
+          "path": "/maps/b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+          "filename": "b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-ee57b407-7ab8-4dd3-899a-2dbf89fa1939",
+          "path": "/maps/bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+          "filename": "bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-0921f084-e956-4252-a407-c9aea6075c17",
+          "path": "/maps/01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+          "filename": "01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-c9c5c637-2ef1-421e-8c73-e9992daebe77",
+          "path": "/maps/5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+          "filename": "5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-3d51fb52-c0e4-4937-b510-fe55168a23d0",
+          "path": "/maps/43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+          "filename": "43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-83c02f0a-922d-4bf2-bda3-5a5713d7d942",
+          "path": "/maps/4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+          "filename": "4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-434624e7-a1bc-4625-be72-f17cabad0abd",
+          "path": "/maps/8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+          "filename": "8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-2a249758-ff87-4801-9fb1-10231c62363a",
+          "path": "/maps/2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+          "filename": "2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+          "type": "image"
+        },
+        {
+          "id": "flavor-63a0afbf-f849-4f76-8172-158d43f8f5a7",
+          "path": "/maps/c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+          "filename": "c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+          "type": "image"
+        }
+      ],
+      "flavorSounds": [],
+      "placedEnemies": []
     }
-  ]
+  ],
+  "flavorImages": [
+    {
+      "id": "flavor-4330b568-cb1a-4a56-a6c2-728ba475cfbf",
+      "path": "/maps/b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+      "filename": "b944b17e-f31d-4b9d-9de9-99940b1f35ef.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-ee57b407-7ab8-4dd3-899a-2dbf89fa1939",
+      "path": "/maps/bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+      "filename": "bedcd5e4-c1a9-4639-843d-d298708a464b.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-0921f084-e956-4252-a407-c9aea6075c17",
+      "path": "/maps/01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+      "filename": "01c60fc8-b3ec-4c69-988e-1e1691b51c16.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-c9c5c637-2ef1-421e-8c73-e9992daebe77",
+      "path": "/maps/5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+      "filename": "5ca25fd8-c38f-411b-b7fb-5a962ff70739.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-3d51fb52-c0e4-4937-b510-fe55168a23d0",
+      "path": "/maps/43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+      "filename": "43641b6f-f499-4b5d-a75a-492b2a8083d2.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-83c02f0a-922d-4bf2-bda3-5a5713d7d942",
+      "path": "/maps/4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+      "filename": "4b2acccc-1ce3-4931-a204-b5aa46cf781c.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-434624e7-a1bc-4625-be72-f17cabad0abd",
+      "path": "/maps/8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+      "filename": "8085dcf1-3087-4a0f-90ff-2f0193378ca5.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-2a249758-ff87-4801-9fb1-10231c62363a",
+      "path": "/maps/2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+      "filename": "2109422d-5a3c-4b6f-8aa4-1c9432a83fb4.png",
+      "type": "image"
+    },
+    {
+      "id": "flavor-63a0afbf-f849-4f76-8172-158d43f8f5a7",
+      "path": "/maps/c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+      "filename": "c593d2ce-bf69-4784-b604-0dae9d996da3.png",
+      "type": "image"
+    }
+  ],
+  "flavorSounds": []
 }

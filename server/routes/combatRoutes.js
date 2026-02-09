@@ -9,6 +9,31 @@ const {
 } = require('../services/encounterService');
 const { ENCOUNTERS_DIR } = require('../config/constants');
 
+function isDefeatedEnemy(combatant) {
+  if (!combatant) return false;
+  const type = String(combatant.type || '').toLowerCase();
+  const isEnemy = type === 'enemy' || type === 'monster' || type === 'e';
+  if (!isEnemy) return false;
+  const hpCurrent = Number(combatant?.hp?.current);
+  return Number.isFinite(hpCurrent) && hpCurrent <= 0;
+}
+
+function findFirstActiveTurnIndex(combatants = []) {
+  return combatants.findIndex((combatant) => !isDefeatedEnemy(combatant));
+}
+
+function findNextActiveTurnIndex(combatants = [], startIndex = 0) {
+  if (!combatants.length) return -1;
+  let idx = Number.isFinite(startIndex) ? startIndex : 0;
+  for (let i = 0; i < combatants.length; i += 1) {
+    idx = (idx + 1) % combatants.length;
+    if (!isDefeatedEnemy(combatants[idx])) {
+      return idx;
+    }
+  }
+  return -1;
+}
+
 function registerCombatRoutes(app, { broadcastDisplayState }) {
   app.get('/api/encounter', (req, res) => {
     res.json(encounterState.currentEncounter);
@@ -387,8 +412,13 @@ function registerCombatRoutes(app, { broadcastDisplayState }) {
       return b.dexModifier - a.dexModifier;
     });
 
+    const firstActiveIndex = findFirstActiveTurnIndex(encounterState.currentEncounter.combatants);
+    if (firstActiveIndex === -1) {
+      return res.status(400).json({ error: 'No active combatants in initiative order' });
+    }
+
     encounterState.currentEncounter.combatActive = true;
-    encounterState.currentEncounter.currentTurnIndex = 0;
+    encounterState.currentEncounter.currentTurnIndex = firstActiveIndex;
     encounterState.currentEncounter.roundNumber = 1;
 
     if (!encounterState.currentEncounter.encounterId) {
@@ -425,14 +455,33 @@ function registerCombatRoutes(app, { broadcastDisplayState }) {
       return res.status(400).json({ error: 'Combat has not started' });
     }
 
-    const currentCombatant = encounterState.currentEncounter.combatants[encounterState.currentEncounter.currentTurnIndex];
+    const combatants = encounterState.currentEncounter.combatants;
+    let currentTurnIndex = encounterState.currentEncounter.currentTurnIndex;
+
+    if (!Number.isFinite(currentTurnIndex) || currentTurnIndex < 0 || currentTurnIndex >= combatants.length || isDefeatedEnemy(combatants[currentTurnIndex])) {
+      currentTurnIndex = findFirstActiveTurnIndex(combatants);
+      if (currentTurnIndex === -1) {
+        encounterState.currentEncounter.combatActive = false;
+        autoSaveEncounter();
+        broadcastDisplayState();
+        return res.status(400).json({ error: 'No active combatants in initiative order' });
+      }
+      encounterState.currentEncounter.currentTurnIndex = currentTurnIndex;
+    }
+
+    const currentCombatant = combatants[currentTurnIndex];
     console.log('[next-turn] Applying end-of-turn effects for:', currentCombatant.name);
     applyEffects(currentCombatant, 'end');
 
-    encounterState.currentEncounter.currentTurnIndex++;
+    const nextTurnIndex = findNextActiveTurnIndex(combatants, currentTurnIndex);
+    if (nextTurnIndex === -1) {
+      encounterState.currentEncounter.combatActive = false;
+      autoSaveEncounter();
+      broadcastDisplayState();
+      return res.status(400).json({ error: 'No active combatants in initiative order' });
+    }
 
-    if (encounterState.currentEncounter.currentTurnIndex >= encounterState.currentEncounter.combatants.length) {
-      encounterState.currentEncounter.currentTurnIndex = 0;
+    if (nextTurnIndex <= currentTurnIndex) {
       encounterState.currentEncounter.roundNumber++;
       console.log('[next-turn] New round:', encounterState.currentEncounter.roundNumber);
 
@@ -446,7 +495,8 @@ function registerCombatRoutes(app, { broadcastDisplayState }) {
       });
     }
 
-    const nextCombatant = encounterState.currentEncounter.combatants[encounterState.currentEncounter.currentTurnIndex];
+    encounterState.currentEncounter.currentTurnIndex = nextTurnIndex;
+    const nextCombatant = encounterState.currentEncounter.combatants[nextTurnIndex];
     console.log('[next-turn] Applying start-of-turn effects for:', nextCombatant.name);
     applyEffects(nextCombatant, 'start');
 
