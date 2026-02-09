@@ -894,6 +894,13 @@ function saveAtlasSettings() {
 
 let mainUiScale = 100;
 let displayUiScale = 100;
+const ARENA_THEMES = new Set([
+    'white-frosted',
+    'grey',
+    'black-orange-frosted',
+    'fantasy',
+    'terminal'
+]);
 
 function initSettings() {
     const settingsBtn = document.getElementById('settings-btn');
@@ -904,6 +911,7 @@ function initSettings() {
     const mainUiScaleIncreaseBtn = document.getElementById('main-ui-scale-increase-btn');
     const displayUiScaleDecreaseBtn = document.getElementById('display-ui-scale-decrease-btn');
     const displayUiScaleIncreaseBtn = document.getElementById('display-ui-scale-increase-btn');
+    const themeSelect = document.getElementById('theme-select');
 
     settingsBtn.addEventListener('click', () => {
         settingsModal.style.display = 'flex';
@@ -917,6 +925,9 @@ function initSettings() {
     mainUiScaleIncreaseBtn.addEventListener('click', () => setMainUiScale(mainUiScale + 5));
     displayUiScaleDecreaseBtn.addEventListener('click', () => setDisplayUiScale(displayUiScale - 5));
     displayUiScaleIncreaseBtn.addEventListener('click', () => setDisplayUiScale(displayUiScale + 5));
+    if (themeSelect) {
+        themeSelect.addEventListener('change', (event) => setArenaTheme(event.target.value));
+    }
 
     // Load saved settings
     const savedMainUiScale = localStorage.getItem('mainUiScale');
@@ -927,6 +938,12 @@ function initSettings() {
     const savedDisplayUiScale = localStorage.getItem('displayUiScale');
     if (savedDisplayUiScale) {
         setDisplayUiScale(parseInt(savedDisplayUiScale));
+    }
+
+    const savedTheme = localStorage.getItem('arenaTheme') || 'grey';
+    setArenaTheme(savedTheme);
+    if (themeSelect) {
+        themeSelect.value = savedTheme;
     }
 }
 
@@ -945,6 +962,17 @@ function setDisplayUiScale(scale) {
     // Send to server via socket
     if (window.socket) {
         window.socket.emit('settings:ui-scale', { scale: displayUiScale });
+    }
+}
+
+function setArenaTheme(themeName) {
+    const normalized = ARENA_THEMES.has(themeName) ? themeName : 'grey';
+    document.documentElement.setAttribute('data-theme', normalized);
+    localStorage.setItem('arenaTheme', normalized);
+
+    const themeSelect = document.getElementById('theme-select');
+    if (themeSelect && themeSelect.value !== normalized) {
+        themeSelect.value = normalized;
     }
 }
 
@@ -3119,6 +3147,21 @@ function switchAtlasSection(section) {
     document.querySelectorAll('.atlas-section').forEach(sec => {
         sec.classList.toggle('active', sec.id === `atlas-${section}-section`);
     });
+
+    // Redraw canvases after the section becomes visible so hidden-tab sizing
+    // does not leave encounter/map canvases blank until first interaction.
+    if (section === 'encounters') {
+        window.requestAnimationFrame(() => {
+            window.requestAnimationFrame(() => {
+                handleAtlasResize();
+                drawAtlasEncounter();
+            });
+        });
+    } else if (section === 'map') {
+        window.requestAnimationFrame(() => {
+            drawAtlasPreview();
+        });
+    }
 }
 
 // Atlas Map Module
@@ -8269,4 +8312,6 @@ if (document.getElementById('flavor-image-upload')) {
     bindFlavorMediaEvents();
     loadFlavorMediaFromEncounter();
 }
+
+
 
