@@ -1,0 +1,26 @@
+{
+  "name": "Blaster",
+  "type": "enemy",
+  "powerLevel": 10,
+  "abilities": { "str": 0, "sta": 2, "agl": 3, "dex": 4, "fgt": 2, "int": 2, "awe": 2, "pre": 2 },
+  "defenses": { "dodge": 12, "parry": 6, "fortitude": 8, "will": 8, "toughness": 8 },
+  "attacks": [
+    { "name": "Energy Blast", "type": "ranged", "attackBonus": 10, "effectRank": 10, "resistedBy": "toughness", "notes": "Ranged Damage 10 (energy)" },
+    { "name": "Explosive Blast", "type": "ranged", "attackBonus": 0, "effectRank": 10, "resistedBy": "toughness", "notes": "Burst Area Ranged Damage 10; no attack roll, Dodge DC 20 for half" },
+    { "name": "Unarmed", "type": "close", "attackBonus": 4, "effectRank": 0, "resistedBy": "toughness", "notes": "Strength-based damage; weak in melee" }
+  ],
+  "powers": [
+    { "name": "Energy Blast", "rank": 10, "type": "Ranged Damage", "notes": "Primary attack; energy projection" },
+    { "name": "Explosive Blast", "rank": 10, "type": "Burst Area Ranged Damage", "notes": "Alternate effect of Energy Blast" },
+    { "name": "Force Field", "rank": 6, "type": "Protection", "notes": "Sustained; Toughness = Sta 2 + Protection 6 = 8" },
+    { "name": "Flight", "rank": 7, "type": "Flight", "notes": "250 mph" }
+  ],
+  "advantages": ["Ranged Attack 6", "Improved Initiative 2", "Move-by Action", "Precise Attack (Ranged, Cover)", "Power Attack"],
+  "skills": { "Acrobatics": 6, "Perception": 6, "Ranged Combat (Energy)": 2, "Technology": 4 },
+  "specialAbilities": [
+    { "name": "Sustained Force Field", "description": "Force Field is sustained; if stunned or incapacitated, Toughness drops to 2." },
+    { "name": "Aerial Combatant", "description": "Prefers to stay airborne and attack at range. Will flee melee engagements." }
+  ],
+  "heroPoints": 1,
+  "conditions": { "bruised": 0 }
+}

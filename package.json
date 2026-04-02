@@ -1,19 +1,20 @@
 {
   "name": "arcforge",
   "version": "1.0.0",
-  "description": "ArcForge: D&D 5e Battle and Initiative Tracker for Dungeon Masters",
+  "description": "ArcForge: Mutants & Masterminds 3E Battle Tracker for Game Masters",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "node_modules\\.bin\\nodemon server/server.js"
+    "dev": "npx nodemon server/server.js"
   },
   "keywords": [
-    "dnd",
-    "5e",
+    "mutants-and-masterminds",
+    "mm3e",
     "initiative",
     "combat",
     "tracker",
-    "dm"
+    "gm",
+    "superhero"
   ],
   "author": "",
   "license": "ISC",

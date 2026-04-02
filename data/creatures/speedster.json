@@ -1,0 +1,28 @@
+{
+  "name": "Speedster",
+  "type": "enemy",
+  "powerLevel": 10,
+  "abilities": { "str": 1, "sta": 3, "agl": 5, "dex": 2, "fgt": 6, "int": 1, "awe": 3, "pre": 1 },
+  "defenses": { "dodge": 14, "parry": 10, "fortitude": 8, "will": 6, "toughness": 6 },
+  "attacks": [
+    { "name": "Rapid Strike", "type": "close", "attackBonus": 14, "effectRank": 6, "resistedBy": "toughness", "notes": "Multiattack Strength-based Strike 5; trades effect for accuracy" },
+    { "name": "Speed Charge", "type": "close", "attackBonus": 10, "effectRank": 10, "resistedBy": "toughness", "notes": "Move-by Action slam at full speed; alternate effect" }
+  ],
+  "powers": [
+    { "name": "Super Speed", "rank": 12, "type": "Speed", "notes": "8000 mph; includes Quickness 12" },
+    { "name": "Rapid Strike", "rank": 5, "type": "Strength-based Strike", "notes": "Multiattack; flurry of high-speed blows" },
+    { "name": "Speed Charge", "rank": 10, "type": "Damage", "notes": "Alternate effect of Rapid Strike; full-speed body slam" },
+    { "name": "Vibration Defense", "rank": 3, "type": "Protection", "notes": "Vibrating body partially phases through attacks; Toughness = Sta 3 + Protection 3 = 6" },
+    { "name": "Speed Dodge", "rank": 4, "type": "Enhanced Dodge", "notes": "Included in defenses; too fast to hit" },
+    { "name": "Wall Running", "rank": 2, "type": "Movement", "notes": "Wall-crawling (limited to while moving)" }
+  ],
+  "advantages": ["Improved Initiative 4", "Move-by Action", "Evasion 2", "Instant Up", "Uncanny Dodge", "Seize Initiative"],
+  "skills": { "Acrobatics": 8, "Athletics": 4, "Perception": 6, "Close Combat (Unarmed)": 4 },
+  "specialAbilities": [
+    { "name": "Defensive Trade-off", "description": "Dodge 14 / Toughness 6: extremely hard to hit but less durable when struck." },
+    { "name": "Offensive Trade-off", "description": "Attack +14 / Effect 6 on Rapid Strike: hits often but each blow is individually weaker." },
+    { "name": "Speed Tactics", "description": "Prefers hit-and-run tactics. Uses Move-by Action to attack then retreat out of reach." }
+  ],
+  "heroPoints": 1,
+  "conditions": { "bruised": 0 }
+}

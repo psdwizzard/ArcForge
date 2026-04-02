@@ -77,9 +77,10 @@
                 return entry.name === combatant.name;
             });
 
-            const hpValue = typeof combatant.hp === 'object' ? (combatant.hp.current ?? combatant.hp.max ?? null) : combatant.hp;
-            const acValue = typeof combatant.ac === 'number' ? combatant.ac : null;
-            const dexValue = typeof combatant.dexModifier === 'number' ? combatant.dexModifier : null;
+            // M&M 3E: Track conditions and defenses instead of HP/AC
+            const conditionsValue = combatant.conditions || null;
+            const defensesValue = combatant.defenses || null;
+            const agilityValue = typeof combatant.agilityModifier === 'number' ? combatant.agilityModifier : null;
 
             if (existingEntry) {
                 existingEntry.name = combatant.name;
@@ -92,12 +93,14 @@
                     existingEntry.visible = combatant.visible !== false;
                 }
                 existingEntry.stats = existingEntry.stats || {};
-                existingEntry.stats.hp = hpValue ?? existingEntry.stats.hp ?? null;
-                if (acValue !== null) {
-                    existingEntry.stats.ac = acValue;
+                if (conditionsValue) {
+                    existingEntry.stats.conditions = conditionsValue;
                 }
-                if (dexValue !== null) {
-                    existingEntry.stats.dexModifier = dexValue;
+                if (defensesValue) {
+                    existingEntry.stats.defenses = defensesValue;
+                }
+                if (agilityValue !== null) {
+                    existingEntry.stats.agilityModifier = agilityValue;
                 }
                 if (combatant.abilities) {
                     existingEntry.abilities = { ...combatant.abilities };
@@ -124,9 +127,9 @@
                 originCombatantId: combatant.id,
                 visible: combatant.visible !== false,
                 stats: {
-                    hp: hpValue ?? null,
-                    ac: acValue,
-                    dexModifier: dexValue
+                    conditions: conditionsValue,
+                    defenses: defensesValue,
+                    agilityModifier: agilityValue
                 },
                 abilities: combatant.abilities ? { ...combatant.abilities } : null,
                 inventory: cloneInventory(combatant.inventory),

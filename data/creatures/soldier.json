@@ -1,0 +1,21 @@
+{
+  "name": "Soldier",
+  "type": "enemy",
+  "powerLevel": 6,
+  "abilities": { "str": 2, "sta": 2, "agl": 2, "dex": 2, "fgt": 4, "int": 0, "awe": 1, "pre": 0 },
+  "defenses": { "dodge": 6, "parry": 6, "fortitude": 6, "will": 4, "toughness": 6 },
+  "attacks": [
+    { "name": "Assault Rifle", "type": "ranged", "attackBonus": 6, "effectRank": 5, "resistedBy": "toughness", "notes": "Ranged Damage 5 (ballistic), Multiattack" },
+    { "name": "Unarmed/Rifle Butt", "type": "close", "attackBonus": 6, "effectRank": 3, "resistedBy": "toughness", "notes": "Strength-based Strike 1" },
+    { "name": "Fragmentation Grenade", "type": "ranged", "attackBonus": 6, "effectRank": 5, "resistedBy": "toughness", "notes": "Ranged Burst Area Damage 5, limited uses" }
+  ],
+  "powers": [],
+  "advantages": ["Equipment 3", "Improved Initiative", "Teamwork", "Ranged Attack 2"],
+  "skills": { "Athletics": 6, "Intimidation": 4, "Perception": 4, "Stealth": 4, "Vehicles": 4 },
+  "specialAbilities": [
+    { "name": "Body Armor", "description": "Protection 4 (equipment), included in Toughness." },
+    { "name": "Combat Training", "description": "Well-trained in squad tactics. Gains +2 to attack when using Teamwork advantage with allies." }
+  ],
+  "heroPoints": 0,
+  "conditions": { "bruised": 0 }
+}

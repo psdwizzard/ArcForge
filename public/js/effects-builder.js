@@ -51,25 +51,40 @@ async function handleSaveEffect(e) {
         // Roll modifiers
         attackMod: document.getElementById('effect-attack-mod').value,
         attackValue: parseInt(document.getElementById('effect-attack-value').value) || 0,
-        saveMod: document.getElementById('effect-save-mod').value,
-        saveValue: parseInt(document.getElementById('effect-save-value').value) || 0,
-        abilityMod: document.getElementById('effect-ability-mod').value,
-        abilityValue: parseInt(document.getElementById('effect-ability-value').value) || 0,
 
-        // Stat modifiers
-        acMod: parseInt(document.getElementById('effect-ac-mod').value) || 0,
-        speedMod: parseInt(document.getElementById('effect-speed-mod').value) || 0,
+        // Defense modifiers
+        dodgeMod: parseInt(document.getElementById('effect-dodge-mod').value) || 0,
+        parryMod: parseInt(document.getElementById('effect-parry-mod').value) || 0,
+        fortitudeMod: parseInt(document.getElementById('effect-fortitude-mod').value) || 0,
+        willMod: parseInt(document.getElementById('effect-will-mod').value) || 0,
+        toughnessMod: parseInt(document.getElementById('effect-toughness-mod').value) || 0,
 
         // Conditions
         conditions: {
+            bruised: parseInt(document.getElementById('effect-bruised').value) || 0,
+            dazed: document.getElementById('effect-dazed').checked,
+            staggered: document.getElementById('effect-staggered').checked,
             incapacitated: document.getElementById('effect-incapacitated').checked,
-            unconscious: document.getElementById('effect-unconscious').checked,
-            stunned: document.getElementById('effect-stunned').checked,
-            paralyzed: document.getElementById('effect-paralyzed').checked,
+            dying: document.getElementById('effect-dying').checked,
+            blind: document.getElementById('effect-blind').checked,
+            bound: document.getElementById('effect-bound').checked,
+            compelled: document.getElementById('effect-compelled').checked,
+            controlled: document.getElementById('effect-controlled').checked,
+            defenseless: document.getElementById('effect-defenseless').checked,
+            disabled: document.getElementById('effect-disabled').checked,
+            exhausted: document.getElementById('effect-exhausted').checked,
+            fatigued: document.getElementById('effect-fatigued').checked,
+            hindered: document.getElementById('effect-hindered').checked,
+            immobile: document.getElementById('effect-immobile').checked,
+            impaired: document.getElementById('effect-impaired').checked,
+            prone: document.getElementById('effect-prone').checked,
             restrained: document.getElementById('effect-restrained').checked,
-            blinded: document.getElementById('effect-blinded').checked,
-            deafened: document.getElementById('effect-deafened').checked,
-            invisible: document.getElementById('effect-invisible').checked
+            stunned: document.getElementById('effect-stunned').checked,
+            surprised: document.getElementById('effect-surprised').checked,
+            transformed: document.getElementById('effect-transformed').checked,
+            unaware: document.getElementById('effect-unaware').checked,
+            vulnerable: document.getElementById('effect-vulnerable').checked,
+            weakened: document.getElementById('effect-weakened').checked
         }
     };
 
@@ -127,10 +142,17 @@ function renderEffectsList() {
             const hpText = effect.hpChange > 0 ? `+${effect.hpChange} HP` : `${effect.hpChange} HP`;
             summary.push(`${hpText} per ${effect.hpTiming}`);
         }
-        if (effect.acMod !== 0) summary.push(`AC ${effect.acMod > 0 ? '+' : ''}${effect.acMod}`);
         if (effect.attackMod && effect.attackMod !== 'none') summary.push(`Attack: ${effect.attackMod}`);
+        const defMods = [];
+        if (effect.dodgeMod) defMods.push(`Dodge ${effect.dodgeMod > 0 ? '+' : ''}${effect.dodgeMod}`);
+        if (effect.parryMod) defMods.push(`Parry ${effect.parryMod > 0 ? '+' : ''}${effect.parryMod}`);
+        if (effect.fortitudeMod) defMods.push(`Fort ${effect.fortitudeMod > 0 ? '+' : ''}${effect.fortitudeMod}`);
+        if (effect.willMod) defMods.push(`Will ${effect.willMod > 0 ? '+' : ''}${effect.willMod}`);
+        if (effect.toughnessMod) defMods.push(`Tough ${effect.toughnessMod > 0 ? '+' : ''}${effect.toughnessMod}`);
+        if (defMods.length > 0) summary.push(defMods.join(', '));
 
-        const activeConditions = Object.keys(effect.conditions || {}).filter(k => effect.conditions[k]);
+        const activeConditions = Object.keys(effect.conditions || {}).filter(k => effect.conditions[k])
+            .map(k => k === 'bruised' ? `Bruised x${effect.conditions[k]}` : k);
         if (activeConditions.length > 0) {
             summary.push(`Conditions: ${activeConditions.join(', ')}`);
         }
@@ -165,24 +187,39 @@ async function loadEffectToForm(effectId) {
 
     document.getElementById('effect-attack-mod').value = effect.attackMod;
     document.getElementById('effect-attack-value').value = effect.attackValue || '';
-    document.getElementById('effect-save-mod').value = effect.saveMod;
-    document.getElementById('effect-save-value').value = effect.saveValue || '';
-    document.getElementById('effect-ability-mod').value = effect.abilityMod;
-    document.getElementById('effect-ability-value').value = effect.abilityValue || '';
 
-    document.getElementById('effect-ac-mod').value = effect.acMod || '';
-    document.getElementById('effect-speed-mod').value = effect.speedMod || '';
+    document.getElementById('effect-dodge-mod').value = effect.dodgeMod || '';
+    document.getElementById('effect-parry-mod').value = effect.parryMod || '';
+    document.getElementById('effect-fortitude-mod').value = effect.fortitudeMod || '';
+    document.getElementById('effect-will-mod').value = effect.willMod || '';
+    document.getElementById('effect-toughness-mod').value = effect.toughnessMod || '';
 
     // Set conditions
     if (effect.conditions) {
+        document.getElementById('effect-bruised').value = effect.conditions.bruised || 0;
+        document.getElementById('effect-dazed').checked = effect.conditions.dazed || false;
+        document.getElementById('effect-staggered').checked = effect.conditions.staggered || false;
         document.getElementById('effect-incapacitated').checked = effect.conditions.incapacitated || false;
-        document.getElementById('effect-unconscious').checked = effect.conditions.unconscious || false;
-        document.getElementById('effect-stunned').checked = effect.conditions.stunned || false;
-        document.getElementById('effect-paralyzed').checked = effect.conditions.paralyzed || false;
+        document.getElementById('effect-dying').checked = effect.conditions.dying || false;
+        document.getElementById('effect-blind').checked = effect.conditions.blind || false;
+        document.getElementById('effect-bound').checked = effect.conditions.bound || false;
+        document.getElementById('effect-compelled').checked = effect.conditions.compelled || false;
+        document.getElementById('effect-controlled').checked = effect.conditions.controlled || false;
+        document.getElementById('effect-defenseless').checked = effect.conditions.defenseless || false;
+        document.getElementById('effect-disabled').checked = effect.conditions.disabled || false;
+        document.getElementById('effect-exhausted').checked = effect.conditions.exhausted || false;
+        document.getElementById('effect-fatigued').checked = effect.conditions.fatigued || false;
+        document.getElementById('effect-hindered').checked = effect.conditions.hindered || false;
+        document.getElementById('effect-immobile').checked = effect.conditions.immobile || false;
+        document.getElementById('effect-impaired').checked = effect.conditions.impaired || false;
+        document.getElementById('effect-prone').checked = effect.conditions.prone || false;
         document.getElementById('effect-restrained').checked = effect.conditions.restrained || false;
-        document.getElementById('effect-blinded').checked = effect.conditions.blinded || false;
-        document.getElementById('effect-deafened').checked = effect.conditions.deafened || false;
-        document.getElementById('effect-invisible').checked = effect.conditions.invisible || false;
+        document.getElementById('effect-stunned').checked = effect.conditions.stunned || false;
+        document.getElementById('effect-surprised').checked = effect.conditions.surprised || false;
+        document.getElementById('effect-transformed').checked = effect.conditions.transformed || false;
+        document.getElementById('effect-unaware').checked = effect.conditions.unaware || false;
+        document.getElementById('effect-vulnerable').checked = effect.conditions.vulnerable || false;
+        document.getElementById('effect-weakened').checked = effect.conditions.weakened || false;
     }
 
     // Scroll to top of form
@@ -220,18 +257,39 @@ function clearEffectsForm() {
     document.getElementById('effect-duration').value = 1;
     document.getElementById('effect-hp-timing').value = 'start';
     document.getElementById('effect-attack-mod').value = 'none';
-    document.getElementById('effect-save-mod').value = 'none';
-    document.getElementById('effect-ability-mod').value = 'none';
 
-    // Uncheck all conditions
+    // Reset defense modifiers
+    document.getElementById('effect-dodge-mod').value = '';
+    document.getElementById('effect-parry-mod').value = '';
+    document.getElementById('effect-fortitude-mod').value = '';
+    document.getElementById('effect-will-mod').value = '';
+    document.getElementById('effect-toughness-mod').value = '';
+
+    // Reset conditions
+    document.getElementById('effect-bruised').value = 0;
+    document.getElementById('effect-dazed').checked = false;
+    document.getElementById('effect-staggered').checked = false;
     document.getElementById('effect-incapacitated').checked = false;
-    document.getElementById('effect-unconscious').checked = false;
-    document.getElementById('effect-stunned').checked = false;
-    document.getElementById('effect-paralyzed').checked = false;
+    document.getElementById('effect-dying').checked = false;
+    document.getElementById('effect-blind').checked = false;
+    document.getElementById('effect-bound').checked = false;
+    document.getElementById('effect-compelled').checked = false;
+    document.getElementById('effect-controlled').checked = false;
+    document.getElementById('effect-defenseless').checked = false;
+    document.getElementById('effect-disabled').checked = false;
+    document.getElementById('effect-exhausted').checked = false;
+    document.getElementById('effect-fatigued').checked = false;
+    document.getElementById('effect-hindered').checked = false;
+    document.getElementById('effect-immobile').checked = false;
+    document.getElementById('effect-impaired').checked = false;
+    document.getElementById('effect-prone').checked = false;
     document.getElementById('effect-restrained').checked = false;
-    document.getElementById('effect-blinded').checked = false;
-    document.getElementById('effect-deafened').checked = false;
-    document.getElementById('effect-invisible').checked = false;
+    document.getElementById('effect-stunned').checked = false;
+    document.getElementById('effect-surprised').checked = false;
+    document.getElementById('effect-transformed').checked = false;
+    document.getElementById('effect-unaware').checked = false;
+    document.getElementById('effect-vulnerable').checked = false;
+    document.getElementById('effect-weakened').checked = false;
 }
 
 // Make functions globally available

@@ -365,23 +365,28 @@ document.addEventListener('DOMContentLoaded', () => {
     ctx.restore();
   }
 
+  // M&M 3E: Color based on condition severity instead of HP percentage
   function getHealthRingColor(percent) {
+    // Legacy HP-based fallback (shouldn't be called in M&M)
     if (!Number.isFinite(percent)) {
       return 'rgba(220, 38, 38, 0.9)';
     }
-    if (percent <= 0) {
-      return '#6b7280';
-    }
-    if (percent <= 25) {
-      return '#ef4444';
-    }
-    if (percent <= 50) {
-      return '#f97316';
-    }
-    if (percent <= 75) {
-      return '#facc15';
-    }
+    if (percent <= 0) return '#6b7280';
+    if (percent <= 25) return '#ef4444';
+    if (percent <= 50) return '#f97316';
+    if (percent <= 75) return '#facc15';
     return '#22c55e';
+  }
+
+  function getConditionRingColor(severity) {
+    // 0 = clean (green), 1 = bruised (yellow), 2 = dazed/staggered (orange), 3 = incapacitated (gray)
+    switch (severity) {
+      case 0: return '#22c55e';
+      case 1: return '#facc15';
+      case 2: return '#f97316';
+      case 3: return '#6b7280';
+      default: return 'rgba(220, 38, 38, 0.9)';
+    }
   }
 
   function preloadTokenImage(imagePath) {
@@ -431,18 +436,14 @@ document.addEventListener('DOMContentLoaded', () => {
         screenY += jitterY;
       }
 
-      const basePercent = Number.isFinite(token.hpPercent)
-        ? token.hpPercent
-        : (Number.isFinite(token.hpCurrent) && Number.isFinite(token.hpMax) && token.hpMax > 0
-            ? Math.round((token.hpCurrent / token.hpMax) * 100)
-            : null);
-      const clampedPercent = Number.isFinite(basePercent) ? Math.max(0, Math.min(100, basePercent)) : null;
+      // M&M 3E: Use condition severity for ring color
+      const conditionSeverity = Number.isFinite(token.conditionSeverity) ? token.conditionSeverity : 0;
       const defaultRingColor = 'rgba(220, 38, 38, 0.9)';
-      const isDead = token.isDead === true;
+      const isDead = token.isDead === true || token.isIncapacitated === true;
       const ringColor = showHealthRings
         ? (isDead
-            ? getHealthRingColor(0)
-            : (clampedPercent !== null ? getHealthRingColor(clampedPercent) : defaultRingColor))
+            ? getConditionRingColor(3)
+            : getConditionRingColor(conditionSeverity))
         : defaultRingColor;
       const ringLineWidth = Math.max(4, tokenRadius * 0.18);
 

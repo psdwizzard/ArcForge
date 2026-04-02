@@ -1,0 +1,26 @@
+{
+  "name": "Brick",
+  "type": "enemy",
+  "powerLevel": 10,
+  "abilities": { "str": 12, "sta": 10, "agl": 0, "dex": 0, "fgt": 6, "int": 0, "awe": 1, "pre": 2 },
+  "defenses": { "dodge": 6, "parry": 6, "fortitude": 12, "will": 6, "toughness": 14 },
+  "attacks": [
+    { "name": "Super Punch", "type": "close", "attackBonus": 6, "effectRank": 12, "resistedBy": "toughness", "notes": "Strength-based damage; traded accuracy for effect" },
+    { "name": "Shockwave", "type": "close", "attackBonus": 6, "effectRank": 12, "resistedBy": "toughness", "notes": "Burst Area Damage 12 (ground slam), limited to targets on ground" },
+    { "name": "Thrown Object", "type": "ranged", "attackBonus": 4, "effectRank": 12, "resistedBy": "toughness", "notes": "Throwing heavy objects; improvised ranged attack" }
+  ],
+  "powers": [
+    { "name": "Super Strength", "rank": 12, "type": "Enhanced Strength", "notes": "Included in abilities; can lift ~100 tons" },
+    { "name": "Invulnerability", "rank": 4, "type": "Protection", "notes": "Impervious Toughness 12; Toughness = Sta 10 + Protection 4 = 14" },
+    { "name": "Leaping", "rank": 6, "type": "Leaping", "notes": "Can leap up to 1/2 mile" },
+    { "name": "Shockwave", "rank": 12, "type": "Burst Area Damage", "notes": "Alternate effect of Super Punch; ground slam" }
+  ],
+  "advantages": ["All-out Attack", "Power Attack", "Diehard", "Great Endurance", "Improved Grab", "Interpose"],
+  "skills": { "Athletics": 4, "Intimidation": 8, "Perception": 4, "Close Combat (Unarmed)": 2 },
+  "specialAbilities": [
+    { "name": "Impervious", "description": "Impervious Toughness 12: ignores damage effects with rank 6 or less." },
+    { "name": "Power Attack Trade-off", "description": "Brick trades attack bonus for effect rank. Lower accuracy but devastating hits." }
+  ],
+  "heroPoints": 1,
+  "conditions": { "bruised": 0 }
+}

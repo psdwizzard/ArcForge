@@ -143,109 +143,88 @@
                                             <label for="char-name">Character Name *</label>
                                             <input type="text" id="char-name" required>
                                         </div>
-                                        <div class="form-group">
-                                            <label for="char-race">Race</label>
-                                            <select id="char-race">
-                                                <option value="">Select Race</option>
-                                                <option value="human">Human</option>
-                                                <option value="elf">Elf</option>
-                                                <option value="dwarf">Dwarf</option>
-                                                <option value="halfling">Halfling</option>
-                                                <option value="dragonborn">Dragonborn</option>
-                                                <option value="gnome">Gnome</option>
-                                                <option value="half-elf">Half-Elf</option>
-                                                <option value="half-orc">Half-Orc</option>
-                                                <option value="tiefling">Tiefling</option>
-                                            </select>
-                                        </div>
                                     </div>
-
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="char-class">Class</label>
-                                            <select id="char-class">
-                                                <option value="">Select Class</option>
-                                                <option value="barbarian">Barbarian</option>
-                                                <option value="bard">Bard</option>
-                                                <option value="cleric">Cleric</option>
-                                                <option value="druid">Druid</option>
-                                                <option value="fighter">Fighter</option>
-                                                <option value="monk">Monk</option>
-                                                <option value="paladin">Paladin</option>
-                                                <option value="ranger">Ranger</option>
-                                                <option value="rogue">Rogue</option>
-                                                <option value="sorcerer">Sorcerer</option>
-                                                <option value="warlock">Warlock</option>
-                                                <option value="wizard">Wizard</option>
-                                            </select>
+                                            <label for="char-power-level">Power Level</label>
+                                            <input type="number" id="char-power-level" min="1" max="20" value="10">
                                         </div>
                                         <div class="form-group">
-                                            <label for="char-level">Level</label>
-                                            <input type="number" id="char-level" min="1" max="20" value="1">
+                                            <label for="char-power-points">Power Points</label>
+                                            <input type="number" id="char-power-points" min="0" value="150">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="char-hero-points">Hero Points</label>
+                                            <input type="number" id="char-hero-points" min="0" value="1">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Ability Scores -->
+                                <!-- Abilities (8 M&M abilities - direct modifiers) -->
                                 <div class="form-section">
-                                    <h3>Ability Scores</h3>
+                                    <h3>Abilities</h3>
                                     <div class="ability-scores-grid">
                                         <div class="ability-score-group">
                                             <label for="char-str">STR</label>
-                                            <input type="number" id="char-str" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="str-mod">+0</span>
+                                            <input type="number" id="char-str" min="-5" max="20" value="0">
+                                        </div>
+                                        <div class="ability-score-group">
+                                            <label for="char-sta">STA</label>
+                                            <input type="number" id="char-sta" min="-5" max="20" value="0">
+                                        </div>
+                                        <div class="ability-score-group">
+                                            <label for="char-agl">AGL</label>
+                                            <input type="number" id="char-agl" min="-5" max="20" value="0">
                                         </div>
                                         <div class="ability-score-group">
                                             <label for="char-dex">DEX</label>
-                                            <input type="number" id="char-dex" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="dex-mod">+0</span>
+                                            <input type="number" id="char-dex" min="-5" max="20" value="0">
                                         </div>
                                         <div class="ability-score-group">
-                                            <label for="char-con">CON</label>
-                                            <input type="number" id="char-con" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="con-mod">+0</span>
+                                            <label for="char-fgt">FGT</label>
+                                            <input type="number" id="char-fgt" min="-5" max="20" value="0">
                                         </div>
                                         <div class="ability-score-group">
                                             <label for="char-int">INT</label>
-                                            <input type="number" id="char-int" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="int-mod">+0</span>
+                                            <input type="number" id="char-int" min="-5" max="20" value="0">
                                         </div>
                                         <div class="ability-score-group">
-                                            <label for="char-wis">WIS</label>
-                                            <input type="number" id="char-wis" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="wis-mod">+0</span>
+                                            <label for="char-awe">AWE</label>
+                                            <input type="number" id="char-awe" min="-5" max="20" value="0">
                                         </div>
                                         <div class="ability-score-group">
-                                            <label for="char-cha">CHA</label>
-                                            <input type="number" id="char-cha" min="1" max="30" value="10">
-                                            <span class="ability-modifier" id="cha-mod">+0</span>
+                                            <label for="char-pre">PRE</label>
+                                            <input type="number" id="char-pre" min="-5" max="20" value="0">
                                         </div>
                                     </div>
                                     <div class="form-row">
-                                        <button type="button" id="standard-array-btn" class="btn btn-secondary btn-small">Standard Array</button>
-                                        <button type="button" id="roll-stats-btn" class="btn btn-secondary btn-small">Roll 4d6 Drop Lowest</button>
+                                        <button type="button" id="pl10-template-btn" class="btn btn-secondary btn-small">PL 10 Template</button>
                                     </div>
                                 </div>
 
-                                <!-- Combat Stats -->
+                                <!-- Defenses -->
                                 <div class="form-section">
-                                    <h3>Combat Stats</h3>
+                                    <h3>Defenses</h3>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="char-hp">Max HP</label>
-                                            <input type="number" id="char-hp" min="1" value="10">
+                                            <label for="char-dodge">Dodge <span id="dodge-base" style="font-size:0.8em;color:var(--text-secondary)">(AGL)</span></label>
+                                            <input type="number" id="char-dodge" min="0" max="30" value="0">
                                         </div>
                                         <div class="form-group">
-                                            <label for="char-ac">Armor Class</label>
-                                            <input type="number" id="char-ac" min="1" value="10">
+                                            <label for="char-parry">Parry <span id="parry-base" style="font-size:0.8em;color:var(--text-secondary)">(FGT)</span></label>
+                                            <input type="number" id="char-parry" min="0" max="30" value="0">
                                         </div>
                                         <div class="form-group">
-                                            <label for="char-speed">Speed (ft)</label>
-                                            <input type="number" id="char-speed" min="0" value="30">
+                                            <label for="char-toughness">Toughness <span id="toughness-base" style="font-size:0.8em;color:var(--text-secondary)">(STA)</span></label>
+                                            <input type="number" id="char-toughness" min="0" max="30" value="0">
                                         </div>
                                         <div class="form-group">
-                                            <label>Initiative</label>
-                                            <span id="char-initiative-mod" class="stat-display">+0</span>
+                                            <label for="char-fortitude">Fortitude <span id="fortitude-base" style="font-size:0.8em;color:var(--text-secondary)">(STA)</span></label>
+                                            <input type="number" id="char-fortitude" min="0" max="30" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="char-will">Will <span id="will-base" style="font-size:0.8em;color:var(--text-secondary)">(AWE)</span></label>
+                                            <input type="number" id="char-will" min="0" max="30" value="0">
                                         </div>
                                     </div>
                                 </div>
@@ -258,6 +237,20 @@
                                     </div>
                                 </div>
 
+                                <!-- Powers -->
+                                <div class="form-section">
+                                    <h3>Powers</h3>
+                                    <div id="powers-list"></div>
+                                    <button type="button" id="add-power-btn" class="btn btn-secondary btn-small">+ Add Power</button>
+                                </div>
+
+                                <!-- Advantages -->
+                                <div class="form-section">
+                                    <h3>Advantages</h3>
+                                    <div id="advantages-list"></div>
+                                    <button type="button" id="add-advantage-btn" class="btn btn-secondary btn-small">+ Add Advantage</button>
+                                </div>
+
                                 <!-- Attacks -->
                                 <div class="form-section">
                                     <h3>Attacks</h3>
@@ -265,10 +258,17 @@
                                     <button type="button" id="add-attack-btn" class="btn btn-secondary btn-small">+ Add Attack</button>
                                 </div>
 
+                                <!-- Complications -->
+                                <div class="form-section">
+                                    <h3>Complications</h3>
+                                    <div id="complications-list"></div>
+                                    <button type="button" id="add-complication-btn" class="btn btn-secondary btn-small">+ Add Complication</button>
+                                </div>
+
                                 <!-- Notes -->
                                 <div class="form-section">
-                                    <h3>Notes / Features</h3>
-                                    <textarea id="char-notes" rows="4" placeholder="Character features, abilities, backstory, etc."></textarea>
+                                    <h3>Notes</h3>
+                                    <textarea id="char-notes" rows="4" placeholder="Background, tactics, description, etc."></textarea>
                                 </div>
 
                                 <div class="form-actions">
@@ -305,7 +305,7 @@
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="effect-name">Effect Name *</label>
-                                            <input type="text" id="effect-name" required placeholder="e.g., Bless, Poisoned, Rage">
+                                            <input type="text" id="effect-name" required placeholder="e.g., Affliction, Power Attack, Force Field">
                                         </div>
                                         <div class="form-group">
                                             <label for="effect-duration">Default Duration (Rounds)</label>
@@ -337,16 +337,14 @@
                                     </div>
                                 </div>
 
-                                <!-- Roll Modifiers -->
+                                <!-- Attack Roll Modifier -->
                                 <div class="form-section">
-                                    <h3>Roll Modifiers</h3>
+                                    <h3>Attack Modifier</h3>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="effect-attack-mod">Attack Roll Modifier</label>
                                             <select id="effect-attack-mod">
                                                 <option value="none">None</option>
-                                                <option value="advantage">Advantage</option>
-                                                <option value="disadvantage">Disadvantage</option>
                                                 <option value="bonus">Bonus (numeric)</option>
                                                 <option value="penalty">Penalty (numeric)</option>
                                             </select>
@@ -356,92 +354,140 @@
                                             <input type="number" id="effect-attack-value" placeholder="e.g., +2 or -2">
                                         </div>
                                     </div>
+                                </div>
 
+                                <!-- Defense Modifiers -->
+                                <div class="form-section">
+                                    <h3>Defense Modifiers</h3>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="effect-save-mod">Saving Throw Modifier</label>
-                                            <select id="effect-save-mod">
-                                                <option value="none">None</option>
-                                                <option value="advantage">Advantage</option>
-                                                <option value="disadvantage">Disadvantage</option>
-                                                <option value="bonus">Bonus (numeric)</option>
-                                                <option value="penalty">Penalty (numeric)</option>
-                                            </select>
+                                            <label for="effect-dodge-mod">Dodge Modifier</label>
+                                            <input type="number" id="effect-dodge-mod" placeholder="e.g., +2 or -2">
                                         </div>
                                         <div class="form-group">
-                                            <label for="effect-save-value">Value (if bonus/penalty)</label>
-                                            <input type="number" id="effect-save-value" placeholder="e.g., +2 or -2">
+                                            <label for="effect-parry-mod">Parry Modifier</label>
+                                            <input type="number" id="effect-parry-mod" placeholder="e.g., +2 or -2">
                                         </div>
                                     </div>
-
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="effect-ability-mod">Ability Check Modifier</label>
-                                            <select id="effect-ability-mod">
-                                                <option value="none">None</option>
-                                                <option value="advantage">Advantage</option>
-                                                <option value="disadvantage">Disadvantage</option>
-                                                <option value="bonus">Bonus (numeric)</option>
-                                                <option value="penalty">Penalty (numeric)</option>
-                                            </select>
+                                            <label for="effect-fortitude-mod">Fortitude Modifier</label>
+                                            <input type="number" id="effect-fortitude-mod" placeholder="e.g., +2 or -2">
                                         </div>
                                         <div class="form-group">
-                                            <label for="effect-ability-value">Value (if bonus/penalty)</label>
-                                            <input type="number" id="effect-ability-value" placeholder="e.g., +2 or -2">
+                                            <label for="effect-will-mod">Will Modifier</label>
+                                            <input type="number" id="effect-will-mod" placeholder="e.g., +2 or -2">
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="effect-toughness-mod">Toughness Modifier</label>
+                                            <input type="number" id="effect-toughness-mod" placeholder="e.g., +2 or -2">
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Stat Modifiers -->
+                                <!-- M&M Conditions -->
                                 <div class="form-section">
-                                    <h3>Stat Modifiers</h3>
+                                    <h3>Conditions</h3>
                                     <div class="form-row">
                                         <div class="form-group">
-                                            <label for="effect-ac-mod">AC Modifier</label>
-                                            <input type="number" id="effect-ac-mod" placeholder="e.g., +2 or -2">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="effect-speed-mod">Speed Modifier</label>
-                                            <input type="number" id="effect-speed-mod" placeholder="e.g., +10 or -10">
+                                            <label for="effect-bruised">Bruised (stacking penalty)</label>
+                                            <input type="number" id="effect-bruised" min="0" max="20" value="0" placeholder="Number of Bruised ranks">
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Special Conditions -->
-                                <div class="form-section">
-                                    <h3>Special Conditions</h3>
                                     <div class="conditions-grid">
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-dazed">
+                                            <span>Dazed</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-staggered">
+                                            <span>Staggered</span>
+                                        </label>
                                         <label class="condition-checkbox">
                                             <input type="checkbox" id="effect-incapacitated">
                                             <span>Incapacitated</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-unconscious">
-                                            <span>Unconscious</span>
+                                            <input type="checkbox" id="effect-dying">
+                                            <span>Dying</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-stunned">
-                                            <span>Stunned</span>
+                                            <input type="checkbox" id="effect-blind">
+                                            <span>Blind</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-paralyzed">
-                                            <span>Paralyzed</span>
+                                            <input type="checkbox" id="effect-bound">
+                                            <span>Bound</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-compelled">
+                                            <span>Compelled</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-controlled">
+                                            <span>Controlled</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-defenseless">
+                                            <span>Defenseless</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-disabled">
+                                            <span>Disabled</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-exhausted">
+                                            <span>Exhausted</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-fatigued">
+                                            <span>Fatigued</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-hindered">
+                                            <span>Hindered</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-immobile">
+                                            <span>Immobile</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-impaired">
+                                            <span>Impaired</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-prone">
+                                            <span>Prone</span>
                                         </label>
                                         <label class="condition-checkbox">
                                             <input type="checkbox" id="effect-restrained">
                                             <span>Restrained</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-blinded">
-                                            <span>Blinded</span>
+                                            <input type="checkbox" id="effect-stunned">
+                                            <span>Stunned</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-deafened">
-                                            <span>Deafened</span>
+                                            <input type="checkbox" id="effect-surprised">
+                                            <span>Surprised</span>
                                         </label>
                                         <label class="condition-checkbox">
-                                            <input type="checkbox" id="effect-invisible">
-                                            <span>Invisible</span>
+                                            <input type="checkbox" id="effect-transformed">
+                                            <span>Transformed</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-unaware">
+                                            <span>Unaware</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-vulnerable">
+                                            <span>Vulnerable</span>
+                                        </label>
+                                        <label class="condition-checkbox">
+                                            <input type="checkbox" id="effect-weakened">
+                                            <span>Weakened</span>
                                         </label>
                                     </div>
                                 </div>
@@ -881,7 +927,7 @@
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="effect-name">Effect Name *</label>
-                                    <input type="text" id="effect-name" required placeholder="e.g., Bless, Poisoned, Rage">
+                                    <input type="text" id="effect-name" required placeholder="e.g., Affliction, Power Attack, Force Field">
                                 </div>
                                 <div class="form-group">
                                     <label for="effect-duration">Default Duration (Rounds)</label>

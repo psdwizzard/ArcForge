@@ -1,0 +1,22 @@
+{
+  "name": "Gang Leader",
+  "type": "enemy",
+  "powerLevel": 6,
+  "abilities": { "str": 3, "sta": 2, "agl": 1, "dex": 1, "fgt": 3, "int": 1, "awe": 1, "pre": 3 },
+  "defenses": { "dodge": 5, "parry": 5, "fortitude": 6, "will": 5, "toughness": 7 },
+  "attacks": [
+    { "name": "Heavy Pistol", "type": "ranged", "attackBonus": 5, "effectRank": 4, "resistedBy": "toughness", "notes": "Ranged Damage 4 (ballistic)" },
+    { "name": "Brass Knuckles", "type": "close", "attackBonus": 6, "effectRank": 4, "resistedBy": "toughness", "notes": "Strength-based Strike 1" },
+    { "name": "Intimidating Glare", "type": "close", "attackBonus": 6, "effectRank": 6, "resistedBy": "will", "notes": "Demoralize using Intimidation" }
+  ],
+  "powers": [],
+  "advantages": ["Equipment 2", "Diehard", "Startle", "Improved Initiative", "Connected", "Contacts"],
+  "skills": { "Athletics": 4, "Deception": 6, "Intimidation": 8, "Perception": 4, "Insight": 4, "Stealth": 2 },
+  "specialAbilities": [
+    { "name": "Armored Coat", "description": "Protection 5 (equipment), included in Toughness." },
+    { "name": "Gang Boss", "description": "Commands 4-8 thugs. Can spend a move action to direct allies, granting them +1 to attacks until the start of the gang leader's next turn." },
+    { "name": "Tough as Nails", "description": "Diehard advantage: does not fall unconscious from the staggered condition." }
+  ],
+  "heroPoints": 1,
+  "conditions": { "bruised": 0 }
+}

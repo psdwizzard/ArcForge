@@ -1,6 +1,6 @@
 @echo off
 echo ========================================
-echo ArcForge - D^&D 5e Combat Tracker
+echo ArcForge - Mutants ^& Masterminds 3E
 echo Installation Script
 echo ========================================
 echo.
@@ -76,7 +76,7 @@ echo.
 echo Next steps:
 echo   1. Run 'start.bat' to launch the server
 echo   2. Open your browser to http://localhost:3000
-echo   3. Start tracking your D^&D combat!
+echo   3. Start tracking your M^&M 3E combat!
 echo.
 echo Additional commands:
 echo   - npm run dev    : Run with auto-reload (development)

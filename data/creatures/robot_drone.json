@@ -1,0 +1,25 @@
+{
+  "name": "Robot Drone",
+  "type": "enemy",
+  "powerLevel": 8,
+  "abilities": { "str": 4, "sta": -1, "agl": 2, "dex": 4, "fgt": 4, "int": -1, "awe": 0, "pre": -2 },
+  "defenses": { "dodge": 8, "parry": 6, "fortitude": 8, "will": 4, "toughness": 8 },
+  "attacks": [
+    { "name": "Blaster Cannons", "type": "ranged", "attackBonus": 8, "effectRank": 8, "resistedBy": "toughness", "notes": "Ranged Damage 8 (energy)" },
+    { "name": "Slam", "type": "close", "attackBonus": 8, "effectRank": 4, "resistedBy": "toughness", "notes": "Strength-based damage" }
+  ],
+  "powers": [
+    { "name": "Armored Chassis", "rank": 9, "type": "Protection", "notes": "Impervious 6; Toughness = Sta (-1) + Protection 9 = 8" },
+    { "name": "Blaster Cannons", "rank": 8, "type": "Ranged Damage", "notes": "Energy-based ranged weaponry" },
+    { "name": "Sensors", "rank": 6, "type": "Senses", "notes": "Darkvision, Infravision, Radio, Direction Sense, Distance Sense" },
+    { "name": "Flight Jets", "rank": 4, "type": "Flight", "notes": "30 mph" }
+  ],
+  "advantages": ["Improved Initiative 2", "Move-by Action"],
+  "skills": { "Perception": 6 },
+  "specialAbilities": [
+    { "name": "Construct", "description": "Immune to fortitude effects (unless they affect objects), mental effects, and interaction skills. No Stamina; uses 0 for Fortitude-based checks." },
+    { "name": "Programmed", "description": "Follows basic programming. Cannot adapt tactics or be reasoned with." }
+  ],
+  "heroPoints": 0,
+  "conditions": { "bruised": 0 }
+}

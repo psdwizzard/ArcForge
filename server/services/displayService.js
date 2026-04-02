@@ -1,5 +1,5 @@
 const { atlasState } = require('./atlasService');
-const { encounterState } = require('./encounterService');
+const { encounterState, getConditionSeverity } = require('./encounterService');
 const { computePixelsPerInch } = require('../utils/mathUtils');
 
 const displayState = {
@@ -78,35 +78,10 @@ function buildDisplayState() {
           || (enemy.combatantId ? encounterState.currentEncounter.combatants.find(c => c.id === enemy.combatantId) : null)
           || combatantsByName.get(enemy.name);
 
-        let hpCurrent = null;
-        let hpMax = null;
-        let hpTemp = null;
-
-        // Prefer live combatant HP so display rings update immediately when damage/heal is applied.
-        if (combatantMatch?.hp) {
-          const combatantHp = combatantMatch.hp;
-          if (hpCurrent === null) hpCurrent = toNumber(combatantHp.current ?? combatantHp.value ?? combatantHp);
-          if (hpMax === null) hpMax = toNumber(combatantHp.max);
-          if (hpTemp === null) hpTemp = toNumber(combatantHp.temp);
-        }
-
-        const stagedHp = enemy.stats?.hp;
-        if (stagedHp) {
-          if (hpCurrent === null) hpCurrent = toNumber(stagedHp.current);
-          if (hpMax === null) hpMax = toNumber(stagedHp.max);
-          if (hpTemp === null) hpTemp = toNumber(stagedHp.temp);
-        }
-
-        if (hpCurrent === null && enemy.hp !== undefined) {
-          hpCurrent = toNumber(enemy.hp);
-        }
-
-        let hpPercent = null;
-        if (hpCurrent !== null && hpMax !== null && hpMax > 0) {
-          hpPercent = Math.max(0, Math.min(100, Math.round((hpCurrent / hpMax) * 100)));
-        } else if (hpCurrent !== null && hpMax === null) {
-          hpPercent = null;
-        }
+        // M&M 3E: Use condition severity instead of HP for token status
+        const conditions = combatantMatch?.conditions || null;
+        const severity = conditions ? getConditionSeverity(conditions) : 0;
+        const isIncapacitated = conditions ? Boolean(conditions.incapacitated || conditions.dying) : false;
 
         const tokenRecord = {
           id: enemy.id,
@@ -118,11 +93,11 @@ function buildDisplayState() {
           mapId: enemy.position.mapId,
           imagePath,
           isEnemy: true,
-          hpCurrent,
-          hpMax,
-          hpTemp,
-          hpPercent,
-          isDead: hpCurrent !== null ? hpCurrent <= 0 : false
+          // M&M 3E condition-based status (replaces HP)
+          conditionSeverity: severity,  // 0=clean, 1=bruised, 2=dazed/staggered, 3=incapacitated
+          bruisedCount: conditions?.bruised || 0,
+          isIncapacitated,
+          isDead: isIncapacitated
         };
 
         tokens.push(tokenRecord);
@@ -141,14 +116,10 @@ function buildDisplayState() {
   if (encounterState.currentEncounter && encounterState.currentEncounter.combatActive && encounterState.currentEncounter.combatants && encounterState.currentEncounter.combatants.length > 0) {
     const currentCombatant = encounterState.currentEncounter.combatants[encounterState.currentEncounter.currentTurnIndex];
     if (currentCombatant) {
-      // Check if this combatant has a corresponding placed enemy in the encounter
       const placedEnemy = atlasState.currentSessionEncounter?.placedEnemies?.find(e =>
         e.name === currentCombatant.name || e.id === currentCombatant.atlasTokenId
       );
-
-      // Only show if the combatant is visible (for enemies on the map, check their visibility)
       const isVisible = placedEnemy ? (placedEnemy.visible !== false) : true;
-
       const tokenId = placedEnemy?.id || currentCombatant.atlasTokenId || null;
 
       currentTurn = {
@@ -194,14 +165,12 @@ function buildDisplayState() {
 
       imagePath = normalizeImagePath(imagePath);
 
-      const hpCurrent = toNumber(combatant.hp?.current ?? combatant.hp?.value ?? combatant.hp);
-      const hpMax = toNumber(combatant.hp?.max);
-      const hpPercent = (hpCurrent !== null && hpMax !== null && hpMax > 0)
-        ? Math.max(0, Math.min(100, Math.round((hpCurrent / hpMax) * 100)))
-        : null;
-      const isDead = hpCurrent !== null ? hpCurrent <= 0 : false;
+      // M&M 3E: condition-based status instead of HP
+      const conditions = combatant.conditions || {};
+      const severity = getConditionSeverity(conditions);
+      const isIncapacitated = Boolean(conditions.incapacitated || conditions.dying);
 
-      if (isEnemy && isDead) {
+      if (isEnemy && isIncapacitated) {
         return;
       }
 
@@ -215,8 +184,9 @@ function buildDisplayState() {
         isVisible,
         atlasTokenId: combatant.atlasTokenId || linkedEnemy?.atlasTokenId || linkedEnemy?.id || tokenMatch?.atlasTokenId || null,
         tokenId: linkedEnemy?.id || linkedEnemy?.atlasTokenId || tokenMatch?.id || combatant.atlasTokenId || null,
-        hpPercent,
-        isDead,
+        conditionSeverity: severity,
+        isIncapacitated,
+        isDead: isIncapacitated,
         order: index
       });
     });

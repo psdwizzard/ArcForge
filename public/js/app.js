@@ -256,8 +256,8 @@ function renderCodexCharacters() {
             ${portraitUrl ? `<img class="codex-sheet-portrait" src="${portraitUrl}" alt="${char.name} portrait" loading="lazy">` : ''}
             <div class="codex-sheet-meta">
                 <div class="codex-sheet-name">${char.name}</div>
-                <div class="codex-sheet-sub">${[char.race, char.class ? `${char.class} ${char.level || ''}` : ''].filter(Boolean).join(' • ')}</div>
-                <div class="codex-sheet-sub">HP ${char.hp} • AC ${char.ac}</div>
+                <div class="codex-sheet-sub">PL ${char.powerLevel ?? 10}</div>
+                <div class="codex-sheet-sub">Dodge ${char.defenses?.dodge ?? 0} • Parry ${char.defenses?.parry ?? 0} • Tough ${char.defenses?.toughness ?? 0}</div>
             </div>
         `;
         card.addEventListener('click', () => {
@@ -302,8 +302,8 @@ function renderCodexEnemies() {
             ${portraitUrl ? `<img class="codex-sheet-portrait" src="${portraitUrl}" alt="${enemy.name} portrait" loading="lazy">` : ''}
             <div class="codex-sheet-meta">
                 <div class="codex-sheet-name">${enemy.name}</div>
-                <div class="codex-sheet-sub">CR ${enemy.cr || '—'} • ${enemy.type || ''}</div>
-                <div class="codex-sheet-sub">HP ${enemy.hp || '—'} • AC ${enemy.ac || '—'}</div>
+                <div class="codex-sheet-sub">PL ${enemy.powerLevel ?? '—'} • ${enemy.type || ''}</div>
+                <div class="codex-sheet-sub">Dodge ${enemy.defenses?.dodge ?? '—'} • Parry ${enemy.defenses?.parry ?? '—'} • Tough ${enemy.defenses?.toughness ?? '—'}</div>
             </div>
         `;
         card.addEventListener('click', () => {
@@ -340,30 +340,50 @@ function getCodexSheetDetailHTML(sheet, type) {
 
     const extraBlocks = [];
 
-    if (type === 'character') {
+    // M&M 3E: Defense summary blocks
+    const defenses = sheet.defenses || {};
+    extraBlocks.push(`
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">Dodge</div>
+            <div class="codex-summary-value">${defenses.dodge ?? '—'}</div>
+        </div>
+    `);
+    extraBlocks.push(`
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">Parry</div>
+            <div class="codex-summary-value">${defenses.parry ?? '—'}</div>
+        </div>
+    `);
+    extraBlocks.push(`
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">Toughness</div>
+            <div class="codex-summary-value">${defenses.toughness ?? '—'}</div>
+        </div>
+    `);
+    extraBlocks.push(`
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">Fortitude</div>
+            <div class="codex-summary-value">${defenses.fortitude ?? '—'}</div>
+        </div>
+    `);
+    extraBlocks.push(`
+        <div class="codex-summary-block">
+            <div class="codex-summary-label">Will</div>
+            <div class="codex-summary-value">${defenses.will ?? '—'}</div>
+        </div>
+    `);
+    if (type === 'enemy') {
         extraBlocks.push(`
             <div class="codex-summary-block">
-                <div class="codex-summary-label">Class & Level</div>
-                <div class="codex-summary-value">${sheet.class ? `${sheet.class} ${sheet.level || ''}` : '—'}</div>
+                <div class="codex-summary-label">Power Level</div>
+                <div class="codex-summary-value">PL ${sheet.powerLevel ?? '—'}</div>
             </div>
         `);
+    } else if (type === 'character') {
         extraBlocks.push(`
             <div class="codex-summary-block">
-                <div class="codex-summary-label">Speed</div>
-                <div class="codex-summary-value">${sheet.speed || '—'}</div>
-            </div>
-        `);
-    } else if (type === 'enemy') {
-        extraBlocks.push(`
-            <div class="codex-summary-block">
-                <div class="codex-summary-label">Challenge</div>
-                <div class="codex-summary-value">CR ${sheet.cr || '—'}</div>
-            </div>
-        `);
-        extraBlocks.push(`
-            <div class="codex-summary-block">
-                <div class="codex-summary-label">Type & Size</div>
-                <div class="codex-summary-value">${[sheet.size, sheet.type].filter(Boolean).join(' • ') || '—'}</div>
+                <div class="codex-summary-label">Power Level</div>
+                <div class="codex-summary-value">PL ${sheet.powerLevel ?? '—'}</div>
             </div>
         `);
     }
@@ -432,11 +452,11 @@ function getCodexSheetDetailHTML(sheet, type) {
                     <h2>${sheet.name}</h2>
                     <span class="codex-sheet-tag">${type === 'character' ? 'Character' : 'Enemy'}</span>
                 </div>
-                <div class="codex-sheet-subtitle">${type === 'character' ? [sheet.race, sheet.background].filter(Boolean).join(' • ') : [sheet.type, sheet.size].filter(Boolean).join(' • ')}</div>
+                <div class="codex-sheet-subtitle">PL ${sheet.powerLevel ?? '—'} ${type === 'enemy' ? [sheet.type, sheet.size].filter(Boolean).join(' • ') : ''}</div>
                 <div class="codex-sheet-primary-stats">
-                    <span>HP <strong>${sheet.hp || '—'}</strong></span>
-                    <span>AC <strong>${sheet.ac || '—'}</strong></span>
-                    <span>DEX <strong>${sheet.dexModifier >= 0 ? '+' : ''}${sheet.dexModifier || 0}</strong></span>
+                    <span>Dodge <strong>${sheet.defenses?.dodge ?? '—'}</strong></span>
+                    <span>Parry <strong>${sheet.defenses?.parry ?? '—'}</strong></span>
+                    <span>Toughness <strong>${sheet.defenses?.toughness ?? '—'}</strong></span>
                 </div>
             </div>
         </div>
@@ -1055,8 +1075,7 @@ function isDefeatedEnemy(combatant) {
     if (!combatant || !isEnemyType(combatant.type)) {
         return false;
     }
-    const hpCurrent = Number(combatant?.hp?.current);
-    return Number.isFinite(hpCurrent) && hpCurrent <= 0;
+    return Boolean(combatant.conditions?.incapacitated);
 }
 
 function getAgentsMiniMapElements() {
@@ -1404,63 +1423,12 @@ async function handleNextTurn() {
     }
 
     try {
-        // Auto-apply any pending damage/healing/status effects for ALL combatants
-        console.log('[handleNextTurn] Processing pending damage/healing/effects for', encounterState.combatants.length, 'combatants');
+        // Auto-apply any pending status effects for ALL combatants
+        console.log('[handleNextTurn] Processing pending effects for', encounterState.combatants.length, 'combatants');
 
         for (const combatant of encounterState.combatants) {
-            const dmgInput = document.getElementById(`dmg-${combatant.id}`);
-            const healInput = document.getElementById(`heal-${combatant.id}`);
-            const tempInput = document.getElementById(`temp-${combatant.id}`);
             const statusNameInput = document.getElementById(`status-name-${combatant.id}`);
             const statusDurationInput = document.getElementById(`status-duration-${combatant.id}`);
-
-            // Apply damage if there's a value
-            if (dmgInput && dmgInput.value) {
-                const amount = parseInt(dmgInput.value);
-                if (amount > 0) {
-                    console.log(`[handleNextTurn] Applying ${amount} damage to ${combatant.name}`);
-                    const dmgResponse = await fetch(`${API_BASE}/combatants/${combatant.id}/hp`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount, type: 'damage' })
-                    });
-                    if (!dmgResponse.ok) {
-                        console.error(`[handleNextTurn] Failed to apply damage to ${combatant.name}`);
-                    }
-                }
-            }
-
-            // Apply healing if there's a value
-            if (healInput && healInput.value) {
-                const amount = parseInt(healInput.value);
-                if (amount > 0) {
-                    console.log(`[handleNextTurn] Applying ${amount} healing to ${combatant.name}`);
-                    const healResponse = await fetch(`${API_BASE}/combatants/${combatant.id}/hp`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount, type: 'heal' })
-                    });
-                    if (!healResponse.ok) {
-                        console.error(`[handleNextTurn] Failed to apply healing to ${combatant.name}`);
-                    }
-                }
-            }
-
-            // Apply temp HP if there's a value
-            if (tempInput && tempInput.value) {
-                const amount = parseInt(tempInput.value);
-                if (amount > 0) {
-                    console.log(`[handleNextTurn] Applying ${amount} temp HP to ${combatant.name}`);
-                    const tempResponse = await fetch(`${API_BASE}/combatants/${combatant.id}/temp-hp`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ amount })
-                    });
-                    if (!tempResponse.ok) {
-                        console.error(`[handleNextTurn] Failed to apply temp HP to ${combatant.name}`);
-                    }
-                }
-            }
 
             // Apply status effect if there's a name entered
             if (statusNameInput && statusNameInput.value.trim()) {
@@ -1793,7 +1761,11 @@ function getAttacksHTML(combatant) {
 
     const targetOptions = (encounterState.combatants || [])
         .filter(target => target.id !== combatant.id)
-        .map(target => `<option value="${target.id}">${target.name} (AC ${target.ac})</option>`)
+        .map(target => {
+            const dodge = target.defenses?.dodge ?? 0;
+            const parry = target.defenses?.parry ?? 0;
+            return `<option value="${target.id}">${target.name} (Dodge ${dodge} / Parry ${parry})</option>`;
+        })
         .join('');
 
     const targetSelectDisabled = targetOptions ? '' : 'disabled';
@@ -1813,9 +1785,8 @@ function getAttacksHTML(combatant) {
                         </select>
                     </div>
                     <div class="attack-roll-group">
-                        <button type="button" class="btn btn-small btn-secondary" onclick="rollAttack('${combatant.id}')">Roll</button>
-                        <input type="number" class="attack-damage-input" id="attack-damage-${combatant.id}" placeholder="Damage" min="0" step="1" value="0" disabled>
-                        <button type="button" class="btn btn-small btn-primary" id="attack-confirm-${combatant.id}" onclick="confirmAttack('${combatant.id}')" disabled>Confirm</button>
+                        <button type="button" class="btn btn-small btn-secondary" onclick="rollAttack('${combatant.id}')">Roll Attack</button>
+                        <button type="button" class="btn btn-small btn-primary" id="attack-confirm-${combatant.id}" onclick="confirmAttack('${combatant.id}')" disabled>Roll Resistance</button>
                     </div>
                 </div>
                 <div class="attack-result" id="attack-result-${combatant.id}"></div>
@@ -1951,14 +1922,13 @@ function toggleCombatantDetails(combatantId) {
     }
 }
 
-// Roll to hit with the currently selected attack and target
+// M&M 3E: Roll attack (d20 + bonus vs target's defense DC)
 function rollAttack(attackerId) {
     const attackSelect = document.getElementById(`attack-select-${attackerId}`);
     const targetSelect = document.getElementById(`attack-target-${attackerId}`);
-    const damageInput = document.getElementById(`attack-damage-${attackerId}`);
     const confirmButton = document.getElementById(`attack-confirm-${attackerId}`);
 
-    if (!attackSelect || !targetSelect || !damageInput || !confirmButton) {
+    if (!attackSelect || !targetSelect || !confirmButton) {
         return;
     }
 
@@ -1967,16 +1937,12 @@ function rollAttack(attackerId) {
 
     if (Number.isNaN(attackIndex)) {
         updateAttackResultUI(attackerId, 'Select an attack before rolling.', 'info');
-        damageInput.disabled = true;
-        damageInput.value = '0';
         confirmButton.disabled = true;
         return;
     }
 
     if (!targetId) {
         updateAttackResultUI(attackerId, 'Select a target before rolling.', 'info');
-        damageInput.disabled = true;
-        damageInput.value = '0';
         confirmButton.disabled = true;
         return;
     }
@@ -1994,14 +1960,14 @@ function rollAttack(attackerId) {
     let attacks = attacker.attacks || [];
     if (attacks.length === 0) {
         const attackerBaseName = attacker.name.split(' - ')[0];
-        const attackerData = attacker.sourceId 
-            ? savedAgents.find(agent => agent.id === attacker.sourceId) 
+        const attackerData = attacker.sourceId
+            ? savedAgents.find(agent => agent.id === attacker.sourceId)
             : (savedAgents.find(agent => agent.name === attacker.name) || savedAgents.find(agent => agent.name === attackerBaseName));
         if (attackerData && attackerData.attacks) {
             attacks = attackerData.attacks;
         }
     }
-    
+
     if (!attacks || !attacks[attackIndex]) {
         updateAttackResultUI(attackerId, 'Attack data is missing for this combatant.', 'info');
         resetAttackUI(attackerId);
@@ -2012,31 +1978,37 @@ function rollAttack(attackerId) {
     const attackBonus = Number(attack.attackBonus) || 0;
     const d20Roll = Math.floor(Math.random() * 20) + 1;
     const totalRoll = d20Roll + attackBonus;
-    const targetAC = Number(target.ac) || 0;
     const isCritical = d20Roll === 20;
     const isCriticalMiss = d20Roll === 1;
-    const hit = isCritical || (!isCriticalMiss && totalRoll >= targetAC);
 
-    // Support both damageDice (from character builder) and damageRoll (from monster library)
-    const damageFormula = attack.damageRoll || attack.damageDice || '';
-    const sanitizedDamage = damageFormula.toString().replace(/\s+/g, '');
-    const rolledDamage = hit ? Math.max(0, rollDice(sanitizedDamage, isCritical)) : 0;
-    
-    console.log(`[rollAttack] Attack: ${attack.name}, damageRoll: ${attack.damageRoll}, damageDice: ${attack.damageDice}, sanitized: ${sanitizedDamage}, rolled: ${rolledDamage}`);
+    // M&M 3E: defense DC = 10 + Dodge (ranged) or 10 + Parry (melee)
+    const attackType = attack.type || 'close';
+    const defenseUsed = attackType === 'ranged' ? 'dodge' : 'parry';
+    const defenseValue = target.defenses?.[defenseUsed] ?? 0;
+    const defenseDC = 10 + defenseValue;
+    const hit = isCritical || (!isCriticalMiss && totalRoll >= defenseDC);
+
+    // M&M 3E: effect rank determines resistance DC, not damage dice
+    const effectRank = Number(attack.effectRank) || 0;
+    // Critical hit adds +5 to effect rank for resistance check
+    const effectiveRank = isCritical && hit ? effectRank + 5 : effectRank;
+    const resistDC = 15 + effectiveRank;
+
+    console.log(`[rollAttack] M&M: ${attack.name}, type=${attackType}, bonus=${attackBonus}, effectRank=${effectRank}, vs ${defenseUsed} DC ${defenseDC}`);
 
     let message = `${attack.name || 'Attack'} vs ${target.name}: rolled ${d20Roll}`;
     message += attackBonus ? ` + ${attackBonus} = ${totalRoll}` : '';
-    message += ` against AC ${targetAC}.`;
+    message += ` against ${defenseUsed.charAt(0).toUpperCase() + defenseUsed.slice(1)} DC ${defenseDC}.`;
 
     if (isCriticalMiss) {
         message += ' Critical miss!';
     } else if (isCritical) {
-        message += ' Critical hit!';
+        message += ' Critical hit! (+5 effect rank)';
     }
 
     if (hit) {
-        const damageSuffix = attack.damageType ? ` ${attack.damageType}` : '';
-        message += ` Pending damage: ${rolledDamage}${damageSuffix}.`;
+        const resistedBy = attack.resistedBy || 'toughness';
+        message += ` HIT! Target must make ${resistedBy.charAt(0).toUpperCase() + resistedBy.slice(1)} check vs DC ${resistDC}.`;
     } else {
         message += ' Missed.';
     }
@@ -2051,70 +2023,68 @@ function rollAttack(attackerId) {
         totalRoll,
         isCritical,
         status: hit ? 'hit' : 'miss',
-        damage: rolledDamage,
+        effectRank: effectiveRank,
+        resistDC,
+        resistedBy: attack.resistedBy || 'toughness',
         message
     };
 
     if (hit) {
-        damageInput.disabled = false;
-        damageInput.value = String(rolledDamage);
         confirmButton.disabled = false;
     } else {
-        damageInput.disabled = true;
-        damageInput.value = '0';
         confirmButton.disabled = true;
     }
 
     updateAttackResultUI(attackerId, message, hit ? 'hit' : 'miss');
 }
 
-// Apply damage to the selected target if the attack roll was successful
+// M&M 3E: Roll the target's resistance check after a successful attack
 async function confirmAttack(attackerId) {
     const state = combatantAttackState[attackerId];
-    const damageInput = document.getElementById(`attack-damage-${attackerId}`);
     const confirmButton = document.getElementById(`attack-confirm-${attackerId}`);
 
     if (!state || state.status !== 'hit') {
-        updateAttackResultUI(attackerId, 'Roll a successful attack before confirming damage.', 'info');
+        updateAttackResultUI(attackerId, 'Roll a successful attack before rolling resistance.', 'info');
         return;
     }
 
-    if (!damageInput || !confirmButton) {
-        return;
-    }
-
-    const amount = parseInt(damageInput.value, 10);
-    if (Number.isNaN(amount) || amount < 0) {
-        updateAttackResultUI(attackerId, 'Enter a non-negative damage amount.', 'info');
-        damageInput.focus();
-        return;
-    }
-
-    if (amount === 0) {
-        updateAttackResultUI(attackerId, 'No damage applied.', 'info');
-        resetAttackUI(attackerId);
+    if (!confirmButton) {
         return;
     }
 
     try {
         confirmButton.disabled = true;
-        const response = await fetch(`${API_BASE}/combatants/${state.targetId}/hp`, {
+        const response = await fetch(`${API_BASE}/combatants/${state.targetId}/resistance-check`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount, type: 'damage' })
+            body: JSON.stringify({
+                dc: state.resistDC,
+                defense: state.resistedBy || 'toughness'
+            })
         });
 
         if (!response.ok) {
-            throw new Error(`Failed to apply damage: ${response.statusText}`);
+            throw new Error(`Failed to roll resistance: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        // Build result message
+        const degreeLabels = ['Success', '1 Degree Failure', '2 Degree Failure', '3 Degree Failure', '4+ Degree Failure'];
+        const bruisedPenalty = result.bruisedPenalty ? ` (−${result.bruisedPenalty} bruised)` : '';
+        let resultMsg = `${state.targetName} ${state.resistedBy} check: rolled ${result.roll} + ${result.defenseValue}${bruisedPenalty} = ${result.total} vs DC ${state.resistDC}. `;
+        resultMsg += degreeLabels[Math.min(result.degrees, 4)] + '! ';
+        if (result.effects && result.effects.length > 0) {
+            resultMsg += result.effects.map(e => e.description).join(', ');
         }
 
         resetAttackUI(attackerId);
         await loadEncounterState();
         renderCombatantsList();
-        alert(`${amount} damage applied to ${state.targetName}.`);
+        alert(resultMsg);
     } catch (error) {
-        console.error('Error applying damage:', error);
-        updateAttackResultUI(attackerId, 'Failed to apply damage. Please try again.', 'info');
+        console.error('Error rolling resistance:', error);
+        updateAttackResultUI(attackerId, 'Failed to roll resistance. Please try again.', 'info');
         confirmButton.disabled = false;
     }
 }
@@ -2160,18 +2130,21 @@ function createCombatantCard(combatant, isCurrentTurn) {
         card.classList.remove('collapsed');
     }
 
-    // Determine HP color class
-    const hpPercent = (combatant.hp.current / combatant.hp.max) * 100;
-    let hpClass = 'hp';
-    if (combatant.hp.current === 0) {
-        hpClass = 'hp dead';
-    } else if (hpPercent <= 25) {
-        hpClass = 'hp critical';
-    } else if (hpPercent <= 50) {
-        hpClass = 'hp low';
+    // M&M 3E: Determine condition severity for styling
+    const conditions = combatant.conditions || {};
+    const bruised = conditions.bruised || 0;
+    let conditionClass = '';
+    if (conditions.incapacitated || conditions.dying) {
+        conditionClass = 'condition-incapacitated';
+    } else if (conditions.staggered) {
+        conditionClass = 'condition-staggered';
+    } else if (conditions.dazed || conditions.stunned) {
+        conditionClass = 'condition-dazed';
+    } else if (bruised > 0) {
+        conditionClass = 'condition-bruised';
     }
 
-    // Build status effects HTML
+    // Build status effects HTML (timed effects)
     let statusEffectsHTML = '';
     if (combatant.statusEffects && combatant.statusEffects.length > 0) {
         statusEffectsHTML = '<div class="status-effects">';
@@ -2187,48 +2160,52 @@ function createCombatantCard(combatant, isCurrentTurn) {
         statusEffectsHTML += '</div>';
     }
 
-    // Build death saves HTML if at 0 HP (only for players and NPCs, not enemies)
-    let deathSavesHTML = '';
-    if (combatant.hp.current === 0 && (combatant.type === 'player' || combatant.type === 'npc')) {
-        deathSavesHTML = `
-            <div class="death-saves">
-                <div class="death-saves-title">Death Saves</div>
-                <div class="death-saves-row">
-                    <div class="death-save-group">
-                        <span class="death-save-label">Successes</span>
-                        <div class="death-save-circles">
-                            ${[1, 2, 3].map(i => `
-                                <div class="death-save-circle ${combatant.deathSaves.successes >= i ? 'success' : ''}"
-                                     onclick="updateDeathSave('${combatant.id}', 'successes', ${i})"></div>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <div class="death-save-group">
-                        <span class="death-save-label">Failures</span>
-                        <div class="death-save-circles">
-                            ${[1, 2, 3].map(i => `
-                                <div class="death-save-circle ${combatant.deathSaves.failures >= i ? 'failure' : ''}"
-                                     onclick="updateDeathSave('${combatant.id}', 'failures', ${i})"></div>
-                            `).join('')}
-                        </div>
-                    </div>
-                </div>
-                <div class="death-saves-actions">
-                    <button class="btn btn-small btn-primary" onclick="rollDeathSave('${combatant.id}')">Roll Death Save</button>
-                </div>
-            </div>
-        `;
-    } else if (combatant.hp.current === 0 && (combatant.type === 'enemy' || combatant.type === 'monster')) {
-        // Just show "DEAD" for enemies/monsters
-        deathSavesHTML = `
-            <div class="death-saves" style="text-align: center; padding: 0.5rem;">
-                <div class="death-saves-title">DEAD</div>
-            </div>
-        `;
+    // M&M 3E: Build condition track display
+    const activeConditions = [];
+    if (bruised > 0) activeConditions.push(`Bruised x${bruised}`);
+    if (conditions.dazed) activeConditions.push('Dazed');
+    if (conditions.staggered) activeConditions.push('Staggered');
+    if (conditions.stunned) activeConditions.push('Stunned');
+    if (conditions.incapacitated) activeConditions.push('Incapacitated');
+    if (conditions.dying) activeConditions.push('Dying');
+    if (conditions.blind) activeConditions.push('Blind');
+    if (conditions.bound) activeConditions.push('Bound');
+    if (conditions.compelled) activeConditions.push('Compelled');
+    if (conditions.controlled) activeConditions.push('Controlled');
+    if (conditions.defenseless) activeConditions.push('Defenseless');
+    if (conditions.disabled) activeConditions.push('Disabled');
+    if (conditions.exhausted) activeConditions.push('Exhausted');
+    if (conditions.fatigued) activeConditions.push('Fatigued');
+    if (conditions.hindered) activeConditions.push('Hindered');
+    if (conditions.immobile) activeConditions.push('Immobile');
+    if (conditions.impaired) activeConditions.push('Impaired');
+    if (conditions.prone) activeConditions.push('Prone');
+    if (conditions.restrained) activeConditions.push('Restrained');
+    if (conditions.surprised) activeConditions.push('Surprised');
+    if (conditions.vulnerable) activeConditions.push('Vulnerable');
+    if (conditions.weakened) activeConditions.push('Weakened');
+
+    let conditionTrackHTML = '';
+    if (activeConditions.length > 0) {
+        conditionTrackHTML = `<div class="condition-track ${conditionClass}">
+            ${activeConditions.map(c => `<span class="condition-badge">${c}</span>`).join(' ')}
+        </div>`;
     }
 
-    // Temp HP display
-    const tempHPDisplay = combatant.hp.temp > 0 ? ` (+${combatant.hp.temp})` : '';
+    // M&M 3E: Incapacitated display
+    let incapacitatedHTML = '';
+    if (conditions.incapacitated && isEnemyType(combatant.type)) {
+        incapacitatedHTML = `<div class="death-saves" style="text-align: center; padding: 0.5rem;">
+            <div class="death-saves-title">INCAPACITATED</div>
+        </div>`;
+    } else if (conditions.incapacitated || conditions.dying) {
+        incapacitatedHTML = `<div class="death-saves" style="text-align: center; padding: 0.5rem;">
+            <div class="death-saves-title">${conditions.dying ? 'DYING' : 'INCAPACITATED'}</div>
+            <div class="death-saves-actions">
+                <button class="btn btn-small btn-success" onclick="recoverCondition('${combatant.id}', 'incapacitated')">Recover</button>
+            </div>
+        </div>`;
+    }
 
     // Header display helpers
     const displayName = combatant.name || 'Unknown';
@@ -2257,6 +2234,10 @@ function createCombatantCard(combatant, isCurrentTurn) {
 
     const initiativeRollValue = getInitiativeRollValue(combatant);
     const totalInitiativeDisplay = getInitiativeTotalDisplay(combatant);
+    const agilityMod = combatant.agilityModifier ?? combatant.abilities?.agl ?? 0;
+    const defenses = combatant.defenses || {};
+    const toughnessPenalty = bruised > 0 ? ` (−${bruised})` : '';
+    const heroPoints = combatant.heroPoints ?? 0;
 
     card.innerHTML = `
         <div class="combatant-header">
@@ -2277,48 +2258,74 @@ function createCombatantCard(combatant, isCurrentTurn) {
             </div>
             <div class="combatant-summary">
             <div class="combatant-initiative">
-                <span class="initiative-mod" title="DEX Modifier">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
+                <span class="initiative-mod" title="AGL Modifier">${agilityMod >= 0 ? '+' : ''}${agilityMod}</span>
                 <span class="initiative-plus">+</span>
                 <input type="number" class="initiative-roll-input" id="initiative-roll-${combatant.id}" value="${initiativeRollValue}" onchange="updateInitiativeRoll('${combatant.id}')" title="d20 Roll">
                 <span class="initiative-equals">=</span>
                 <span class="initiative-total" id="initiative-total-${combatant.id}">${totalInitiativeDisplay}</span>
             </div>
                 <div class="combatant-summary-stats">
-                    <span class="summary-stat hp">HP ${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</span>
-                    <span class="summary-stat ac">AC ${combatant.ac}</span>
-                    <span class="summary-stat dex">DEX ${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</span>
+                    <span class="summary-stat">Dodge ${defenses.dodge ?? 0}</span>
+                    <span class="summary-stat">Parry ${defenses.parry ?? 0}</span>
+                    <span class="summary-stat">Tough ${defenses.toughness ?? 0}${toughnessPenalty}</span>
+                    <span class="summary-stat">HP <strong>${heroPoints}</strong></span>
         </div>
             </div>
         </div>
         <div class="combatant-details">
         <div class="combatant-stats">
             <div class="stat">
-                <div class="stat-label">HP</div>
-                <div class="stat-value ${hpClass}">${combatant.hp.current} / ${combatant.hp.max}${tempHPDisplay}</div>
+                <div class="stat-label">Dodge</div>
+                <div class="stat-value">${defenses.dodge ?? 0}</div>
             </div>
             <div class="stat">
-                <div class="stat-label">AC</div>
-                <div class="stat-value">${combatant.ac}</div>
+                <div class="stat-label">Parry</div>
+                <div class="stat-value">${defenses.parry ?? 0}</div>
             </div>
             <div class="stat">
-                <div class="stat-label">DEX</div>
-                <div class="stat-value">${combatant.dexModifier >= 0 ? '+' : ''}${combatant.dexModifier}</div>
+                <div class="stat-label">Toughness</div>
+                <div class="stat-value ${conditionClass}">${defenses.toughness ?? 0}${toughnessPenalty}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Fort</div>
+                <div class="stat-value">${defenses.fortitude ?? 0}</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Will</div>
+                <div class="stat-value">${defenses.will ?? 0}</div>
             </div>
         </div>
+        <div class="combatant-hero-points" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0;">
+            <span style="font-weight: bold;">Hero Points:</span>
+            <button class="btn btn-small btn-danger" onclick="adjustHeroPoints('${combatant.id}', -1)">−</button>
+            <span id="hero-points-${combatant.id}" style="font-size: 1.1em; font-weight: bold; min-width: 1.5em; text-align: center;">${heroPoints}</span>
+            <button class="btn btn-small btn-success" onclick="adjustHeroPoints('${combatant.id}', 1)">+</button>
+        </div>
+        ${conditionTrackHTML}
         ${statusEffectsHTML}
-        ${deathSavesHTML}
+        ${incapacitatedHTML}
         <div class="hp-controls">
             <div class="hp-input-group">
-                <input type="number" class="hp-input" id="dmg-${combatant.id}" placeholder="0" min="0">
-                <button class="btn btn-small btn-danger" onclick="applyDamage('${combatant.id}')">Damage</button>
+                <label style="font-size: 0.75em; color: var(--text-secondary);">Resistance Check</label>
+                <div style="display: flex; gap: 0.25rem; align-items: center;">
+                    <select id="resist-defense-${combatant.id}" class="hp-input" style="width: auto;">
+                        <option value="toughness">Toughness</option>
+                        <option value="fortitude">Fortitude</option>
+                        <option value="will">Will</option>
+                        <option value="dodge">Dodge</option>
+                        <option value="parry">Parry</option>
+                    </select>
+                    <input type="number" class="hp-input" id="resist-dc-${combatant.id}" placeholder="DC" min="1" value="15">
+                    <button class="btn btn-small btn-danger" onclick="rollResistanceCheck('${combatant.id}')">Roll</button>
+                </div>
             </div>
             <div class="hp-input-group">
-                <input type="number" class="hp-input" id="heal-${combatant.id}" placeholder="0" min="0">
-                <button class="btn btn-small btn-success" onclick="applyHealing('${combatant.id}')">Heal</button>
-            </div>
-            <div class="hp-input-group">
-                <input type="number" class="hp-input" id="temp-${combatant.id}" placeholder="Temp" min="0">
-                <button class="btn btn-small btn-secondary" onclick="applyTempHP('${combatant.id}')">Temp HP</button>
+                <label style="font-size: 0.75em; color: var(--text-secondary);">Conditions</label>
+                <div style="display: flex; gap: 0.25rem; align-items: center;">
+                    <button class="btn btn-small btn-warning" onclick="addBruise('${combatant.id}')">+Bruise</button>
+                    <button class="btn btn-small btn-secondary" onclick="removeBruise('${combatant.id}')">−Bruise</button>
+                    <button class="btn btn-small btn-success" onclick="recoverCondition('${combatant.id}', 'all')">Recover All</button>
+                </div>
             </div>
         </div>
         <div class="add-status-controls">
@@ -2345,73 +2352,105 @@ function handleEffectSelection(event) {
     }
 }
 
-// Apply damage
-async function applyDamage(combatantId) {
-    const input = document.getElementById(`dmg-${combatantId}`);
-    const amount = parseInt(input.value) || 0;
-
-    if (amount <= 0) return;
+// M&M 3E: Roll a resistance check for a combatant
+async function rollResistanceCheck(combatantId) {
+    const defenseSelect = document.getElementById(`resist-defense-${combatantId}`);
+    const dcInput = document.getElementById(`resist-dc-${combatantId}`);
+    const defense = defenseSelect?.value || 'toughness';
+    const dc = parseInt(dcInput?.value) || 15;
 
     try {
-        const response = await fetch(`${API_BASE}/combatants/${combatantId}/hp`, {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/resistance-check`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount, type: 'damage' })
+            body: JSON.stringify({ dc, defense })
         });
 
         if (response.ok) {
-            delete combatantMovementTracker[combatantId];
+            const result = await response.json();
+            const degreeLabels = ['Success', '1 Degree Failure', '2 Degree Failure', '3 Degree Failure', '4+ Degree Failure'];
+            const bruisedPenalty = result.bruisedPenalty ? ` (−${result.bruisedPenalty} bruised)` : '';
+            let msg = `${defense.charAt(0).toUpperCase() + defense.slice(1)} check: rolled ${result.roll} + ${result.defenseValue}${bruisedPenalty} = ${result.total} vs DC ${dc}. `;
+            msg += degreeLabels[Math.min(result.degrees, 4)] + '!';
+            if (result.effects && result.effects.length > 0) {
+                msg += '\n' + result.effects.map(e => e.description).join('\n');
+            }
+            alert(msg);
             await loadEncounterState();
             renderCombatantsList();
         }
     } catch (error) {
-        console.error('Error applying damage:', error);
+        console.error('Error rolling resistance check:', error);
     }
 }
 
-// Apply healing
-async function applyHealing(combatantId) {
-    const input = document.getElementById(`heal-${combatantId}`);
-    const amount = parseInt(input.value) || 0;
-
-    if (amount <= 0) return;
-
+// M&M 3E: Add a bruise
+async function addBruise(combatantId) {
+    const combatant = encounterState.combatants.find(c => c.id === combatantId);
+    const currentBruised = combatant?.conditions?.bruised || 0;
     try {
-        const response = await fetch(`${API_BASE}/combatants/${combatantId}/hp`, {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/conditions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount, type: 'heal' })
+            body: JSON.stringify({ condition: 'bruised', value: currentBruised + 1 })
         });
-
         if (response.ok) {
             await loadEncounterState();
             renderCombatantsList();
         }
     } catch (error) {
-        console.error('Error applying healing:', error);
+        console.error('Error adding bruise:', error);
     }
 }
 
-// Apply temporary HP
-async function applyTempHP(combatantId) {
-    const input = document.getElementById(`temp-${combatantId}`);
-    const amount = parseInt(input.value) || 0;
-
-    if (amount <= 0) return;
-
+// M&M 3E: Remove a bruise
+async function removeBruise(combatantId) {
     try {
-        const response = await fetch(`${API_BASE}/combatants/${combatantId}/temp-hp`, {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/recover`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ condition: 'bruised' })
+        });
+        if (response.ok) {
+            await loadEncounterState();
+            renderCombatantsList();
+        }
+    } catch (error) {
+        console.error('Error removing bruise:', error);
+    }
+}
+
+// M&M 3E: Recover from a condition
+async function recoverCondition(combatantId, condition) {
+    try {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/recover`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ condition })
+        });
+        if (response.ok) {
+            await loadEncounterState();
+            renderCombatantsList();
+        }
+    } catch (error) {
+        console.error('Error recovering condition:', error);
+    }
+}
+
+// M&M 3E: Adjust hero points
+async function adjustHeroPoints(combatantId, amount) {
+    try {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/hero-points`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ amount })
         });
-
         if (response.ok) {
             await loadEncounterState();
             renderCombatantsList();
         }
     } catch (error) {
-        console.error('Error applying temp HP:', error);
+        console.error('Error adjusting hero points:', error);
     }
 }
 
@@ -2465,20 +2504,18 @@ async function removeStatusEffect(combatantId, effectIndex) {
     }
 }
 
-// Update death save
-async function updateDeathSave(combatantId, type, value) {
+// M&M 3E: Toggle a specific condition on/off
+async function toggleCondition(combatantId, condition) {
     const combatant = encounterState.combatants.find(c => c.id === combatantId);
     if (!combatant) return;
 
-    // Toggle the value
-    const currentValue = combatant.deathSaves[type];
-    const newValue = currentValue === value ? value - 1 : value;
+    const currentValue = combatant.conditions?.[condition] || false;
 
     try {
-        const response = await fetch(`${API_BASE}/combatants/${combatantId}/death-saves`, {
+        const response = await fetch(`${API_BASE}/combatants/${combatantId}/conditions`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ [type]: newValue })
+            body: JSON.stringify({ condition, value: !currentValue })
         });
 
         if (response.ok) {
@@ -2486,25 +2523,7 @@ async function updateDeathSave(combatantId, type, value) {
             renderCombatantsList();
         }
     } catch (error) {
-        console.error('Error updating death save:', error);
-    }
-}
-
-// Roll death save
-async function rollDeathSave(combatantId) {
-    try {
-        const response = await fetch(`${API_BASE}/combatants/${combatantId}/death-saves/roll`, {
-            method: 'POST'
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            alert(`Rolled ${data.roll}: ${data.result}`);
-            await loadEncounterState();
-            renderCombatantsList();
-        }
-    } catch (error) {
-        console.error('Error rolling death save:', error);
+        console.error('Error toggling condition:', error);
     }
 }
 
@@ -2665,28 +2684,31 @@ function renderAgentsList() {
                 card.classList.add('collapsed');
             }
 
+            // M&M 3E: Show 8 abilities as direct modifiers
             const abilities = agent.abilities || {};
             const abilityMods = [
                 ['STR', abilities.str],
+                ['STA', abilities.sta],
+                ['AGL', abilities.agl],
                 ['DEX', abilities.dex],
-                ['CON', abilities.con],
+                ['FGT', abilities.fgt],
                 ['INT', abilities.int],
-                ['WIS', abilities.wis],
-                ['CHA', abilities.cha]
-            ].map(([label, score]) => `
+                ['AWE', abilities.awe],
+                ['PRE', abilities.pre]
+            ].map(([label, val]) => `
                 <span class="agent-ability-mod">
                     <span class="agent-ability-label">${label}</span>
-                    <strong>${formatAbilityModifier(score)}</strong>
+                    <strong>${(val ?? 0) >= 0 ? '+' : ''}${val ?? 0}</strong>
                 </span>
             `).join('');
+            const agentDefenses = agent.defenses || {};
             const detailsHTML = `
                 <div class="agent-details">
                     ${agent.imagePath ? `<img class="agent-list-portrait" src="${agent.imagePath}" alt="${agent.name} portrait">` : ''}
                     <div class="agent-info-text">
                         <div class="agent-detail-name">${agent.name}</div>
-                        <div class="agent-info-line">${agent.race || 'No race set'}</div>
-                        <div class="agent-info-line">Type: ${getTypeDisplayName(agent.agentType || group.key)}</div>
-                        <div class="agent-core-stats">HP: ${agent.hp ?? '�'} | AC: ${agent.ac ?? '�'}</div>
+                        <div class="agent-info-line">PL ${agent.powerLevel ?? 10} | Type: ${getTypeDisplayName(agent.agentType || group.key)}</div>
+                        <div class="agent-core-stats">Dodge: ${agentDefenses.dodge ?? 0} | Parry: ${agentDefenses.parry ?? 0} | Tough: ${agentDefenses.toughness ?? 0}</div>
                         <div class="agent-ability-mods">${abilityMods}</div>
                     </div>
                 </div>
@@ -2721,12 +2743,10 @@ function handleCreateNewAgent() {
     }
 }
 
-// Add agent to combat from list
+// Add agent to combat from list (M&M 3E)
 async function addAgentToCombatFromList(agentId) {
     const agent = savedAgents.find(a => a.id === agentId);
     if (!agent) return;
-
-    const dexMod = agent.abilities ? Math.floor((agent.abilities.dex - 10) / 2) : 0;
 
     try {
         const response = await fetch(`${API_BASE}/combatants`, {
@@ -2735,11 +2755,18 @@ async function addAgentToCombatFromList(agentId) {
             body: JSON.stringify({
                 name: agent.name,
                 type: agent.agentType || 'player',
-                hp: agent.hp,
-                ac: agent.ac,
-                dexModifier: dexMod,
+                abilities: agent.abilities || {},
+                defenses: agent.defenses || {},
+                agilityModifier: agent.abilities?.agl ?? 0,
+                powerLevel: agent.powerLevel ?? 10,
+                heroPoints: agent.heroPoints ?? 1,
+                attacks: agent.attacks || [],
+                powers: agent.powers || [],
+                advantages: agent.advantages || [],
+                skills: agent.skills || {},
                 initiative: 0,
-                imagePath: agent.imagePath || null
+                imagePath: agent.imagePath || null,
+                sourceId: agent.id
             })
         });
 
@@ -2900,7 +2927,7 @@ async function updateInitiativeRoll(combatantId) {
     const combatant = encounterState.combatants.find(c => c.id === combatantId);
     if (!combatant) return;
 
-    const totalInitiative = roll + combatant.dexModifier;
+    const totalInitiative = roll + combatant.agilityModifier;
 
     const totalDisplay = document.getElementById(`initiative-total-${combatantId}`);
     totalDisplay.textContent = totalInitiative;
@@ -2932,7 +2959,7 @@ function getInitiativeRollValue(combatant) {
     if (!combatant.initiative) {
         return '';
     }
-    return combatant.initiative - (combatant.dexModifier || 0);
+    return combatant.initiative - (combatant.agilityModifier || 0);
 }
 
 function getInitiativeTotalDisplay(combatant) {
@@ -2980,11 +3007,13 @@ async function showAttacksModal(combatantId) {
         attackItem.className = 'attack-modal-item';
         attackItem.onclick = () => performAttack(combatantId, attack);
 
+        const atkType = attack.type || 'close';
+        const resistedBy = attack.resistedBy || 'toughness';
         attackItem.innerHTML = `
             <div class="attack-modal-name">${attack.name}</div>
             <div class="attack-modal-details">
-                <span>Attack: +${attack.attackBonus}</span>
-                <span>Damage: ${attack.damageDice} ${attack.damageType}</span>
+                <span>+${attack.attackBonus} ${atkType}</span>
+                <span>Rank ${attack.effectRank || 0} (DC ${15 + (attack.effectRank || 0)} ${resistedBy})</span>
             </div>
         `;
 
@@ -3001,14 +3030,13 @@ function closeAttackModal() {
     modal.style.display = 'none';
 }
 
-// Perform an attack
+// M&M 3E: Perform an attack (modal-based flow)
 async function performAttack(attackerId, attack) {
     closeAttackModal();
 
-    // Get all valid targets (players and NPCs)
+    // Get all valid targets (not incapacitated)
     const targets = encounterState.combatants.filter(c =>
-        (c.type === 'p' || c.type === 'player' || c.type === 'n' || c.type === 'npc') &&
-        c.hp.current > 0
+        c.id !== attackerId && !c.conditions?.incapacitated
     );
 
     if (targets.length === 0) {
@@ -3016,8 +3044,13 @@ async function performAttack(attackerId, attack) {
         return;
     }
 
-    // Let user select a target
-    const targetNames = targets.map((t, i) => `${i + 1}. ${t.name} (AC ${t.ac}, HP ${t.hp.current}/${t.hp.max})`).join('\n');
+    const attackType = attack.type || 'close';
+    const defenseUsed = attackType === 'ranged' ? 'dodge' : 'parry';
+
+    const targetNames = targets.map((t, i) => {
+        const def = t.defenses?.[defenseUsed] ?? 0;
+        return `${i + 1}. ${t.name} (${defenseUsed.charAt(0).toUpperCase() + defenseUsed.slice(1)} ${def})`;
+    }).join('\n');
     const targetSelection = prompt(`Select target for ${attack.name}:\n\n${targetNames}\n\nEnter number:`);
 
     if (!targetSelection) return;
@@ -3029,6 +3062,8 @@ async function performAttack(attackerId, attack) {
     }
 
     const target = targets[targetIndex];
+    const defenseValue = target.defenses?.[defenseUsed] ?? 0;
+    const defenseDC = 10 + defenseValue;
 
     // Roll to hit (d20 + attack bonus)
     const d20Roll = Math.floor(Math.random() * 20) + 1;
@@ -3037,7 +3072,7 @@ async function performAttack(attackerId, attack) {
     const isCrit = d20Roll === 20;
     const isCritFail = d20Roll === 1;
 
-    let resultMessage = `${attack.name} Attack:\nRolled: ${d20Roll} + ${attack.attackBonus} = ${attackRoll}\nTarget AC: ${target.ac}\n\n`;
+    let resultMessage = `${attack.name} Attack:\nRolled: ${d20Roll} + ${attack.attackBonus} = ${attackRoll}\nTarget ${defenseUsed} DC: ${defenseDC}\n\n`;
 
     if (isCritFail) {
         resultMessage += 'CRITICAL MISS!\nThe attack automatically fails.';
@@ -3045,32 +3080,41 @@ async function performAttack(attackerId, attack) {
         return;
     }
 
-    if (isCrit || attackRoll >= target.ac) {
-        // Hit! Roll damage
-        const damageRoll = rollDice(attack.damageDice, isCrit);
-        resultMessage += isCrit ? 'CRITICAL HIT!\n' : 'HIT!\n';
-        resultMessage += `Damage: ${damageRoll} ${attack.damageType} damage`;
+    if (isCrit || attackRoll >= defenseDC) {
+        const effectRank = Number(attack.effectRank) || 0;
+        const effectiveRank = isCrit ? effectRank + 5 : effectRank;
+        const resistDC = 15 + effectiveRank;
+        const resistedBy = attack.resistedBy || 'toughness';
+        resultMessage += isCrit ? 'CRITICAL HIT! (+5 effect rank)\n' : 'HIT!\n';
+        resultMessage += `Target must make ${resistedBy} check vs DC ${resistDC}`;
 
-        const confirmed = confirm(`${resultMessage}\n\nApply ${damageRoll} damage to ${target.name}?`);
+        const confirmed = confirm(`${resultMessage}\n\nRoll ${resistedBy} resistance for ${target.name}?`);
 
         if (confirmed) {
             try {
-                const response = await fetch(`${API_BASE}/combatants/${target.id}/hp`, {
+                const response = await fetch(`${API_BASE}/combatants/${target.id}/resistance-check`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: damageRoll, type: 'damage' })
+                    body: JSON.stringify({ dc: resistDC, defense: resistedBy })
                 });
 
                 if (response.ok) {
+                    const result = await response.json();
+                    const degreeLabels = ['Success', '1 Degree Failure', '2 Degree Failure', '3 Degree Failure', '4+ Degree Failure'];
+                    let resistMsg = `${target.name} ${resistedBy} check: rolled ${result.roll} + ${result.defenseValue} = ${result.total} vs DC ${resistDC}.\n`;
+                    resistMsg += degreeLabels[Math.min(result.degrees, 4)] + '!';
+                    if (result.effects && result.effects.length > 0) {
+                        resistMsg += '\n' + result.effects.map(e => e.description).join('\n');
+                    }
+                    alert(resistMsg);
                     await loadEncounterState();
                     renderCombatantsList();
-                    alert(`${damageRoll} damage applied to ${target.name}!`);
                 } else {
-                    alert('Failed to apply damage');
+                    alert('Failed to roll resistance');
                 }
             } catch (error) {
-                console.error('Error applying damage:', error);
-                alert('Error applying damage');
+                console.error('Error rolling resistance:', error);
+                alert('Error rolling resistance');
             }
         }
     } else {
@@ -3105,6 +3149,12 @@ function rollDice(diceString, isCrit = false) {
 // Make functions globally available
 window.showAttacksModal = showAttacksModal;
 window.closeAttackModal = closeAttackModal;
+window.rollResistanceCheck = rollResistanceCheck;
+window.addBruise = addBruise;
+window.removeBruise = removeBruise;
+window.recoverCondition = recoverCondition;
+window.adjustHeroPoints = adjustHeroPoints;
+window.toggleCondition = toggleCondition;
 
 async function handleRollEnemyInitiative() {
     if (!encounterState || !encounterState.combatants) {
@@ -5187,34 +5237,12 @@ async function addPlacedEnemyToCombat(entry) {
     }
 
     try {
+        // M&M 3E: Extract abilities, defenses from entry/monster data
         const entryStats = entry.stats || {};
         const entryAbilities = entry.abilities || null;
         const baseAbilities = entryAbilities || (monster?.abilities ? { ...monster.abilities } : null);
-        const hpSource = entryStats.hp;
-        let hpValue = null;
-        if (typeof hpSource === 'object' && hpSource !== null) {
-            hpValue = coerceNumber(hpSource.current ?? hpSource.max);
-        } else if (hpSource !== undefined) {
-            hpValue = coerceNumber(hpSource);
-        }
-        if (hpValue === null || hpValue === undefined) {
-            hpValue = coerceNumber(entry.hp);
-        }
-        if (hpValue === null || hpValue === undefined) {
-            hpValue = monster ? coerceNumber(monster.hp) : null;
-        }
-        if (hpValue === null || hpValue === undefined) {
-            hpValue = 0;
-        }
-
-        const acValue = coerceNumber(entryStats.ac) ?? coerceNumber(entry.ac) ?? (monster ? coerceNumber(monster.ac) : null) ?? 10;
-        let dexModifier = coerceNumber(entryStats.dexModifier);
-        if (dexModifier === null || dexModifier === undefined) {
-            const dexScore = baseAbilities?.dex ?? monster?.abilities?.dex ?? null;
-            dexModifier = dexScore !== null && dexScore !== undefined ? modifierFromScore(dexScore) : 0;
-        }
-
-        const inventory = Array.isArray(entry.inventory) ? entry.inventory.map(item => ({ ...item })) : [];
+        const entryDefenses = entry.defenses || entryStats.defenses || (monster?.defenses ? { ...monster.defenses } : null);
+        const agilityModifier = baseAbilities?.agl ?? 0;
 
         const imageCandidates = [
             entry.imagePath,
@@ -5235,95 +5263,48 @@ async function addPlacedEnemyToCombat(entry) {
         const combatantData = {
             name: entry.name,
             type: 'enemy',
-            atlasTokenId: entry.id, // Link back to the placed token
-            hp: hpValue,
-            ac: acValue,
-            dexModifier,
+            atlasTokenId: entry.id,
+            agilityModifier,
             imagePath,
             sourceId: monster ? monster.id : null
         };
         if (baseAbilities) {
             combatantData.abilities = { ...baseAbilities };
         }
-        if (inventory.length) {
-            combatantData.inventory = inventory;
+        if (entryDefenses) {
+            combatantData.defenses = { ...entryDefenses };
         }
-        if (typeof entry.gold === 'number') {
-            combatantData.gold = entry.gold;
+        if (monster?.powerLevel) {
+            combatantData.powerLevel = monster.powerLevel;
+        }
+        if (monster?.heroPoints !== undefined) {
+            combatantData.heroPoints = monster.heroPoints;
         }
 
-        // Extract attacks if we have monster data
-        if (monster && monster.actions) {
-            combatantData.attacks = (monster.actions || []).filter(action => {
-                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
-                if (rawItem && rawItem.system?.activities) {
-                    const activities = Object.values(rawItem.system.activities);
-                    return activities.some(a => a.type === 'attack');
-                }
-                return false;
-            }).map(action => {
-                let attackBonus = 0;
-                let damageRoll = '';
-
-                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
-                if (rawItem && rawItem.system?.activities) {
-                    const activities = Object.values(rawItem.system.activities);
-                    const attackActivity = activities.find(a => a.type === 'attack');
-
-                    if (attackActivity) {
-                        const bonusStr = attackActivity.attack?.bonus || '';
-                        if (bonusStr && bonusStr.trim() !== '') {
-                            attackBonus = parseInt(bonusStr);
-                        } else {
-                            const abilityKey = attackActivity.attack?.ability || 'str';
-                            const abilityScore = monster.abilities?.[abilityKey] || 10;
-                            const abilityMod = modifierFromScore(abilityScore);
-                            const profBonus = Math.floor((monster.cr - 1) / 4) + 2;
-                            attackBonus = abilityMod + profBonus;
-                        }
-
-                        const baseDamage = rawItem.system?.damage?.base;
-                        if (baseDamage && baseDamage.number && baseDamage.denomination) {
-                            const abilityKey = attackActivity.attack?.ability || 'str';
-                            const abilityScore = monster.abilities?.[abilityKey] || 10;
-                            const abilityMod = modifierFromScore(abilityScore);
-                            damageRoll = `${baseDamage.number}d${baseDamage.denomination}+${abilityMod}`;
-                        }
-
-                        const damageParts = attackActivity.damage?.parts || [];
-                        if (damageParts.length > 0) {
-                            const extraDamage = damageParts.map(part => {
-                                if (part.number && part.denomination) {
-                                    return `${part.number}d${part.denomination}`;
-                                }
-                                return '';
-                            }).filter(Boolean).join(' + ');
-                            if (extraDamage) {
-                                damageRoll = damageRoll ? `${damageRoll} + ${extraDamage}` : extraDamage;
-                            }
-                        }
-                    }
-                }
-
-                return {
-                    name: action.name,
-                    attackBonus: attackBonus,
-                    damageRoll: damageRoll,
-                    description: action.description || ''
-                };
-            });
-
-            combatantData.specialAbilities = (monster.actions || []).filter(action => {
-                const rawItem = (monster.raw?.items || []).find(item => item.name === action.name);
-                if (rawItem && rawItem.system?.activities) {
-                    const activities = Object.values(rawItem.system.activities);
-                    return !activities.some(a => a.type === 'attack');
-                }
-                return false;
-            }).map(action => ({
-                name: action.name,
-                description: action.description || ''
+        // Extract attacks from monster data (M&M format)
+        if (monster && monster.attacks) {
+            combatantData.attacks = monster.attacks.map(attack => ({
+                name: attack.name,
+                type: attack.type || 'close',
+                attackBonus: attack.attackBonus || 0,
+                effectRank: attack.effectRank || 0,
+                resistedBy: attack.resistedBy || 'toughness',
+                notes: attack.notes || ''
             }));
+        }
+
+        // Extract special abilities
+        if (monster && monster.specialAbilities) {
+            combatantData.specialAbilities = monster.specialAbilities.map(ability => ({
+                name: ability.name,
+                description: ability.description || ''
+            }));
+        }
+        if (monster?.powers) {
+            combatantData.powers = monster.powers;
+        }
+        if (monster?.advantages) {
+            combatantData.advantages = monster.advantages;
         }
 
         console.log('[Atlas] Adding placed enemy to combat:', combatantData);

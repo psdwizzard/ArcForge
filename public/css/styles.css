@@ -195,9 +195,55 @@
 .combatant-card.collapsed .combatant-attacks,
 .combatant-card.collapsed .status-effects,
 .combatant-card.collapsed .combatant-stats,
-.combatant-card.collapsed .death-saves {
+.combatant-card.collapsed .death-saves,
+.combatant-card.collapsed .condition-track,
+.combatant-card.collapsed .combatant-hero-points {
     display: none;
 }
+
+/* M&M 3E Condition Track */
+.condition-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.35rem 0;
+}
+
+.condition-badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--bg-tertiary, #374151);
+    color: var(--text-primary, #f3f4f6);
+}
+
+.condition-track.condition-bruised .condition-badge {
+    background: #854d0e;
+    color: #fef3c7;
+}
+
+.condition-track.condition-dazed .condition-badge {
+    background: #9a3412;
+    color: #fed7aa;
+}
+
+.condition-track.condition-staggered .condition-badge {
+    background: #b91c1c;
+    color: #fecaca;
+}
+
+.condition-track.condition-incapacitated .condition-badge {
+    background: #4b5563;
+    color: #d1d5db;
+}
+
+/* M&M condition-based stat coloring */
+.stat-value.condition-bruised { color: #facc15; }
+.stat-value.condition-dazed { color: #f97316; }
+.stat-value.condition-staggered { color: #ef4444; }
+.stat-value.condition-incapacitated { color: #6b7280; text-decoration: line-through; }
 
 .combatant-header {
     display: flex;

@@ -1,0 +1,34 @@
+{
+  "name": "Overlord",
+  "type": "enemy",
+  "powerLevel": 14,
+  "abilities": { "str": 14, "sta": 12, "agl": 4, "dex": 4, "fgt": 10, "int": 6, "awe": 6, "pre": 8 },
+  "defenses": { "dodge": 12, "parry": 12, "fortitude": 14, "will": 14, "toughness": 16 },
+  "attacks": [
+    { "name": "Devastating Punch", "type": "close", "attackBonus": 12, "effectRank": 14, "resistedBy": "toughness", "notes": "Strength-based damage; trades slight accuracy for power" },
+    { "name": "Omega Beam", "type": "ranged", "attackBonus": 14, "effectRank": 14, "resistedBy": "toughness", "notes": "Ranged Damage 14 (energy)" },
+    { "name": "Domination", "type": "ranged", "attackBonus": 0, "effectRank": 14, "resistedBy": "will", "notes": "Perception-range Affliction 14 (dazed+compelled/controlled); Will DC 24" },
+    { "name": "Shockwave", "type": "close", "attackBonus": 0, "effectRank": 14, "resistedBy": "toughness", "notes": "Burst Area Damage 14; Dodge DC 24 for half" }
+  ],
+  "powers": [
+    { "name": "Omega Beam", "rank": 14, "type": "Ranged Damage", "notes": "Devastating energy projection" },
+    { "name": "Super Strength", "rank": 14, "type": "Enhanced Strength", "notes": "Included in abilities; can lift ~400 tons" },
+    { "name": "Invulnerability", "rank": 4, "type": "Protection", "notes": "Impervious Toughness 14; Toughness = Sta 12 + Protection 4 = 16" },
+    { "name": "Domination", "rank": 14, "type": "Perception Range Affliction", "notes": "Alternate effect of Omega Beam; mind control" },
+    { "name": "Shockwave", "rank": 14, "type": "Burst Area Damage", "notes": "Alternate effect of Omega Beam; ground slam" },
+    { "name": "Flight", "rank": 10, "type": "Flight", "notes": "2000 mph" },
+    { "name": "Regeneration", "rank": 5, "type": "Regeneration", "notes": "Recovers 1 bruise per 2 rounds" },
+    { "name": "Immunity", "rank": 10, "type": "Immunity", "notes": "Life support (all)" },
+    { "name": "Super Senses", "rank": 6, "type": "Senses", "notes": "Darkvision, Extended Vision 2, Danger Sense, Awareness (Energy)" }
+  ],
+  "advantages": ["All-out Attack", "Power Attack", "Diehard", "Great Endurance", "Improved Initiative 3", "Interpose", "Ranged Attack 6", "Startle", "Fearless", "Ultimate Toughness", "Inspire 3", "Leadership", "Seize Initiative", "Takedown 2"],
+  "skills": { "Athletics": 4, "Deception": 8, "Expertise (Tactics)": 10, "Intimidation": 14, "Perception": 8, "Persuasion": 8, "Technology": 6, "Insight": 6, "Ranged Combat (Omega Beam)": 4 },
+  "specialAbilities": [
+    { "name": "Impervious", "description": "Impervious Toughness 14: ignores damage effects with rank 7 or less." },
+    { "name": "Master Villain", "description": "Commands vast resources, minions, and bases. Plans are multi-layered and always have contingencies." },
+    { "name": "Fearsome Presence", "description": "Can demoralize all opponents within 30 feet as a free action using Startle." },
+    { "name": "Contingency Plan", "description": "Once per encounter, can retroactively declare having planned for a specific situation, gaining a +5 circumstance bonus on one check." }
+  ],
+  "heroPoints": 3,
+  "conditions": { "bruised": 0 }
+}

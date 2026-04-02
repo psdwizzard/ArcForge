@@ -1,0 +1,20 @@
+{
+  "name": "Security Guard",
+  "type": "enemy",
+  "powerLevel": 4,
+  "abilities": { "str": 1, "sta": 1, "agl": 1, "dex": 1, "fgt": 2, "int": 0, "awe": 1, "pre": 0 },
+  "defenses": { "dodge": 4, "parry": 4, "fortitude": 4, "will": 3, "toughness": 4 },
+  "attacks": [
+    { "name": "Baton", "type": "close", "attackBonus": 5, "effectRank": 3, "resistedBy": "toughness", "notes": "Strength-based Strike 2" },
+    { "name": "Taser", "type": "close", "attackBonus": 5, "effectRank": 3, "resistedBy": "fortitude", "notes": "Affliction 3 (dazed/stunned/incapacitated)" }
+  ],
+  "powers": [],
+  "advantages": ["Equipment 2", "Teamwork"],
+  "skills": { "Athletics": 4, "Intimidation": 2, "Investigation": 2, "Perception": 4, "Technology": 2 },
+  "specialAbilities": [
+    { "name": "Radio", "description": "Can call for backup; additional guards may arrive in 1d4 rounds." },
+    { "name": "Body Armor", "description": "Protection 3 (equipment), included in Toughness." }
+  ],
+  "heroPoints": 0,
+  "conditions": { "bruised": 0 }
+}

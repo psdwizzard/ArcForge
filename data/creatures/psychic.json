@@ -1,0 +1,30 @@
+{
+  "name": "Psychic",
+  "type": "enemy",
+  "powerLevel": 10,
+  "abilities": { "str": 0, "sta": 1, "agl": 1, "dex": 1, "fgt": 1, "int": 4, "awe": 6, "pre": 4 },
+  "defenses": { "dodge": 10, "parry": 6, "fortitude": 6, "will": 14, "toughness": 6 },
+  "attacks": [
+    { "name": "Mental Blast", "type": "ranged", "attackBonus": 10, "effectRank": 10, "resistedBy": "will", "notes": "Perception-range Damage 10 (mental); uses Will instead of Toughness" },
+    { "name": "Mind Control", "type": "ranged", "attackBonus": 0, "effectRank": 10, "resistedBy": "will", "notes": "Perception-range Affliction 10 (dazed+compelled/controlled); Will DC 20" },
+    { "name": "Telekinetic Slam", "type": "ranged", "attackBonus": 8, "effectRank": 8, "resistedBy": "toughness", "notes": "Move Object rank 8 used offensively" }
+  ],
+  "powers": [
+    { "name": "Mental Blast", "rank": 10, "type": "Perception Range Damage", "notes": "Mental damage; resisted by Will" },
+    { "name": "Mind Control", "rank": 10, "type": "Perception Range Affliction", "notes": "Alternate effect of Mental Blast; dazed+compelled / controlled" },
+    { "name": "Telekinesis", "rank": 8, "type": "Move Object", "notes": "Alternate effect of Mental Blast; ~6 tons" },
+    { "name": "Telepathy", "rank": 4, "type": "Communication (Mental)", "notes": "Mental communication within 1 mile" },
+    { "name": "Mind Reading", "rank": 10, "type": "Mind Reading", "notes": "Resisted by Will" },
+    { "name": "Psychic Shield", "rank": 5, "type": "Protection", "notes": "Sustained; mental force barrier. Toughness = Sta 1 + Protection 5 = 6" },
+    { "name": "Psychic Senses", "rank": 4, "type": "Senses", "notes": "Mental Awareness, Danger Sense, Postcognition" }
+  ],
+  "advantages": ["Ranged Attack 4", "Trance", "Eidetic Memory", "Fascinate (Persuasion)", "Ultimate Will", "Uncanny Dodge"],
+  "skills": { "Deception": 6, "Insight": 8, "Perception": 6, "Persuasion": 6, "Investigation": 4 },
+  "specialAbilities": [
+    { "name": "Perception Range", "description": "Mental Blast and Mind Control require no attack roll; targets make a Will resistance check (DC 20)." },
+    { "name": "Will-based Defense", "description": "Relies on Will (14) as primary defense. Physically frail; vulnerable to Toughness-targeting attacks." },
+    { "name": "Sustained Shield", "description": "Psychic Shield is sustained; if stunned, Toughness drops to 1." }
+  ],
+  "heroPoints": 1,
+  "conditions": { "bruised": 0 }
+}

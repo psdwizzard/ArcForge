@@ -1,68 +1,39 @@
-// D&D 5e Skills with their associated abilities
-const DND_SKILLS = [
-    { name: 'Acrobatics', ability: 'dex' },
-    { name: 'Animal Handling', ability: 'wis' },
-    { name: 'Arcana', ability: 'int' },
+// Mutants & Masterminds 3e Skills with their associated abilities
+const MM_SKILLS = [
+    { name: 'Acrobatics', ability: 'agl' },
     { name: 'Athletics', ability: 'str' },
-    { name: 'Deception', ability: 'cha' },
-    { name: 'History', ability: 'int' },
-    { name: 'Insight', ability: 'wis' },
-    { name: 'Intimidation', ability: 'cha' },
+    { name: 'Close Combat', ability: 'fgt', ranked: true },
+    { name: 'Deception', ability: 'pre' },
+    { name: 'Expertise', ability: 'int', ranked: true },
+    { name: 'Insight', ability: 'awe' },
+    { name: 'Intimidation', ability: 'pre' },
     { name: 'Investigation', ability: 'int' },
-    { name: 'Medicine', ability: 'wis' },
-    { name: 'Nature', ability: 'int' },
-    { name: 'Perception', ability: 'wis' },
-    { name: 'Performance', ability: 'cha' },
-    { name: 'Persuasion', ability: 'cha' },
-    { name: 'Religion', ability: 'int' },
+    { name: 'Perception', ability: 'awe' },
+    { name: 'Persuasion', ability: 'pre' },
+    { name: 'Ranged Combat', ability: 'dex', ranked: true },
     { name: 'Sleight of Hand', ability: 'dex' },
-    { name: 'Stealth', ability: 'dex' },
-    { name: 'Survival', ability: 'wis' }
+    { name: 'Stealth', ability: 'agl' },
+    { name: 'Technology', ability: 'int' },
+    { name: 'Treatment', ability: 'int' },
+    { name: 'Vehicles', ability: 'dex' }
 ];
 
-// Class data with hit dice and proficiencies
-const CLASS_DATA = {
-    barbarian: { hitDice: 12, savingThrows: ['str', 'con'], skillChoices: 2, skills: ['Animal Handling', 'Athletics', 'Intimidation', 'Nature', 'Perception', 'Survival'] },
-    bard: { hitDice: 8, savingThrows: ['dex', 'cha'], skillChoices: 3, skills: 'any' },
-    cleric: { hitDice: 8, savingThrows: ['wis', 'cha'], skillChoices: 2, skills: ['History', 'Insight', 'Medicine', 'Persuasion', 'Religion'] },
-    druid: { hitDice: 8, savingThrows: ['int', 'wis'], skillChoices: 2, skills: ['Arcana', 'Animal Handling', 'Insight', 'Medicine', 'Nature', 'Perception', 'Religion', 'Survival'] },
-    fighter: { hitDice: 10, savingThrows: ['str', 'con'], skillChoices: 2, skills: ['Acrobatics', 'Animal Handling', 'Athletics', 'History', 'Insight', 'Intimidation', 'Perception', 'Survival'] },
-    monk: { hitDice: 8, savingThrows: ['str', 'dex'], skillChoices: 2, skills: ['Acrobatics', 'Athletics', 'History', 'Insight', 'Religion', 'Stealth'] },
-    paladin: { hitDice: 10, savingThrows: ['wis', 'cha'], skillChoices: 2, skills: ['Athletics', 'Insight', 'Intimidation', 'Medicine', 'Persuasion', 'Religion'] },
-    ranger: { hitDice: 10, savingThrows: ['str', 'dex'], skillChoices: 3, skills: ['Animal Handling', 'Athletics', 'Insight', 'Investigation', 'Nature', 'Perception', 'Stealth', 'Survival'] },
-    rogue: { hitDice: 8, savingThrows: ['dex', 'int'], skillChoices: 4, skills: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Performance', 'Persuasion', 'Sleight of Hand', 'Stealth'] },
-    sorcerer: { hitDice: 6, savingThrows: ['con', 'cha'], skillChoices: 2, skills: ['Arcana', 'Deception', 'Insight', 'Intimidation', 'Persuasion', 'Religion'] },
-    warlock: { hitDice: 8, savingThrows: ['wis', 'cha'], skillChoices: 2, skills: ['Arcana', 'Deception', 'History', 'Intimidation', 'Investigation', 'Nature', 'Religion'] },
-    wizard: { hitDice: 6, savingThrows: ['int', 'wis'], skillChoices: 2, skills: ['Arcana', 'History', 'Insight', 'Investigation', 'Medicine', 'Religion'] }
-};
+// M&M ability abbreviations
+const MM_ABILITIES = ['str', 'sta', 'agl', 'dex', 'fgt', 'int', 'awe', 'pre'];
 
-// Race data with ability score modifiers and traits
-const RACE_DATA = {
-    human: { abilityScores: { str: 1, dex: 1, con: 1, int: 1, wis: 1, cha: 1 }, speed: 30, size: 'Medium' },
-    elf: { abilityScores: { dex: 2 }, speed: 30, size: 'Medium' },
-    dwarf: { abilityScores: { con: 2 }, speed: 25, size: 'Medium' },
-    halfling: { abilityScores: { dex: 2 }, speed: 25, size: 'Small' },
-    dragonborn: { abilityScores: { str: 2, cha: 1 }, speed: 30, size: 'Medium' },
-    gnome: { abilityScores: { int: 2 }, speed: 25, size: 'Small' },
-    'half-elf': { abilityScores: { cha: 2 }, speed: 30, size: 'Medium' },
-    'half-orc': { abilityScores: { str: 2, con: 1 }, speed: 30, size: 'Medium' },
-    tiefling: { abilityScores: { cha: 2, int: 1 }, speed: 30, size: 'Medium' }
+// Defense definitions: each defense has a base ability
+const MM_DEFENSES = {
+    dodge:     { ability: 'agl' },
+    parry:     { ability: 'fgt' },
+    fortitude: { ability: 'sta' },
+    will:      { ability: 'awe' },
+    toughness: { ability: 'sta' }
 };
 
 // Current character state
 let currentCharacter = null;
 let savedCharacters = [];
 window.savedCharacters = savedCharacters;
-
-// Calculate ability modifier from ability score
-function calculateModifier(score) {
-    return Math.floor((score - 10) / 2);
-}
-
-// Calculate proficiency bonus from level
-function calculateProficiencyBonus(level) {
-    return Math.ceil(level / 4) + 1;
-}
 
 // Initialize character builder
 function initCharacterBuilder() {
@@ -88,20 +59,72 @@ function initCharacterBuilder() {
     });
 }
 
-// Populate skills list
+// Populate skills list with rank inputs (not checkboxes)
 function populateSkills() {
     const skillsList = document.getElementById('skills-list');
+    if (!skillsList) return;
     skillsList.innerHTML = '';
 
-    DND_SKILLS.forEach((skill, index) => {
+    MM_SKILLS.forEach((skill, index) => {
+        const abilityVal = getAbilityValue(skill.ability);
         const skillItem = document.createElement('div');
         skillItem.className = 'skill-item';
         skillItem.innerHTML = `
-            <input type="checkbox" id="skill-${index}" data-skill="${skill.name}" data-ability="${skill.ability}">
-            <label for="skill-${index}">${skill.name}</label>
-            <span class="skill-modifier" id="skill-mod-${index}">+0</span>
+            <label for="skill-${index}">${skill.name} (${skill.ability.toUpperCase()})</label>
+            <input type="number" id="skill-${index}" data-skill="${skill.name}" data-ability="${skill.ability}" class="form-input skill-rank-input" min="0" max="20" value="0">
+            <span class="skill-modifier" id="skill-mod-${index}">${formatMod(abilityVal)}</span>
         `;
         skillsList.appendChild(skillItem);
+
+        // Attach listener for rank changes to update total
+        const input = skillItem.querySelector(`#skill-${index}`);
+        input.addEventListener('input', () => updateSkillTotal(index));
+    });
+}
+
+// Format modifier for display
+function formatMod(val) {
+    return val >= 0 ? `+${val}` : `${val}`;
+}
+
+// Get an ability value from the form (M&M abilities ARE direct modifiers)
+function getAbilityValue(ability) {
+    const el = document.getElementById(`char-${ability}`);
+    return el ? (parseInt(el.value) || 0) : 0;
+}
+
+// Update a single skill total display
+function updateSkillTotal(index) {
+    const skill = MM_SKILLS[index];
+    const ranks = parseInt(document.getElementById(`skill-${index}`).value) || 0;
+    const abilityVal = getAbilityValue(skill.ability);
+    const total = abilityVal + ranks;
+    const modDisplay = document.getElementById(`skill-mod-${index}`);
+    if (modDisplay) {
+        modDisplay.textContent = formatMod(total);
+    }
+}
+
+// Update all skill totals (called when an ability value changes)
+function updateAllSkillTotals() {
+    MM_SKILLS.forEach((skill, index) => {
+        updateSkillTotal(index);
+    });
+}
+
+// Update defense base values from abilities
+function updateDefenses() {
+    Object.entries(MM_DEFENSES).forEach(([defense, def]) => {
+        const abilityVal = getAbilityValue(def.ability);
+        const defenseInput = document.getElementById(`char-${defense}`);
+        if (defenseInput) {
+            // Defense value = base ability + purchased ranks
+            // We store total in the input; the base label shows the ability contribution
+            const baseLabel = document.getElementById(`${defense}-base`);
+            if (baseLabel) {
+                baseLabel.textContent = `Base: ${formatMod(abilityVal)}`;
+            }
+        }
     });
 }
 
@@ -113,19 +136,22 @@ function attachCharacterBuilderListeners() {
     document.getElementById('nav-atlas-btn').addEventListener('click', () => switchView('atlas'));
     document.getElementById('nav-codex-btn').addEventListener('click', () => switchView('codex'));
 
-    // Ability score changes
-    ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
-        document.getElementById(`char-${ability}`).addEventListener('input', () => {
-            updateAbilityModifier(ability);
-            updateSkillModifiers();
-        });
+    // Ability value changes - update defenses and skills
+    MM_ABILITIES.forEach(ability => {
+        const el = document.getElementById(`char-${ability}`);
+        if (el) {
+            el.addEventListener('input', () => {
+                updateDefenses();
+                updateAllSkillTotals();
+            });
+        }
     });
 
-    // Standard array button
-    document.getElementById('standard-array-btn').addEventListener('click', applyStandardArray);
-
-    // Roll stats button
-    document.getElementById('roll-stats-btn').addEventListener('click', rollStats);
+    // PL 10 Template button
+    const pl10Btn = document.getElementById('pl10-template-btn');
+    if (pl10Btn) {
+        pl10Btn.addEventListener('click', applyPL10Template);
+    }
 
     // Character form submission
     document.getElementById('character-form').addEventListener('submit', handleSaveCharacter);
@@ -145,23 +171,72 @@ function attachCharacterBuilderListeners() {
     // Upload JSON button
     const uploadJsonBtn = document.getElementById('upload-json-btn');
     const uploadJsonInput = document.getElementById('upload-json-input');
-    uploadJsonBtn.addEventListener('click', () => uploadJsonInput.click());
-    uploadJsonInput.addEventListener('change', handleJsonUpload);
-
-    // Class and level changes
-    document.getElementById('char-class').addEventListener('change', updateCharacterFromClass);
-    document.getElementById('char-level').addEventListener('input', updateCharacterFromLevel);
-
-    // Race change
-    document.getElementById('char-race').addEventListener('change', updateCharacterFromRace);
+    if (uploadJsonBtn && uploadJsonInput) {
+        uploadJsonBtn.addEventListener('click', () => uploadJsonInput.click());
+        uploadJsonInput.addEventListener('change', handleJsonUpload);
+    }
 
     // Add attack button
     document.getElementById('add-attack-btn').addEventListener('click', addAttackToForm);
 
+    // Add power button
+    const addPowerBtn = document.getElementById('add-power-btn');
+    if (addPowerBtn) {
+        addPowerBtn.addEventListener('click', addPowerToForm);
+    }
+
+    // Add advantage button
+    const addAdvantageBtn = document.getElementById('add-advantage-btn');
+    if (addAdvantageBtn) {
+        addAdvantageBtn.addEventListener('click', addAdvantageToForm);
+    }
+
+    // Add complication button
+    const addComplicationBtn = document.getElementById('add-complication-btn');
+    if (addComplicationBtn) {
+        addComplicationBtn.addEventListener('click', addComplicationToForm);
+    }
+
+    // Image upload
     const imageInput = document.getElementById('char-image');
     if (imageInput) {
         imageInput.addEventListener('change', handleCharacterImageUpload);
     }
+}
+
+// Apply PL 10 Template - fills in typical PL 10 starting values
+function applyPL10Template() {
+    // Set PL and PP
+    const plInput = document.getElementById('char-power-level');
+    const ppInput = document.getElementById('char-power-points');
+    const hpInput = document.getElementById('char-hero-points');
+    if (plInput) plInput.value = 10;
+    if (ppInput) ppInput.value = 150;
+    if (hpInput) hpInput.value = 1;
+
+    // Typical PL 10 abilities
+    const templateAbilities = { str: 2, sta: 2, agl: 2, dex: 2, fgt: 4, int: 1, awe: 2, pre: 1 };
+    MM_ABILITIES.forEach(ability => {
+        const el = document.getElementById(`char-${ability}`);
+        if (el) el.value = templateAbilities[ability] || 0;
+    });
+
+    // Typical PL 10 defenses (total values including ability base)
+    const defenseInputs = {
+        dodge: 10,
+        parry: 10,
+        fortitude: 10,
+        will: 10,
+        toughness: 10
+    };
+    Object.entries(defenseInputs).forEach(([defense, val]) => {
+        const el = document.getElementById(`char-${defense}`);
+        if (el) el.value = val;
+    });
+
+    updateDefenses();
+    updateAllSkillTotals();
+    alert('PL 10 template applied! Adjust values as needed.');
 }
 
 // Switch between views
@@ -276,140 +351,41 @@ function switchCrucibleSection(section) {
     }
 }
 
-// Update ability modifier display
-function updateAbilityModifier(ability) {
-    const score = parseInt(document.getElementById(`char-${ability}`).value) || 10;
-    const modifier = calculateModifier(score);
-    const modDisplay = document.getElementById(`${ability}-mod`);
-    modDisplay.textContent = modifier >= 0 ? `+${modifier}` : `${modifier}`;
-
-    if (ability === 'dex') {
-        const initiativeModDisplay = document.getElementById('char-initiative-mod');
-        initiativeModDisplay.textContent = modifier >= 0 ? `+${modifier}` : `${modifier}`;
-    }
-}
-
-// Update all skill modifiers based on ability scores and proficiencies
-function updateSkillModifiers() {
-    const level = parseInt(document.getElementById('char-level').value) || 1;
-    const profBonus = calculateProficiencyBonus(level);
-
-    DND_SKILLS.forEach((skill, index) => {
-        const checkbox = document.getElementById(`skill-${index}`);
-        const modDisplay = document.getElementById(`skill-mod-${index}`);
-        const abilityScore = parseInt(document.getElementById(`char-${skill.ability}`).value) || 10;
-        const abilityMod = calculateModifier(abilityScore);
-        const isProficient = checkbox.checked;
-
-        const totalMod = abilityMod + (isProficient ? profBonus : 0);
-        modDisplay.textContent = totalMod >= 0 ? `+${totalMod}` : `${totalMod}`;
-    });
-}
-
-// Apply standard array (15, 14, 13, 12, 10, 8)
-function applyStandardArray() {
-    const standardArray = [15, 14, 13, 12, 10, 8];
-    const abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-
-    abilities.forEach((ability, index) => {
-        document.getElementById(`char-${ability}`).value = standardArray[index];
-        updateAbilityModifier(ability);
-    });
-
-    updateSkillModifiers();
-}
-
-// Roll 4d6 drop lowest for stats
-function rollStats() {
-    const abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha'];
-
-    abilities.forEach(ability => {
-        // Roll 4d6
-        const rolls = [];
-        for (let i = 0; i < 4; i++) {
-            rolls.push(Math.floor(Math.random() * 6) + 1);
-        }
-
-        // Sort and drop lowest
-        rolls.sort((a, b) => b - a);
-        const total = rolls[0] + rolls[1] + rolls[2];
-
-        document.getElementById(`char-${ability}`).value = total;
-        updateAbilityModifier(ability);
-    });
-
-    updateSkillModifiers();
-    alert('Stats rolled! Review and adjust as needed.');
-}
-
-// Update character based on selected class
-function updateCharacterFromClass() {
-    const selectedClass = document.getElementById('char-class').value;
-    if (!selectedClass) return;
-
-    const classData = CLASS_DATA[selectedClass];
-    if (!classData) return;
-
-    const level = parseInt(document.getElementById('char-level').value) || 1;
-    const conMod = calculateModifier(parseInt(document.getElementById('char-con').value) || 10);
-
-    // Calculate HP (class hit dice + CON modifier per level)
-    const hp = classData.hitDice + (classData.hitDice / 2 + 1) * (level - 1) + (conMod * level);
-    document.getElementById('char-hp').value = Math.floor(hp);
-}
-
-// Update character based on level
-function updateCharacterFromLevel() {
-    updateCharacterFromClass();
-    updateSkillModifiers();
-}
-
-// Update character based on selected race
-function updateCharacterFromRace() {
-    const selectedRace = document.getElementById('char-race').value;
-    if (!selectedRace) return;
-
-    const raceData = RACE_DATA[selectedRace];
-    if (!raceData) return;
-
-    // Update speed
-    document.getElementById('char-speed').value = raceData.speed;
-
-    // Note: Racial ability score bonuses should be applied manually by the user
-    // to avoid overwriting their chosen scores
-}
-
-// Get character data from form into an object
+// Get character data from form into an object (M&M 3e schema)
 function getCharacterDataFromForm() {
     const character = {
-        id: currentCharacter?.id || null, // Keep id for updates, but it can be null for new characters
+        id: currentCharacter?.id || null,
         agentType: document.getElementById('char-agent-type').value,
         name: document.getElementById('char-name').value,
-        race: document.getElementById('char-race').value,
-        class: document.getElementById('char-class').value,
-        level: parseInt(document.getElementById('char-level').value),
-        abilities: {
-            str: parseInt(document.getElementById('char-str').value),
-            dex: parseInt(document.getElementById('char-dex').value),
-            con: parseInt(document.getElementById('char-con').value),
-            int: parseInt(document.getElementById('char-int').value),
-            wis: parseInt(document.getElementById('char-wis').value),
-            cha: parseInt(document.getElementById('char-cha').value)
-        },
-        hp: parseInt(document.getElementById('char-hp').value),
-        ac: parseInt(document.getElementById('char-ac').value),
-        speed: parseInt(document.getElementById('char-speed').value),
-        skills: [],
+        powerLevel: parseInt(document.getElementById('char-power-level')?.value) || 10,
+        powerPoints: parseInt(document.getElementById('char-power-points')?.value) || 150,
+        heroPoints: parseInt(document.getElementById('char-hero-points')?.value) || 1,
+        abilities: {},
+        defenses: {},
+        skills: {},
         attacks: currentCharacter?.attacks || [],
+        powers: currentCharacter?.powers || [],
+        advantages: currentCharacter?.advantages || [],
+        complications: currentCharacter?.complications || [],
         notes: document.getElementById('char-notes').value,
         imagePath: document.getElementById('char-image-path').value || null
     };
 
-    // Get proficient skills
-    DND_SKILLS.forEach((skill, index) => {
-        const checkbox = document.getElementById(`skill-${index}`);
-        if (checkbox.checked) {
-            character.skills.push(skill.name);
+    // Abilities
+    MM_ABILITIES.forEach(ability => {
+        character.abilities[ability] = parseInt(document.getElementById(`char-${ability}`)?.value) || 0;
+    });
+
+    // Defenses
+    Object.keys(MM_DEFENSES).forEach(defense => {
+        character.defenses[defense] = parseInt(document.getElementById(`char-${defense}`)?.value) || 0;
+    });
+
+    // Skills (ranks only)
+    MM_SKILLS.forEach((skill, index) => {
+        const ranks = parseInt(document.getElementById(`skill-${index}`)?.value) || 0;
+        if (ranks > 0) {
+            character.skills[skill.name] = ranks;
         }
     });
 
@@ -423,7 +399,6 @@ async function handleSaveCharacter(e) {
     const characterData = getCharacterDataFromForm();
 
     console.log('[handleSaveCharacter] Character data to save:', characterData);
-    console.log('[handleSaveCharacter] Attacks in data:', characterData.attacks);
 
     // Ensure character has an ID for saving
     if (!characterData.id) {
@@ -466,7 +441,7 @@ async function handleSaveCharacter(e) {
 function handleDownloadJson() {
     const characterData = getCharacterDataFromForm();
 
-    // Don't include the ID in the template
+    // Don't include the ID in the download
     delete characterData.id;
 
     const characterName = characterData.name.trim().replace(/\s+/g, '_') || 'character_template';
@@ -489,28 +464,34 @@ function handleDownloadJson() {
 function downloadCharacterTemplate() {
     const template = {
         agentType: 'p',
-        name: 'Character Name',
-        race: '',
-        class: '',
-        level: 1,
+        name: 'Hero Name',
+        powerLevel: 10,
+        powerPoints: 150,
+        heroPoints: 1,
         abilities: {
-            str: 10,
-            dex: 10,
-            con: 10,
-            int: 10,
-            wis: 10,
-            cha: 10
+            str: 0, sta: 0, agl: 0, dex: 0,
+            fgt: 0, int: 0, awe: 0, pre: 0
         },
-        hp: 10,
-        ac: 10,
-        speed: 30,
-        skills: [],
+        defenses: {
+            dodge: 0, parry: 0, fortitude: 0, will: 0, toughness: 0
+        },
+        skills: {},
         attacks: [],
+        powers: [
+            { name: '', type: '', rank: 0, extras: '', flaws: '', descriptors: '', cost: 0, notes: '' }
+        ],
+        advantages: [
+            { name: '', ranks: 1, notes: '' }
+        ],
+        complications: [
+            { type: 'Motivation', description: '' },
+            { type: 'Identity', description: '' }
+        ],
         notes: '',
         imagePath: null
     };
 
-    const filename = 'character_template.json';
+    const filename = 'mm3e_character_template.json';
     const jsonString = JSON.stringify(template, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -546,7 +527,19 @@ async function handleJsonUpload(event) {
                 characterData.agentType = 'p';
             }
             if (!characterData.skills) {
-                characterData.skills = [];
+                characterData.skills = {};
+            }
+            if (!characterData.attacks) {
+                characterData.attacks = [];
+            }
+            if (!characterData.powers) {
+                characterData.powers = [];
+            }
+            if (!characterData.advantages) {
+                characterData.advantages = [];
+            }
+            if (!characterData.complications) {
+                characterData.complications = [];
             }
 
             // Save the character to the server
@@ -570,7 +563,7 @@ async function handleJsonUpload(event) {
                     renderAgentsList();
                 }
 
-                // Optionally load the character into the form for review
+                // Load the character into the form for review
                 clearCharacterForm();
                 populateFormWithData(characterData);
             } else {
@@ -652,7 +645,7 @@ async function loadSavedCharacters() {
     }
 }
 
-// Render characters list
+// Render characters list (M&M format: PL, defenses)
 function renderCharactersList() {
     const container = document.getElementById('characters-list');
 
@@ -667,17 +660,18 @@ function renderCharactersList() {
         const card = document.createElement('div');
         card.className = 'character-list-card';
 
-        const classLevel = char.class && char.level ? `${char.class} ${char.level}` : 'No class';
-        const raceInfo = char.race ? char.race : '';
+        const plInfo = char.powerLevel ? `PL ${char.powerLevel}` : 'PL ?';
+        const defenses = char.defenses || {};
+        const defLine = `Dodge ${defenses.dodge || 0} | Parry ${defenses.parry || 0} | Tough ${defenses.toughness || 0} | Fort ${defenses.fortitude || 0} | Will ${defenses.will || 0}`;
 
         const portrait = char.imagePath ? `<img class="character-list-portrait" src="${char.imagePath}" alt="${char.name} portrait">` : '';
 
         card.innerHTML = `
             <div class="character-card-header">
                 <div class="character-card-info">
-            <div class="character-list-name">${char.name}</div>
-            <div class="character-list-info">${raceInfo} ${classLevel}</div>
-            <div class="character-list-info">HP: ${char.hp} | AC: ${char.ac}</div>
+                    <div class="character-list-name">${char.name}</div>
+                    <div class="character-list-info">${plInfo} | ${char.powerPoints || 0} PP</div>
+                    <div class="character-list-info">${defLine}</div>
                 </div>
                 ${portrait}
             </div>
@@ -701,24 +695,37 @@ async function loadCharacterToForm(charId) {
     populateFormWithData(character);
 }
 
-// Populate the character form with data from an object
+// Populate the character form with data from an object (M&M 3e schema)
 function populateFormWithData(character) {
     document.getElementById('char-agent-type').value = character.agentType || 'player';
-    document.getElementById('char-name').value = character.name;
-    document.getElementById('char-race').value = character.race || '';
-    document.getElementById('char-class').value = character.class || '';
-    document.getElementById('char-level').value = character.level;
-    document.getElementById('char-str').value = character.abilities.str;
-    document.getElementById('char-dex').value = character.abilities.dex;
-    document.getElementById('char-con').value = character.abilities.con;
-    document.getElementById('char-int').value = character.abilities.int;
-    document.getElementById('char-wis').value = character.abilities.wis;
-    document.getElementById('char-cha').value = character.abilities.cha;
-    document.getElementById('char-hp').value = character.hp;
-    document.getElementById('char-ac').value = character.ac;
-    document.getElementById('char-speed').value = character.speed;
+    document.getElementById('char-name').value = character.name || '';
+
+    // Power Level, Power Points, Hero Points
+    const plInput = document.getElementById('char-power-level');
+    const ppInput = document.getElementById('char-power-points');
+    const hpInput = document.getElementById('char-hero-points');
+    if (plInput) plInput.value = character.powerLevel || 10;
+    if (ppInput) ppInput.value = character.powerPoints || 150;
+    if (hpInput) hpInput.value = character.heroPoints || 1;
+
+    // Abilities
+    const abilities = character.abilities || {};
+    MM_ABILITIES.forEach(ability => {
+        const el = document.getElementById(`char-${ability}`);
+        if (el) el.value = abilities[ability] || 0;
+    });
+
+    // Defenses
+    const defenses = character.defenses || {};
+    Object.keys(MM_DEFENSES).forEach(defense => {
+        const el = document.getElementById(`char-${defense}`);
+        if (el) el.value = defenses[defense] || 0;
+    });
+
+    // Notes
     document.getElementById('char-notes').value = character.notes || '';
 
+    // Image
     const imagePathInput = document.getElementById('char-image-path');
     const preview = document.getElementById('char-image-preview');
     const statusText = document.getElementById('char-image-status');
@@ -741,34 +748,51 @@ function populateFormWithData(character) {
         statusText.textContent = character.imagePath ? 'Image loaded' : '';
     }
 
-    // Update modifiers
-    ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
-        updateAbilityModifier(ability);
+    // Skills (rank-based)
+    const skills = character.skills || {};
+    MM_SKILLS.forEach((skill, index) => {
+        const input = document.getElementById(`skill-${index}`);
+        if (input) {
+            input.value = skills[skill.name] || 0;
+        }
     });
 
-    // Set skills
-    DND_SKILLS.forEach((skill, index) => {
-        const checkbox = document.getElementById(`skill-${index}`);
-        checkbox.checked = character.skills.includes(skill.name);
-    });
+    // Update computed values
+    updateDefenses();
+    updateAllSkillTotals();
 
-    updateSkillModifiers();
-
-    // Load attacks if they exist
-    if (character.attacks && character.attacks.length > 0) {
-        renderAttacksList();
+    // Ensure currentCharacter has arrays for dynamic lists
+    if (!currentCharacter) {
+        currentCharacter = { ...character };
     }
+    if (!currentCharacter.attacks) currentCharacter.attacks = [];
+    if (!currentCharacter.powers) currentCharacter.powers = [];
+    if (!currentCharacter.advantages) currentCharacter.advantages = [];
+    if (!currentCharacter.complications) currentCharacter.complications = [];
+
+    // Copy arrays from loaded data
+    if (character.attacks) currentCharacter.attacks = [...character.attacks];
+    if (character.powers) currentCharacter.powers = [...character.powers];
+    if (character.advantages) currentCharacter.advantages = [...character.advantages];
+    if (character.complications) currentCharacter.complications = [...character.complications];
+
+    // Render dynamic lists
+    renderAttacksList();
+    renderPowersList();
+    renderAdvantagesList();
+    renderComplicationsList();
 
     // Scroll to top of form
-    document.querySelector('.character-form-section').scrollTop = 0;
+    const formSection = document.querySelector('.character-form-section');
+    if (formSection) formSection.scrollTop = 0;
 }
 
-// Add character to combat
+// Add character to combat (M&M version)
 async function addCharacterToCombat(charId) {
     const character = savedCharacters.find(c => c.id === charId);
     if (!character) return;
 
-    const dexMod = calculateModifier(character.abilities.dex);
+    const defenses = character.defenses || {};
 
     try {
         const response = await fetch(`${API_BASE}/combatants`, {
@@ -777,9 +801,9 @@ async function addCharacterToCombat(charId) {
             body: JSON.stringify({
                 name: character.name,
                 type: character.agentType,
-                hp: character.hp,
-                ac: character.ac,
-                dexModifier: dexMod,
+                hp: defenses.toughness || 0,
+                ac: defenses.dodge || 0,
+                dexModifier: character.abilities?.agl || 0,
                 initiative: 0,
                 imagePath: character.imagePath || null,
                 sourceId: character.id
@@ -789,8 +813,12 @@ async function addCharacterToCombat(charId) {
         if (response.ok) {
             alert(`${character.name} added to combat!`);
             switchView('combat');
-            await loadEncounterState();
-            renderCombatantsList();
+            if (typeof loadEncounterState === 'function') {
+                await loadEncounterState();
+            }
+            if (typeof renderCombatantsList === 'function') {
+                renderCombatantsList();
+            }
         }
     } catch (error) {
         console.error('Error adding character to combat:', error);
@@ -834,10 +862,12 @@ function clearCharacterForm() {
     document.getElementById('character-form').reset();
 
     // Reset to default values
-    document.getElementById('char-level').value = 1;
-    document.getElementById('char-hp').value = 10;
-    document.getElementById('char-ac').value = 10;
-    document.getElementById('char-speed').value = 30;
+    const plInput = document.getElementById('char-power-level');
+    const ppInput = document.getElementById('char-power-points');
+    const hpInput = document.getElementById('char-hero-points');
+    if (plInput) plInput.value = 10;
+    if (ppInput) ppInput.value = 150;
+    if (hpInput) hpInput.value = 1;
 
     const imagePreview = document.getElementById('char-image-preview');
     const imagePathInput = document.getElementById('char-image-path');
@@ -856,53 +886,69 @@ function clearCharacterForm() {
         statusText.textContent = '';
     }
 
-    ['str', 'dex', 'con', 'int', 'wis', 'cha'].forEach(ability => {
-        document.getElementById(`char-${ability}`).value = 10;
-        updateAbilityModifier(ability);
+    // Reset abilities to 0 (M&M abilities are direct modifiers)
+    MM_ABILITIES.forEach(ability => {
+        const el = document.getElementById(`char-${ability}`);
+        if (el) el.value = 0;
     });
 
-    // Uncheck all skills
-    DND_SKILLS.forEach((skill, index) => {
-        document.getElementById(`skill-${index}`).checked = false;
+    // Reset defenses to 0
+    Object.keys(MM_DEFENSES).forEach(defense => {
+        const el = document.getElementById(`char-${defense}`);
+        if (el) el.value = 0;
     });
 
-    updateSkillModifiers();
+    // Reset skill ranks to 0
+    MM_SKILLS.forEach((skill, index) => {
+        const input = document.getElementById(`skill-${index}`);
+        if (input) input.value = 0;
+    });
 
-    // Clear attacks list
-    document.getElementById('attacks-list').innerHTML = '';
+    updateDefenses();
+    updateAllSkillTotals();
+
+    // Clear dynamic lists
+    const attacksList = document.getElementById('attacks-list');
+    if (attacksList) attacksList.innerHTML = '';
+
+    const powersList = document.getElementById('powers-list');
+    if (powersList) powersList.innerHTML = '';
+
+    const advantagesList = document.getElementById('advantages-list');
+    if (advantagesList) advantagesList.innerHTML = '';
+
+    const complicationsList = document.getElementById('complications-list');
+    if (complicationsList) complicationsList.innerHTML = '';
 }
 
-// Add attack to form
+// ==================== ATTACKS ====================
+
+// Add attack to form (M&M format)
 function addAttackToForm() {
-    // Initialize currentCharacter if it doesn't exist
     if (!currentCharacter) {
-        currentCharacter = {
-            id: null,
-            attacks: []
-        };
+        currentCharacter = { id: null, attacks: [], powers: [], advantages: [], complications: [] };
     }
     if (!currentCharacter.attacks) {
         currentCharacter.attacks = [];
     }
 
-    const attackId = `attack-${Date.now()}`;
     const attack = {
-        id: attackId,
         name: '',
+        type: 'close',
         attackBonus: 0,
-        damageDice: '1d6',
-        damageType: 'slashing'
+        effectRank: 0,
+        resistedBy: 'toughness',
+        notes: ''
     };
 
     currentCharacter.attacks.push(attack);
     renderAttacksList();
-
-    console.log('[addAttackToForm] Current attacks:', currentCharacter.attacks);
 }
 
-// Render attacks list
+// Render attacks list (M&M format)
 function renderAttacksList() {
     const container = document.getElementById('attacks-list');
+    if (!container) return;
 
     if (!currentCharacter || !currentCharacter.attacks || currentCharacter.attacks.length === 0) {
         container.innerHTML = '<div class="empty-state">No attacks added yet</div>';
@@ -918,24 +964,21 @@ function renderAttacksList() {
             <div class="attack-inputs">
                 <input type="text" placeholder="Attack name" class="form-input" value="${attack.name || ''}"
                        onchange="updateAttackField(${index}, 'name', this.value)">
-                <input type="number" placeholder="+0" class="form-input attack-bonus-input" value="${attack.attackBonus || 0}"
-                       onchange="updateAttackField(${index}, 'attackBonus', parseInt(this.value))">
-                <input type="text" placeholder="1d6" class="form-input attack-damage-input" value="${attack.damageDice || '1d6'}"
-                       onchange="updateAttackField(${index}, 'damageDice', this.value)">
-                <select class="form-input attack-type-input" onchange="updateAttackField(${index}, 'damageType', this.value)">
-                    <option value="slashing" ${attack.damageType === 'slashing' ? 'selected' : ''}>Slashing</option>
-                    <option value="piercing" ${attack.damageType === 'piercing' ? 'selected' : ''}>Piercing</option>
-                    <option value="bludgeoning" ${attack.damageType === 'bludgeoning' ? 'selected' : ''}>Bludgeoning</option>
-                    <option value="fire" ${attack.damageType === 'fire' ? 'selected' : ''}>Fire</option>
-                    <option value="cold" ${attack.damageType === 'cold' ? 'selected' : ''}>Cold</option>
-                    <option value="lightning" ${attack.damageType === 'lightning' ? 'selected' : ''}>Lightning</option>
-                    <option value="acid" ${attack.damageType === 'acid' ? 'selected' : ''}>Acid</option>
-                    <option value="poison" ${attack.damageType === 'poison' ? 'selected' : ''}>Poison</option>
-                    <option value="psychic" ${attack.damageType === 'psychic' ? 'selected' : ''}>Psychic</option>
-                    <option value="necrotic" ${attack.damageType === 'necrotic' ? 'selected' : ''}>Necrotic</option>
-                    <option value="radiant" ${attack.damageType === 'radiant' ? 'selected' : ''}>Radiant</option>
-                    <option value="force" ${attack.damageType === 'force' ? 'selected' : ''}>Force</option>
+                <select class="form-input attack-type-input" onchange="updateAttackField(${index}, 'type', this.value)">
+                    <option value="close" ${attack.type === 'close' ? 'selected' : ''}>Close</option>
+                    <option value="ranged" ${attack.type === 'ranged' ? 'selected' : ''}>Ranged</option>
                 </select>
+                <input type="number" placeholder="+0" class="form-input attack-bonus-input" value="${attack.attackBonus || 0}"
+                       onchange="updateAttackField(${index}, 'attackBonus', parseInt(this.value))" title="Attack Bonus">
+                <input type="number" placeholder="Rank" class="form-input attack-rank-input" value="${attack.effectRank || 0}"
+                       onchange="updateAttackField(${index}, 'effectRank', parseInt(this.value))" title="Effect Rank">
+                <select class="form-input attack-resist-input" onchange="updateAttackField(${index}, 'resistedBy', this.value)">
+                    <option value="toughness" ${attack.resistedBy === 'toughness' ? 'selected' : ''}>vs Toughness</option>
+                    <option value="fortitude" ${attack.resistedBy === 'fortitude' ? 'selected' : ''}>vs Fortitude</option>
+                    <option value="will" ${attack.resistedBy === 'will' ? 'selected' : ''}>vs Will</option>
+                </select>
+                <input type="text" placeholder="Notes" class="form-input attack-notes-input" value="${attack.notes || ''}"
+                       onchange="updateAttackField(${index}, 'notes', this.value)">
                 <button type="button" class="btn btn-danger btn-small" onclick="removeAttack(${index})">Remove</button>
             </div>
         `;
@@ -956,6 +999,233 @@ function removeAttack(index) {
     renderAttacksList();
 }
 
+// ==================== POWERS ====================
+
+// Add power to form
+function addPowerToForm() {
+    if (!currentCharacter) {
+        currentCharacter = { id: null, attacks: [], powers: [], advantages: [], complications: [] };
+    }
+    if (!currentCharacter.powers) {
+        currentCharacter.powers = [];
+    }
+
+    const power = {
+        name: '',
+        type: '',
+        rank: 1,
+        extras: '',
+        flaws: '',
+        descriptors: '',
+        cost: 0,
+        notes: ''
+    };
+
+    currentCharacter.powers.push(power);
+    renderPowersList();
+}
+
+// Render powers list
+function renderPowersList() {
+    const container = document.getElementById('powers-list');
+    if (!container) return;
+
+    if (!currentCharacter || !currentCharacter.powers || currentCharacter.powers.length === 0) {
+        container.innerHTML = '<div class="empty-state">No powers added yet</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    currentCharacter.powers.forEach((power, index) => {
+        const powerDiv = document.createElement('div');
+        powerDiv.className = 'power-item';
+        powerDiv.innerHTML = `
+            <div class="power-inputs">
+                <input type="text" placeholder="Power name" class="form-input" value="${power.name || ''}"
+                       onchange="updatePowerField(${index}, 'name', this.value)">
+                <input type="text" placeholder="Type (e.g. Damage, Move)" class="form-input" value="${power.type || ''}"
+                       onchange="updatePowerField(${index}, 'type', this.value)">
+                <input type="number" placeholder="Rank" class="form-input power-rank-input" min="0" value="${power.rank || 1}"
+                       onchange="updatePowerField(${index}, 'rank', parseInt(this.value))">
+                <input type="text" placeholder="Extras" class="form-input" value="${power.extras || ''}"
+                       onchange="updatePowerField(${index}, 'extras', this.value)">
+                <input type="text" placeholder="Flaws" class="form-input" value="${power.flaws || ''}"
+                       onchange="updatePowerField(${index}, 'flaws', this.value)">
+                <input type="text" placeholder="Descriptors" class="form-input" value="${power.descriptors || ''}"
+                       onchange="updatePowerField(${index}, 'descriptors', this.value)">
+                <input type="number" placeholder="Cost" class="form-input power-cost-input" value="${power.cost || 0}"
+                       onchange="updatePowerField(${index}, 'cost', parseInt(this.value))">
+                <input type="text" placeholder="Notes" class="form-input" value="${power.notes || ''}"
+                       onchange="updatePowerField(${index}, 'notes', this.value)">
+                <button type="button" class="btn btn-danger btn-small" onclick="removePower(${index})">Remove</button>
+            </div>
+        `;
+        container.appendChild(powerDiv);
+    });
+}
+
+// Update power field
+function updatePowerField(index, field, value) {
+    if (!currentCharacter || !currentCharacter.powers || !currentCharacter.powers[index]) return;
+    currentCharacter.powers[index][field] = value;
+}
+
+// Remove power
+function removePower(index) {
+    if (!currentCharacter || !currentCharacter.powers) return;
+    currentCharacter.powers.splice(index, 1);
+    renderPowersList();
+}
+
+// ==================== ADVANTAGES ====================
+
+// Add advantage to form
+function addAdvantageToForm() {
+    if (!currentCharacter) {
+        currentCharacter = { id: null, attacks: [], powers: [], advantages: [], complications: [] };
+    }
+    if (!currentCharacter.advantages) {
+        currentCharacter.advantages = [];
+    }
+
+    const advantage = {
+        name: '',
+        ranks: 1,
+        notes: ''
+    };
+
+    currentCharacter.advantages.push(advantage);
+    renderAdvantagesList();
+}
+
+// Render advantages list
+function renderAdvantagesList() {
+    const container = document.getElementById('advantages-list');
+    if (!container) return;
+
+    if (!currentCharacter || !currentCharacter.advantages || currentCharacter.advantages.length === 0) {
+        container.innerHTML = '<div class="empty-state">No advantages added yet</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    currentCharacter.advantages.forEach((advantage, index) => {
+        const advDiv = document.createElement('div');
+        advDiv.className = 'advantage-item';
+        advDiv.innerHTML = `
+            <div class="advantage-inputs">
+                <input type="text" placeholder="Advantage name" class="form-input" value="${advantage.name || ''}"
+                       onchange="updateAdvantageField(${index}, 'name', this.value)">
+                <input type="number" placeholder="Ranks" class="form-input advantage-rank-input" min="1" value="${advantage.ranks || 1}"
+                       onchange="updateAdvantageField(${index}, 'ranks', parseInt(this.value))">
+                <input type="text" placeholder="Notes" class="form-input" value="${advantage.notes || ''}"
+                       onchange="updateAdvantageField(${index}, 'notes', this.value)">
+                <button type="button" class="btn btn-danger btn-small" onclick="removeAdvantage(${index})">Remove</button>
+            </div>
+        `;
+        container.appendChild(advDiv);
+    });
+}
+
+// Update advantage field
+function updateAdvantageField(index, field, value) {
+    if (!currentCharacter || !currentCharacter.advantages || !currentCharacter.advantages[index]) return;
+    currentCharacter.advantages[index][field] = value;
+}
+
+// Remove advantage
+function removeAdvantage(index) {
+    if (!currentCharacter || !currentCharacter.advantages) return;
+    currentCharacter.advantages.splice(index, 1);
+    renderAdvantagesList();
+}
+
+// ==================== COMPLICATIONS ====================
+
+// Add complication to form
+function addComplicationToForm() {
+    if (!currentCharacter) {
+        currentCharacter = { id: null, attacks: [], powers: [], advantages: [], complications: [] };
+    }
+    if (!currentCharacter.complications) {
+        currentCharacter.complications = [];
+    }
+
+    const complication = {
+        type: '',
+        description: ''
+    };
+
+    currentCharacter.complications.push(complication);
+    renderComplicationsList();
+}
+
+// Render complications list
+function renderComplicationsList() {
+    const container = document.getElementById('complications-list');
+    if (!container) return;
+
+    if (!currentCharacter || !currentCharacter.complications || currentCharacter.complications.length === 0) {
+        container.innerHTML = '<div class="empty-state">No complications added yet</div>';
+        return;
+    }
+
+    container.innerHTML = '';
+
+    currentCharacter.complications.forEach((complication, index) => {
+        const compDiv = document.createElement('div');
+        compDiv.className = 'complication-item';
+        compDiv.innerHTML = `
+            <div class="complication-inputs">
+                <select class="form-input complication-type-input" onchange="updateComplicationField(${index}, 'type', this.value)">
+                    <option value="" ${!complication.type ? 'selected' : ''}>Select Type...</option>
+                    <option value="Motivation" ${complication.type === 'Motivation' ? 'selected' : ''}>Motivation</option>
+                    <option value="Identity" ${complication.type === 'Identity' ? 'selected' : ''}>Identity</option>
+                    <option value="Weakness" ${complication.type === 'Weakness' ? 'selected' : ''}>Weakness</option>
+                    <option value="Enemy" ${complication.type === 'Enemy' ? 'selected' : ''}>Enemy</option>
+                    <option value="Relationship" ${complication.type === 'Relationship' ? 'selected' : ''}>Relationship</option>
+                    <option value="Disability" ${complication.type === 'Disability' ? 'selected' : ''}>Disability</option>
+                    <option value="Prejudice" ${complication.type === 'Prejudice' ? 'selected' : ''}>Prejudice</option>
+                    <option value="Power Loss" ${complication.type === 'Power Loss' ? 'selected' : ''}>Power Loss</option>
+                    <option value="Responsibility" ${complication.type === 'Responsibility' ? 'selected' : ''}>Responsibility</option>
+                    <option value="Secret" ${complication.type === 'Secret' ? 'selected' : ''}>Secret</option>
+                    <option value="Temper" ${complication.type === 'Temper' ? 'selected' : ''}>Temper</option>
+                    <option value="Obsession" ${complication.type === 'Obsession' ? 'selected' : ''}>Obsession</option>
+                    <option value="Quirk" ${complication.type === 'Quirk' ? 'selected' : ''}>Quirk</option>
+                    <option value="Other" ${complication.type === 'Other' ? 'selected' : ''}>Other</option>
+                </select>
+                <input type="text" placeholder="Description" class="form-input complication-desc-input" value="${complication.description || ''}"
+                       onchange="updateComplicationField(${index}, 'description', this.value)">
+                <button type="button" class="btn btn-danger btn-small" onclick="removeComplication(${index})">Remove</button>
+            </div>
+        `;
+        container.appendChild(compDiv);
+    });
+}
+
+// Update complication field
+function updateComplicationField(index, field, value) {
+    if (!currentCharacter || !currentCharacter.complications || !currentCharacter.complications[index]) return;
+    currentCharacter.complications[index][field] = value;
+}
+
+// Remove complication
+function removeComplication(index) {
+    if (!currentCharacter || !currentCharacter.complications) return;
+    currentCharacter.complications.splice(index, 1);
+    renderComplicationsList();
+}
+
+// ==================== GLOBAL EXPORTS ====================
+
 // Make functions globally available
 window.updateAttackField = updateAttackField;
 window.removeAttack = removeAttack;
+window.updatePowerField = updatePowerField;
+window.removePower = removePower;
+window.updateAdvantageField = updateAdvantageField;
+window.removeAdvantage = removeAdvantage;
+window.updateComplicationField = updateComplicationField;
+window.removeComplication = removeComplication;

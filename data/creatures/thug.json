@@ -1,0 +1,19 @@
+{
+  "name": "Thug",
+  "type": "enemy",
+  "powerLevel": 4,
+  "abilities": { "str": 2, "sta": 1, "agl": 1, "dex": 0, "fgt": 2, "int": 0, "awe": 0, "pre": 0 },
+  "defenses": { "dodge": 4, "parry": 4, "fortitude": 4, "will": 2, "toughness": 4 },
+  "attacks": [
+    { "name": "Unarmed", "type": "close", "attackBonus": 4, "effectRank": 2, "resistedBy": "toughness", "notes": "Strength-based damage" },
+    { "name": "Light Pistol", "type": "ranged", "attackBonus": 4, "effectRank": 3, "resistedBy": "toughness", "notes": "Ranged Damage 3 (ballistic)" }
+  ],
+  "powers": [],
+  "advantages": ["Equipment 1", "Improved Initiative"],
+  "skills": { "Athletics": 4, "Intimidation": 4, "Stealth": 2, "Vehicles": 2 },
+  "specialAbilities": [
+    { "name": "Street Smart", "description": "The thug is familiar with the criminal underworld and gains a +2 circumstance bonus on Streetwise-related checks." }
+  ],
+  "heroPoints": 0,
+  "conditions": { "bruised": 0 }
+}
